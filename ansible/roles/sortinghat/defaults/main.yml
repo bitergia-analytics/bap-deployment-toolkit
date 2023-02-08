@@ -46,12 +46,14 @@ nginx_docker_container: nginx
 nginx_workdir: "/docker/nginx"
 nginx_virtualhosts_workdir: "{{ nginx_workdir }}/conf"
 
-## Certificates configuration
+## Enable SSL
+enable_ssl: False
 
+## Certificates configuration. Only used if SSL is enabled
 certs_dir: "{{ nginx_workdir }}/certs"
 
 ## Uncomment to define custom certificates. Otherwise self-signed
-## certificates will be used.
+## certificates will be used. Only needed if SSL is enabled
 # custom_cert:
 #   cert: foo/cert.crt
 #   key: foo/cert.key
