@@ -1,0 +1,97 @@
+---
+
+- name: Set instance variables
+  set_fact:
+    instance_dir: "{{ mordred_instances_dir }}/{{ instance.project }}"
+
+- name: Ensure instance directories are created
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: root
+    group: '1000'
+    mode: '0774'
+  with_items:
+    - "{{ instance_dir }}/conf"
+    - "{{ instance_dir }}/logs"
+    - "{{ instance_dir }}/sources"
+    - "{{ instance_dir }}/perceval-cache"
+
+- name: Add tenant to aliases.json file
+  become: false
+  command: >-
+      python3 {{ role_path }}/files/add_tenant_aliases.py
+      {{ upstream_aliases.dest }} {{ instance.tenant }} -o /tmp/{{ instance.tenant }}_aliases.json
+  delegate_to: localhost
+  changed_when: false
+
+- name: Copy aliases.json
+  copy:
+    src: "/tmp/{{ instance.tenant }}_aliases.json"
+    dest: "{{ instance_dir }}/conf/aliases.json"
+    owner: '1000'
+    group: '1000'
+    mode: '0640'
+
+- name: Checkout sources repo
+  git:
+    repo: "{{ instance.sources.repository }}"
+    dest: "{{ instance_dir }}/sources"
+    force: true
+  when: instance.sources.repository is defined
+
+- name: Change sources permissions
+  file:
+    state: directory
+    path: "{{ instance_dir }}/sources"
+    owner: root
+    group: '1000'
+    mode: '0774'
+
+- name: "Create cron job to pull changes from {{ instance.project }} sources repo"
+  cron:
+    name: "Pull {{ instance.project }} sources"
+    user: "{{ ansible_user_id }}"
+    job: "cd {{ instance_dir }}/sources && git pull"
+
+- name: "Create MariaDB service account for {{ instance.project }}"
+  mysql_user:
+    name: "{{ mariadb_service_account }}"
+    host: "{{ ansible_default_ipv4.address }}"
+    password: "{{ mariadb_service_account_password }}"
+    priv: '*.*:ALL,GRANT'
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: "{{ item }}"
+    state: present
+  register: result
+  retries: 2
+  delay: 5
+  until: result is success
+  with_items:
+    - "{{ mariadb_hosts }}"
+
+- name: "Create roles and tenant for {{ instance.project }}"
+  become: false
+  command: >-
+    python3 {{ role_path }}/files/create_roles_tenant.py
+    https://{{ opensearch_admin_user }}:{{ opensearch_admin_password }}@opensearch-0:9200 {{ instance.tenant }}
+  delegate_to: localhost
+
+- name: "Create mordred user for {{ instance.project }}"
+  uri:
+    url: "https://opensearch-0:9200/_plugins/_security/api/internalusers/{{ instance.tenant }}_mordred"
+    url_username: "{{ opensearch_admin_user }}"
+    url_password: "{{ opensearch_admin_password }}"
+    method: PUT
+    status_code: 200
+    body_format: json
+    body:
+      opendistro_security_roles: ["bap_{{ instance.tenant }}_mordred_role"]
+      password: "{{ instance.mordred_password }}"
+    validate_certs: false
+  register: result
+  until: result.status == 200
+  retries: 10
+  delay: 2
+  become: false

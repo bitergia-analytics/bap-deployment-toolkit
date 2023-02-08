@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# snapshot name format <snapshot-{now{yyyy.MM.dd}}>
+curl -s -XPUT -k --cert "{{ certs_dir }}/{{ certs_files.admin_cert }}" \
+--key "{{ certs_dir }}/{{ certs_files.admin_key }}" \
+-H "Content-Type: application/json" -d "@{{ opensearch_snapshots_json_file }}" \
+-k "{{ opensearch_snapshots_es_url }}/_snapshot/{{ opensearch_snapshots_repository }}/\
+%3Csnapshot-%7Bnow%7Byyyy.MM.dd%7D%7D%3E?wait_for_completion=false&pretty" | tee /dev/tty \
+| jq -e '.accepted == true' >/dev/null

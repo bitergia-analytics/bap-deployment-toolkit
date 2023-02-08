@@ -1,0 +1,35 @@
+---
+# Python packages
+python_packages:
+  - boto>=2.9
+
+# MariaDB
+
+mariadb_docker_image: mariadb
+mariadb_version: latest
+
+mariadb_workdir: "/docker/mariadb"
+gcp_service_account_file: "{{ mariadb_workdir }}/gcs_credentials.json"
+
+# Set in your environments vars.yml copying the name of the bucket created by terraform
+#backups_assets_bucket: bap-mariadb-backups-<XXXXXXXX>.
+#To create gs_access_key and gs_secret_key.
+#1. https://console.cloud.google.com/storage
+#2. Click on `bap-mariadb-backups-<XXXXXXXX>`
+#3. Click on `Settings`
+#4. Click on `INTEROPERABILITY`
+#5. In `Access keys for service accounts` click on `CREATE A KEY FOR A SERVICE ACCOUNT`
+#6. Select the account and click on `CREATE KEY`
+#restore_mariadb_backup:
+#  name: <BACKUP-SQL-NAME>
+#  dest: "/tmp/mariadb.sql"
+#  gs_access_key: <XXX>
+#  gs_secret_key: <YYY>
+
+## Crontab
+mariadb_backup_cronjob: true
+mariadb_backup_cronjob_time:
+  hour: "6"
+  minute: "0"
+  weekday: "0"
+mariadb_backup_script: /usr/local/bin/mariadb_backup.sh

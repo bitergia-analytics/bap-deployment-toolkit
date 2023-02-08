@@ -1,0 +1,41 @@
+---
+_meta:
+  type: "config"
+  config_version: 2
+
+config:
+  dynamic:
+    kibana:
+      # Kibana multitenancy
+      multitenancy_enabled: {{ multitenancy_enabled | string | lower }}
+    do_not_fail_on_forbidden: {{ do_not_fail_on_forbidden | string | lower }}
+    http:
+      anonymous_auth_enabled: {{ anonymous_auth_enabled | string | lower }}
+      xff:
+        enabled: false
+    authc:
+      basic_internal_auth_domain:
+        description: "Authenticate via HTTP Basic against internal users database"
+        http_enabled: true
+        transport_enabled: true
+        order: {{ '1' if openid.connect_url is defined else '0' }}
+        http_authenticator:
+          type: basic
+          challenge: true
+        authentication_backend:
+          type: intern
+{% if openid.connect_url is defined %}
+      openid_auth_domain:
+        description: "Authenticate via OpenID"
+        http_enabled: true
+        transport_enabled: true
+        order: 0
+        http_authenticator:
+          type: openid
+          challenge: false
+          config:
+            openid_connect_url: {{ openid.connect_url }}
+            subject_key: {{ openid.subject_key }}
+        authentication_backend:
+          type: noop
+{% endif %}

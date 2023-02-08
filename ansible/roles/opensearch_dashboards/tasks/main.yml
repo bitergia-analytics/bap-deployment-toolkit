@@ -1,0 +1,32 @@
+---
+
+- name: Create OpenSearch certificates directory
+  file:
+    path: "{{ opensearch_dashboards_workdir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: Copy OpenSearch Dashboards configuration file
+  template:
+    src: opensearch_dashboards.yml.j2
+    dest: "{{ opensearch_dashboards_workdir }}/opensearch_dashboards.yml"
+    owner: '1000'
+    group: '1000'
+    mode: 0644
+
+- name: Remove old OpenSearch Dashboards container
+  docker_container:
+    name: "{{ opensearch_dashboards_docker_container }}"
+    state: absent
+
+- name: Start OpenSearch Dashboards container(s)
+  docker_container:
+    name: "{{ opensearch_dashboards_docker_container }}"
+    image: "{{ opensearch_dashboards_docker_image }}:{{ opensearch_dashboards_version }}"
+    env:
+      NODE_OPTIONS=--max-old-space-size=1000
+    volumes:
+      - "{{ opensearch_dashboards_workdir }}/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
+    ports:
+      - "{{ network.bind_host }}:5601:5601"

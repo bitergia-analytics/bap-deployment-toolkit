@@ -1,0 +1,44 @@
+---
+- name: Add Docker apt key
+  apt_key:
+    # The command apt_key is deprecated and it will be removed from
+    # the distros soon. Check issue https://github.com/ansible/ansible/issues/78063
+    # for more info and for alternatives.
+    url: https://download.docker.com/linux/ubuntu/gpg
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    state: present
+
+- name: Add Docker repository (Debian/Ubuntu)
+  apt_repository:
+    repo: "{{ docker_apt_deb_ubuntu_repository }}"
+    state: present
+    update_cache: true
+  when: ansible_distribution == "Debian"
+    or ansible_distribution == "Ubuntu"
+
+- name: Install Docker
+  block:
+  - name: Install Docker CE (specific version)
+    package:
+      name: "{{ docker_package }}={{ docker_version }}"
+      state: present
+    when: docker_version is defined
+
+  - name: Install Docker CE (latest)
+    package:
+      name: "{{ docker_package }}"
+      state: present
+    when: docker_version is not defined
+
+- name: Ensure Docker is started and enabled at boot.
+  service:
+    name: docker
+    state: started
+    enabled: true
+  changed_when: false
+
+- name: Add current user to the docker group
+  user:
+    name: "{{ ansible_user_id }}"
+    groups: docker
+    append: true

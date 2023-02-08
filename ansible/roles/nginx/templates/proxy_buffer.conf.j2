@@ -1,0 +1,3 @@
+proxy_buffer_size   {{ nginx_proxy_buffer_size }};
+proxy_buffers   {{ nginx_proxy_total_buffers }} {{ nginx_proxy_buffer_size_per_conn }};
+proxy_busy_buffers_size   {{ nginx_proxy_busy_buffers_size }};

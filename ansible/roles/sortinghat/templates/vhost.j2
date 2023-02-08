@@ -1,0 +1,21 @@
+upstream sortinghat {
+    server {{ sortinghat_host }};
+}
+
+server {
+    listen 80;
+    server_name {{ ansible_hostname }};
+    include    mime.types;
+    sendfile   on;
+
+    location /identities/api/ {
+        rewrite ^/identities/(.*) /$1 break;
+        include /etc/nginx/conf.d/{{ ansible_hostname }}_uwsgi_params;
+        uwsgi_pass sortinghat;
+        uwsgi_param Host $host;
+        uwsgi_param X-Real-IP $remote_addr;
+        uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
+        uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
+    }
+   
+}

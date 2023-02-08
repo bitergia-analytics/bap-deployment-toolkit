@@ -1,0 +1,43 @@
+---
+# This is the internal user database
+# The hash value is a bcrypt hash and can be generated with plugin/tools/hash.sh
+
+_meta:
+  type: "internalusers"
+  config_version: 2
+
+# Define your internal users here
+
+{{ opensearch_admin_user }}:
+  hash: "{{ opensearch_admin_password_hash }}"
+  reserved: true
+  backend_roles:
+  - "admin"
+  description: "admin user"
+
+kibanaserver:
+  hash: "{{ opensearch_dashboards_password_hash }}"
+  reserved: true
+  description: "opensearch dashboards service account user"
+
+{{ opensearch_customer_user}}:
+  hash: "{{ opensearch_customer_password_hash }}"
+  reserved: false
+  backend_roles:
+  - "kibanauser"
+  - "readall"
+  description: "kibanaro user"
+
+readall:
+  hash: "{{ opensearch_readall_password_hash }}"
+  reserved: false
+  backend_roles:
+  - "readall"
+  description: "readall user"
+
+{{ opensearch_backups_user }}:
+  hash: "{{ opensearch_backups_password_hash }}"
+  reserved: false
+  backend_roles:
+  - "snapshotrestore"
+  description: "snapshotrestore user"

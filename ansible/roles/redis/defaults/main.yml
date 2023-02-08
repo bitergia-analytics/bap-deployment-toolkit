@@ -1,0 +1,10 @@
+---
+# redis
+
+redis_docker_image: bitnami/redis
+redis_version: latest
+redis_docker_container: redis
+
+network:
+  bind_host: 0.0.0.0
+  publish_host: "{{ ansible_default_ipv4.address }}"

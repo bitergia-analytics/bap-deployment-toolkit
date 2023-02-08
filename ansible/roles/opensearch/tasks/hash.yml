@@ -1,0 +1,8 @@
+- name: Generate hash for {{ item.hash_name }}
+  command: "python3 -c 'import bcrypt; print(bcrypt.hashpw(b\"{{ item.password }}\", bcrypt.gensalt()).decode())'"
+  register: output
+  changed_when: false
+
+- name: Save hash {{ item.hash_name }}
+  set_fact:
+    "{{ item.hash_name }}": "{{ output.stdout }}"

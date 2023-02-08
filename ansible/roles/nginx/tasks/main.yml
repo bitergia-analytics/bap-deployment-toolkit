@@ -1,0 +1,30 @@
+---
+
+- name: Configure virtualhost(s)
+  include_tasks: virtualhost.yml
+
+- name: Configure NGINX proxy buffer sizes
+  template:
+    src: proxy_buffer.conf.j2
+    dest: "{{ nginx_virtualhosts_workdir }}/proxy_buffer.conf"
+    backup: true
+
+- name: Remove old NGINX container
+  docker_container:
+    name: "{{ nginx_docker_container }}"
+    state: absent
+
+- name: Start NGINX container
+  docker_container:
+    name: "{{ nginx_docker_container }}"
+    image: "{{ nginx_docker_image }}:{{ nginx_version }}"
+    volumes:
+      - "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
+      - "{{ certs_dir }}/{{ virtualhost.fqdn }}.crt:/etc/ssl/certs/{{ virtualhost.fqdn }}.crt"
+      - "{{ certs_dir }}/{{ virtualhost.fqdn }}.key:/etc/ssl/private/{{ virtualhost.fqdn }}.key"
+    ports:
+      - "80:80"
+      - "443:443"
+    exposed_ports:
+      - "80"
+      - "443"

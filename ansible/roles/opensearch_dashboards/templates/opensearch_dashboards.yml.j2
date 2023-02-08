@@ -1,0 +1,57 @@
+server.name: {{ server_name }}
+server.host: "0"
+{% if basepath is defined %}
+server.basePath: {{ basepath }}
+{% endif %}
+opensearch.hosts: {{ opensearch.endpoints }}
+opensearch.ssl.verificationMode: none
+opensearch.username: {{ opensearch.username }}
+opensearch.password: {{ opensearch.password }}
+opensearch.requestHeadersWhitelist: ["securitytenant","Authorization"]
+
+opensearch_security.multitenancy.enabled: true
+opensearch_security.multitenancy.tenants.enable_private: false
+opensearch_security.multitenancy.tenants.enable_global: false
+opensearch_security.multitenancy.tenants.preferred: ["Global"]
+opensearch_security.readonly_mode.roles:
+  - "kibana_read_only"
+  - "bap_anonymous_access_role"
+
+opensearch_security.auth.anonymous_auth_enabled: {{ anonymous_auth_enabled }}
+
+# Use this setting if you are running OpenSearch Dashboards without HTTPS
+opensearch_security.cookie.secure: false
+
+opensearch_security.basicauth.login.brandimage: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_login_logo.png"
+opensearch_security.basicauth.login.title: {{ login.title }}
+opensearch_security.basicauth.login.subtitle: {{ login.subtitle }}
+
+# Bitergia Branding
+opensearchDashboards.branding:
+  {{ opensearch_dashboards_branding | to_nice_yaml(indent=2) | indent(2) }}
+bitergia_analytics.branding:
+  {{ bitergia_analytics_branding | to_nice_yaml(indent=2) | indent(2) }}
+
+# Bitergia custom settings
+uiSettings:
+  overrides:
+    defaultRoute: {{ opensearch_dashboard_default_route }}
+
+{% if opensearch_dashboards_enable_ssl | bool %}
+# TLS options
+server.ssl.certificate: "/usr/share/opensearch-dashboards/config/{{ opensearch_dashboards_cert_fqdn }}.cert"
+server.ssl.key: "/usr/share/opensearch-dashboards/config/{{ opensearch_dashboards_cert_fqdn }}.key"
+server.ssl.enabled: true
+{% endif %}
+
+{% if openid is defined %}
+### OpenID configuration
+opensearch_security.auth.type: "openid"
+opensearch_security.openid.connect_url: "{{ openid.connect_url }}"
+opensearch_security.openid.client_id: "{{ openid.client_id }}"
+opensearch_security.openid.client_secret: "{{ openid.client_secret }}"
+opensearch_security.openid.base_redirect_url: "{{ openid.base_redirect_url }}"
+{% if openid.logout_url is defined %}
+opensearch_security.openid.logout_url: "{{ openid.logout_url }}"
+{% endif %}
+{% endif %}

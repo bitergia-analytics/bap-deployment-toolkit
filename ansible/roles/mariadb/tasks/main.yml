@@ -1,0 +1,107 @@
+---
+- name: Install mysqldump
+  apt:
+    name:
+      - mariadb-client
+    state: present
+    update_cache: true
+
+- name: Install Python packages
+  pip:
+    name: "{{ python_packages }}"
+
+- name: Remove old MariaDB container
+  docker_container:
+    name: mariadb
+    state: absent
+  tags:
+    - reconfigure
+    - restart
+
+- name: Start MariaDB container
+  docker_container:
+    name: mariadb
+    image: "{{ mariadb_docker_image }}:{{ mariadb_version }}"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    pull: true
+    restart_policy: always
+    state: started
+    ports:
+      - "3306:3306"
+    exposed_ports:
+      - "3306"
+    env:
+      MARIADB_ROOT_PASSWORD: "{{ mariadb_root_password }}"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+  register: result
+  retries: 2
+  delay: 5
+  until: result is success
+  tags:
+    - reconfigure
+    - restart
+
+- name: "Download MariaDB {{ restore_mariadb_backup.name }} backup from {{ backups_assets_bucket }} bucket"
+  gc_storage:
+    gs_access_key: "{{ restore_mariadb_backup.gs_access_key }}"
+    gs_secret_key: "{{ restore_mariadb_backup.gs_secret_key }}"
+    bucket: "{{ backups_assets_bucket }}"
+    object: "{{ restore_mariadb_backup.name }}"
+    dest: "{{ restore_mariadb_backup.dest }}"
+    mode: get
+  when: restore_mariadb_backup is defined
+
+- name: Restore MariaDB all databases from {{ restore_mariadb_backup.dest }} backup
+  mysql_db:
+    name: all
+    state: import
+    target: "{{ restore_mariadb_backup.dest }}"
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: "{{ groups['mariadb'][0] }}"
+  when: restore_mariadb_backup is defined
+
+- name: Run MariadDB tests
+  import_tasks: test.yml
+  tags:
+    - test
+
+- name: Copy MariaDB backup script
+  template:
+    src: mariadb_backup.sh.j2
+    dest: "{{ mariadb_backup_script }}"
+    mode: 0500
+    owner: "{{ ansible_user_id }}"
+
+- name: Copy gsutil credentials file
+  template:
+    src: boto.j2
+    dest: ~/.boto
+    mode: 0500
+    owner: "{{ ansible_user_id }}"
+
+- name: Create MariaDB configuration directory
+  file:
+    path: "{{ mariadb_workdir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: Copy GCP service account file
+  copy:
+    src: "{{ gcp_service_account_host_file }}"
+    dest: "{{ gcp_service_account_file }}"
+    owner: '1000'
+    group: '1000'
+    mode: 0644
+
+- name: Create cron job
+  cron:
+    name: "Make MariaDB backup"
+    user: "{{ ansible_user_id }}"
+    hour: "{{ mariadb_backup_cronjob_time.hour }}"
+    minute: "{{ mariadb_backup_cronjob_time.minute }}"
+    weekday: "{{ mariadb_backup_cronjob_time.weekday }}"
+    job: "{{ mariadb_backup_script }}"
+    backup: true

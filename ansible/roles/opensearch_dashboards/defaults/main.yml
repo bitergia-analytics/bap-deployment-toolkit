@@ -1,0 +1,66 @@
+---
+# docker
+opensearch_dashboards_docker_image: bitergia/bitergia-analytics-opensearch-dashboards
+opensearch_dashboards_version: 0.6.0
+opensearch_dashboards_docker_container: bap_opensearch_dashboard
+
+opensearch_dashboards_workdir: "/docker/opensearch_dashboard"
+
+# template
+server_name: bap
+network:
+  bind_host: 0.0.0.0
+  publish_host: "{{ ansible_default_ipv4.address }}"
+
+# TODO:
+# basepath:
+
+#
+opensearch_hosts:
+  "{{ groups['opensearch'] | map('extract', hostvars, ['ansible_default_ipv4','address']) | list }}"
+opensearch:
+  endpoints: "{{ ['https'] | product(opensearch_hosts) | map('join','://') | list | product(['9200']) | map('join', ':') | list }}"
+  username: kibanaserver
+  password: "{{ opensearch_dashboards_password }}"
+
+anonymous_auth_enabled: false
+login:
+  title: "Please login to Bitergia Analytics Dashboard."
+  subtitle: "If you have forgotten your username or password, please contact the Bitergia staff."
+
+opensearch_dashboards_branding:
+  applicationTitle: "Bitergia Analytics"
+  logo:
+    defaultUrl: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_logo.svg"
+  mark:
+    defaultUrl: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_logo.svg"
+  loadingLogo:
+    defaultUrl: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_logo.svg"
+  faviconUrl: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_logo.svg"
+
+bitergia_analytics_branding:
+  projectName: "Bitergia Analytics"
+  backgroundColor: "#333"
+  linkColor: "#fcb42e"
+  textColor: "#cecece"
+  menuItemColor: "#dedede"
+  menuItemHoverColor: "#000000"
+  dropdownColor: "#525252"
+  selectedItemColor: "#f49e42"
+
+opensearch_dashboard_default_route: '/app/dashboards#/view/Overview'
+
+opensearch_dashboards_enable_ssl: true
+opensearch_dashboards_cert_fqdn: opensearch.example.org
+
+# OpenID configuration requires of all these parameters
+# than can be either set here or as in the environment
+# vars file.
+#
+# openid:
+#   connect_url: "{{ hostvars[groups['opensearch'][0]].openid_connect_url }}"
+#   client_id: "{{ openid_client_id }}"
+#   client_secret: "{{ openid_secret }}"
+#   base_redirect_url: {{ openid_redirect_url }}
+#   logout_url: "{{ openid_logout_url }}"
+#

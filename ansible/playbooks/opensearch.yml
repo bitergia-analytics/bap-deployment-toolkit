@@ -1,0 +1,5 @@
+---
+- hosts: opensearch
+  roles:
+    - opensearch
+  become: true

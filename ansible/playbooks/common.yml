@@ -1,0 +1,5 @@
+---
+- hosts: mariadb:opensearch
+  roles:
+    - common
+  become: true

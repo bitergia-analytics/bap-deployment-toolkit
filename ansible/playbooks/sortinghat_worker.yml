@@ -1,0 +1,5 @@
+---
+- hosts: sortinghat_worker
+  roles:
+    - sortinghat_worker
+  become: true

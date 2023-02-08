@@ -1,0 +1,99 @@
+upstream sortinghat {
+    server {{ sortinghat_host }};
+}
+
+server {
+    listen 80;
+    server_name {{ virtualhost.fqdn }};
+
+    return 301 https://{{ virtualhost.fqdn }};
+}
+
+server {
+    include    mime.types;
+    sendfile   on;
+
+    listen 443 ssl http2;
+    server_name {{ virtualhost.fqdn }};
+
+    # Needed by OpenSearch Dashboards queries
+    client_max_body_size 2000M;
+
+    ssl    on;
+
+    ssl_certificate /etc/ssl/certs/{{ virtualhost.fqdn }}.crt;
+    ssl_certificate_key /etc/ssl/private/{{ virtualhost.fqdn }}.key;
+
+    ssl_protocols TLSv1.3 TLSv1.2;
+    ssl_ciphers AES256+EECDH:AES256+EDH:!aNULL;
+    ssl_prefer_server_ciphers on;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    add_header Strict-Transport-Security "max-age=63072000;" always;
+
+    rewrite ^/$ /app/dashboards#/view/Overview permanent;
+    location / {
+        proxy_pass {{ opensearch_dashboards_endpoint }}/;
+        proxy_redirect {{ opensearch_dashboards_endpoint }}/ /;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /data/ {
+        proxy_pass {{ opensearch_endpoint }}/;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "Keep-Alive";
+        proxy_set_header Proxy-Connection "Keep-Alive";
+        client_max_body_size 2000M;
+        proxy_read_timeout 300;
+        proxy_send_timeout 240;
+    }
+
+    location /identities {
+        rewrite                 ^/identities/(.*) /$1 break;
+
+        include /etc/nginx/conf.d/{{ virtualhost.fqdn }}_uwsgi_params;
+        uwsgi_pass sortinghat;
+        uwsgi_param Host $host;
+        uwsgi_param X-Real-IP $remote_addr;
+        uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
+        uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
+    }
+
+    location ~ ^/identities/(css|js|fonts)/ {
+        resolver                8.8.8.8 valid=300s ipv6=off;
+        resolver_timeout        10s;
+
+        rewrite                 ^/identities/(.*) /$1 break;
+
+        proxy_set_header        Host storage.googleapis.com;
+        proxy_pass              https://storage.googleapis.com:443/{{ sortinghat_assets_bucket }}$uri;
+        proxy_http_version      1.1;
+        proxy_set_header        Connection "";
+        proxy_set_header        Cookie "";
+        proxy_set_header        Authorization "";
+        proxy_hide_header       x-goog-hash;
+        proxy_hide_header       x-goog-generation;
+        proxy_hide_header       x-goog-metageneration;
+        proxy_hide_header       x-goog-stored-content-encoding;
+        proxy_hide_header       x-goog-stored-content-length;
+        proxy_hide_header       x-goog-storage-class;
+        proxy_hide_header       x-guploader-uploadid;
+        proxy_hide_header       x-xss-protection;
+        proxy_hide_header       x-goog-meta-goog-reserved-file-mtime;
+        proxy_hide_header       accept-ranges;
+        proxy_hide_header       alternate-protocol;
+        proxy_hide_header       Set-Cookie;
+        proxy_hide_header       Expires;
+        proxy_hide_header       Cache-Control;
+        proxy_ignore_headers    Set-Cookie;
+        proxy_intercept_errors  on;
+        proxy_method            GET;
+        proxy_pass_request_body off;
+    }
+}

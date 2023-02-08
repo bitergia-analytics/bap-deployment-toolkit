@@ -1,0 +1,26 @@
+---
+_meta:
+  type: "rolesmapping"
+  config_version: 2
+
+all_access:
+  reserved: false
+  backend_roles:
+  - "admin"
+{% if openid.admins is defined %}
+  users:
+{% for user in openid.admins.users %}
+  - "{{ user }}"
+{% endfor %}
+{% endif %}
+  description: "Maps admin to all_access"
+
+manage_snapshots:
+  reserved: false
+  backend_roles:
+  - "snapshotrestore"
+
+kibana_server:
+  reserved: true
+  users:
+  - "kibanaserver"

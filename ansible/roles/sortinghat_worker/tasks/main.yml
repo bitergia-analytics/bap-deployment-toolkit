@@ -1,0 +1,39 @@
+---
+
+- name: Create MariaDB service account for SortingHat worker
+  mysql_user:
+    name: "{{ mariadb_service_account }}"
+    host: "{{ ansible_default_ipv4.address }}"
+    password: "{{ mariadb_service_account_password }}"
+    priv: "{{ sortinghat_database }}.*:ALL,GRANT"
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: "{{ item }}"
+    state: present
+  register: result
+  retries: 2
+  delay: 5
+  until: result is success
+  with_items:
+    - "{{ mariadb_hosts }}"
+
+- name: Remove old SortingHat worker container
+  docker_container:
+    name: "{{ sortinghat_worker_docker_container }}"
+    state: absent
+
+- name: Start SortingHat worker container
+  docker_container:
+    name: "{{ sortinghat_worker_docker_container }}"
+    image: "{{ sortinghat_worker_docker_image }}:{{ sortinghat_worker_version }}"
+    pull: yes
+    env:
+      SORTINGHAT_CONFIG: sortinghat.config.settings
+      SORTINGHAT_SECRET_KEY: "{{ sortinghat_secret_key }}"
+      SORTINGHAT_DB_HOST: "{{ mariadb_hosts }}"
+      SORTINGHAT_DB_USER: "{{ mariadb_service_account }}"
+      SORTINGHAT_DB_PASSWORD: "{{ mariadb_service_account_password }}"
+      SORTINGHAT_DB_DATABASE: "{{ sortinghat_database }}"
+      SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
+      SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
+      SORTINGHAT_REDIS_DB: "{{ redis_database }}"

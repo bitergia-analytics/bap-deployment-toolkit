@@ -1,0 +1,68 @@
+---
+
+- name: Create MariaDB service account for SortingHat
+  mysql_user:
+    name: "{{ mariadb_service_account }}"
+    host: "{{ ansible_default_ipv4.address }}"
+    password: "{{ mariadb_service_account_password }}"
+    priv: "{{ sortinghat_database }}.*:ALL,GRANT"
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: "{{ item }}"
+    state: present
+  register: result
+  retries: 2
+  delay: 5
+  until: result is success
+  with_items:
+    - "{{ mariadb_hosts }}"
+
+- name: Create SortingHat directory credentials for GCP
+  file:
+    path: "{{ keys_dir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: Copy GCP service account file
+  copy:
+    src: "{{ gcp_service_account_host_file }}"
+    dest: "{{ gcp_service_account_file }}"
+    mode: 0644
+
+- name: Remove old SortingHat container
+  docker_container:
+    name: "{{ sortinghat_docker_container }}"
+    state: absent
+
+- name: Start SortingHat container
+  docker_container:
+    name: "{{ sortinghat_docker_container }}"
+    image: "{{ sortinghat_docker_image }}:{{ sortinghat_version }}"
+    pull: yes
+    command: --upgrade
+    env:
+      SORTINGHAT_DEBUG: "{{ sortinghat_debug }}"
+      SORTINGHAT_CONFIG: sortinghat.config.settings
+      SORTINGHAT_SECRET_KEY: "{{ sortinghat_secret_key }}"
+      SORTINGHAT_DB_HOST: "{{ mariadb_hosts }}"
+      SORTINGHAT_DB_USER: "{{ mariadb_service_account }}"
+      SORTINGHAT_DB_PASSWORD: "{{ mariadb_service_account_password }}"
+      SORTINGHAT_DB_DATABASE: "{{ sortinghat_database }}"
+      SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
+      SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
+      SORTINGHAT_REDIS_DB: "{{ redis_database }}"
+      SORTINGHAT_SUPERUSER_USERNAME: "{{ sortinghat_superuser_name }}"
+      SORTINGHAT_SUPERUSER_PASSWORD: "{{ sortinghat_superuser_password }}"
+      SORTINGHAT_ALLOWED_HOST: "{{ sortinghat_allowed_hosts }}"
+      SORTINGHAT_CORS_ALLOWED_ORIGINS: "{{ sortinghat_cors_allowed_origins }}"
+      SORTINGHAT_STATICFILES_STORAGE: "{{ sortinghat_bucket_provider }}"
+      SORTINGHAT_BUCKET_NAME: "{{ sortinghat_assets_bucket }}"
+      GOOGLE_APPLICATION_CREDENTIALS: /home/sortinghat/gcp_credentials.json
+    volumes:
+      - "{{ gcp_service_account_file }}:/home/sortinghat/gcp_credentials.json:ro"
+    ports:
+      - "{{ network.bind_host }}:9314:9314"
+
+- name: Configure Nginx
+  include_tasks: nginx.yml

@@ -1,0 +1,22 @@
+---
+- name: Ensure dependencies are installed.
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+      - python3-minimal
+      - python3-setuptools
+      - python3-pip
+    state: present
+  tags: packages
+
+- name: Install and configure Docker
+  import_tasks: docker.yml
+  tags: packages
+
+- name: Install Python packages
+  pip:
+    name: "{{ python_packages }}"

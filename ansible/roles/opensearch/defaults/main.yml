@@ -1,0 +1,84 @@
+---
+# OpenSearch image and container
+opensearch_docker_image: bitergia/bitergia-analytics-opensearch
+opensearch_version: 0.6.0
+opensearch_docker_container: bap_opensearch
+
+# OpenSearch node configuration
+opensearch_workdir: "/docker/opensearch"
+heap_size: 512m
+node_name: "{{ inventory_hostname }}"
+network:
+  bind_host: 0.0.0.0
+  publish_host: "{{ ansible_default_ipv4.address }}"
+
+# OpenSearch cluster configuration
+cluster_name: "{{ opensearch_cluster_name }}"
+discovery_seed_hosts:
+  "{{ groups['opensearch'] |
+  map('extract', hostvars, ['ansible_default_ipv4','address']) | list | join(',') }}"
+cluster_initial_master_nodes: "{{ groups['opensearch'] | join(',') }}"
+multitenancy_enabled: true
+do_not_fail_on_forbidden: false
+anonymous_auth_enabled: false
+opensearch_endpoint: "https://{{ network.publish_host }}:9200"
+number_of_shards: "{{ groups['opensearch'] | length }}"
+auto_expand_replicas: "0-1"
+
+# Certificates files and their DNs
+certs_dir: "{{ opensearch_workdir }}/certs"
+certs_files:
+  ca_cert: root-ca.pem
+  admin_cert: admin.pem
+  admin_key: admin-key.pem
+  node_cert: node-0.pem
+  node_key: node-0-key.pem
+certs_dn:
+  admin_cert: "CN=admin,O=Dis,L=All,ST=Any,C=EU"
+  node_cert: "CN=opensearch,O=Dis,L=All,ST=Any,C=EU"
+
+## OpenID
+#
+# OpenID configuration requires of all these parameters
+# than can be either set here or as in the environment
+# vars file.
+# openid:
+#   connect_url: "https://accounts.google.com/.well-known/openid-configuration"
+#   subject_key: email
+#   admins:
+#     users:
+#       - johnsmith@example.com
+#       - janerae@example.com
+#
+
+# Snapshots
+opensearch_base_path: opensearch
+# Set in your environments vars.yml copying the name of the bucket created by terraform
+#backups_assets_bucket: bap-opensearch-snapshots-<XXXXXXXX>
+opensearch_snapshots_repo_type: gcs
+opensearch_snapshots_repository: os_backups
+opensearch_snapshots_es_url: https://localhost:9200
+opensearch_snapshots_index_list:
+  - "*"
+
+## Restore snapshot
+# Uncomment this section to restore indices from a snapshot or set in your environments vars.yml.
+# Remember to remove or comment this section after the snapshot is restored.
+#restore_snapshot:
+#  bucket: <BUCKET-NAME>
+#  name: <SNAPSHOT-NAME>
+#  index_list: "-.opendistro_security,-security-auditlog*,-.kibana_1"
+
+## Crontab
+opensearch_snapshots_cronjob: true
+opensearch_snapshots_cronjob_time:
+  hour: "6"
+  minute: "0"
+  weekday: "*"
+opensearch_snapshots_script: /usr/local/bin/make_snapshot.sh
+opensearch_snapshots_json_file: "{{ opensearch_workdir }}/snapshot.json"
+
+## Google Cloud Credendials
+opensearch_keys_dir:  "{{ opensearch_workdir }}/keys"
+gcp_service_account_file: "{{ opensearch_keys_dir }}/gcs_credentials.json"
+gcs_cred_file_container: "/usr/share/opensearch/config/gcs_credentials.json"

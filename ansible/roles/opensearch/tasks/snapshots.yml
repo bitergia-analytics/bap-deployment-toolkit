@@ -1,0 +1,120 @@
+---
+
+- name: Install OpenSearch Snapshot requirements
+  apt:
+    name:
+      - jq
+      - cron
+    state: present
+    update_cache: true
+
+- name: Create OpenSearch directory credentials for GCP
+  file:
+    path: "{{ opensearch_keys_dir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: Copy GCP service account file
+  copy:
+    src: "{{ gcp_service_account_host_file }}"
+    dest: "{{ gcp_service_account_file }}"
+    owner: '1000'
+    group: '1000'
+    mode: 0644
+
+- name: Copy credentials file to OpenSearch container
+  command: docker cp {{ gcp_service_account_file }} {{ opensearch_docker_container }}:{{ gcs_cred_file_container }}
+  changed_when: false
+
+- name: Register secrets in the OpenSearch keystore
+  command: >
+    docker exec -i -e OPENSEARCH_JAVA_OPTS="-Xms4m -Xmx64m" {{ opensearch_docker_container }}
+    bin/opensearch-keystore add-file gcs.client.default.credentials_file
+    {{ gcs_cred_file_container }} --force
+  changed_when: false
+
+- name: Reload opensearch secure settings
+  uri:
+    url: "{{ opensearch_snapshots_es_url }}/_nodes/reload_secure_settings"
+    method: POST
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
+  run_once: true
+
+- name: Delete credentials file from the container
+  community.docker.docker_container_exec:
+    container: "{{ opensearch_docker_container }}"
+    user: opensearch
+    command: rm {{ gcs_cred_file_container }}
+  ignore_errors: true
+  changed_when: false
+
+- name: Delete credentials file
+  file:
+    path: "{{ gcp_service_account_file }}"
+    state: absent
+  ignore_errors: true
+  changed_when: false
+
+- name: "Create snapshot repository '{{ opensearch_snapshots_repository }}' \
+    in GCS bucket '{{ backups_assets_bucket }}'"
+  uri:
+    url: "{{ opensearch_snapshots_es_url }}/_snapshot/{{ opensearch_snapshots_repository }}"
+    method: PUT
+    body_format: json
+    body:
+      type: "{{ opensearch_snapshots_repo_type }}"
+      settings:
+        bucket: "{{ backups_assets_bucket }}"
+        base_path: "{{ opensearch_base_path }}"
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
+  run_once: true
+
+- name: "Rsync OpenSearch snapshot bucket from {{ restore_snapshot.bucket }} to {{ backups_assets_bucket }}"
+  command: "gsutil -m rsync -r -d -p gs://{{ restore_snapshot.bucket }} gs://{{ backups_assets_bucket }}"
+  delegate_to: localhost
+  run_once: true
+  when: restore_snapshot is defined
+
+- name: "Restore indices from {{ opensearch_snapshots_repository }} of {{ backups_assets_bucket }} bucket"
+  uri:
+    url: "{{ opensearch_snapshots_es_url }}/_snapshot/{{ opensearch_snapshots_repository }}/{{ restore_snapshot.name }}/_restore"
+    method: POST
+    body_format: json
+    body:
+      indices: "{{ restore_snapshot.index_list }}"
+      ignore_unavailable: true
+      include_global_state: false
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
+  run_once: true
+  when: restore_snapshot is defined
+
+- name: Copy snapshot index list JSON file
+  template:
+    src: snapshot.json.j2
+    dest: "{{ opensearch_snapshots_json_file }}"
+    mode: 0400
+    owner: "{{ ansible_user_id }}"
+
+- name: Copy snapshot script
+  template:
+    src: make_snapshot.sh.j2
+    dest: "{{ opensearch_snapshots_script }}"
+    mode: 0500
+    owner: "{{ ansible_user_id }}"
+
+- name: Create cron job
+  cron:
+    name: "Make ES snapshot"
+    user: "{{ ansible_user_id }}"
+    hour: "{{ opensearch_snapshots_cronjob_time.hour }}"
+    minute: "{{ opensearch_snapshots_cronjob_time.minute }}"
+    weekday: "{{ opensearch_snapshots_cronjob_time.weekday }}"
+    job: "{{ opensearch_snapshots_script }}"
+    backup: true

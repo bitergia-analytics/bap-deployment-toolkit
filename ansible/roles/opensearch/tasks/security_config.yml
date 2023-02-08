@@ -1,0 +1,45 @@
+---
+
+- name: Create OpenSearch security directory
+  file:
+    path: "{{ opensearch_workdir }}/securityconfig"
+    state: directory
+    mode: 0775
+    recurse: true
+
+- name: Check if OpenSearch security is already initialized
+  stat:
+    path: "{{ opensearch_workdir }}/security_initialized"
+  register: security_initialized_mark
+
+- name: Create hashes for OpenSearch passwords
+  include_tasks: hash.yml
+  loop:
+    - password: "{{ opensearch_admin_password }}"
+      hash_name: opensearch_admin_password_hash
+    - password: "{{ opensearch_dashboards_password }}"
+      hash_name: opensearch_dashboards_password_hash
+    - password: "{{ opensearch_customer_password }}"
+      hash_name: opensearch_customer_password_hash
+    - password: "{{ opensearch_readall_password }}"
+      hash_name: opensearch_readall_password_hash
+    - password: "{{ opensearch_backups_password }}"
+      hash_name: opensearch_backups_password_hash
+  loop_control:
+    label: "{{ item.hash_name }}"
+  when: not security_initialized_mark.stat.exists
+
+- name: Copy security configuration, internal users and roles mappings
+  template:
+    src: "{{ item.path }}.j2"
+    dest: "{{ opensearch_workdir }}/{{ item.path }}"
+    owner: '1000'
+    group: '1000'
+    mode: 0644
+  loop:
+    - path: securityconfig/config.yml
+      always_update: this
+    - path: securityconfig/internal_users.yml
+    - path: securityconfig/roles_mapping.yml
+  when: item.always_update is defined or
+        not security_initialized_mark.stat.exists

@@ -1,0 +1,7 @@
+- name: Add GCP Ops Agent on hosts
+  hosts: all
+  become: true
+  roles:
+    - role: google-cloud-ops-agents-ansible
+      vars:
+        agent_type: ops-agent

@@ -1,0 +1,19 @@
+- name: Configure virtualhost(s)
+  include_tasks: virtualhost.yml
+
+- name: Remove old NGINX container
+  docker_container:
+    name: "{{ nginx_docker_container }}"
+    state: absent
+
+- name: Start NGINX container
+  docker_container:
+    name: "{{ nginx_docker_container }}"
+    image: "{{ nginx_docker_image }}:{{ nginx_version }}"
+    volumes:
+      - "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
+    ports:
+      - "80:80"    
+    exposed_ports:
+      - "80"
+     

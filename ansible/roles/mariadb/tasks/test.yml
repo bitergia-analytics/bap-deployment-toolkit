@@ -1,0 +1,61 @@
+---
+- name: Create a test service account
+  mysql_user:
+    name: "test_user"
+    host: localhost
+    password: "test_password"
+    priv: '*.*:ALL,GRANT'
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    state: present
+  register: result
+  retries: 2
+  delay: 5
+  until: result is success
+
+- name: Drop a test service account
+  mysql_user:
+    name: "test_user"
+    host: localhost
+    password: "test_password"
+    priv: '*.*:ALL,GRANT'
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    state: absent
+
+- name: Check MariaDB configuration variables
+  mysql_variables:
+    variable: "{{ item.key }}"
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+  register: result
+  failed_when: "item.value != result.msg"
+  with_items:
+    - key: "character_set_client"
+      value: "utf8mb4"
+    - key: "character_set_connection"
+      value: "utf8mb4"
+    - key: "character_set_database"
+      value: "utf8mb4"
+    - key: "character_set_results"
+      value: "utf8mb4"
+    - key: "character_set_server"
+      value: "utf8mb4"
+    - key: "collation_database"
+      value: "utf8mb4_unicode_ci"
+    - key: "collation_server"
+      value: "utf8mb4_unicode_ci"
+
+- name: Create a test database
+  mysql_db:
+    name: bap_test
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+
+- name: Drop the test database
+  mysql_db:
+    name: bap_test
+    state: absent
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"

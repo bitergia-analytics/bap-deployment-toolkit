@@ -1,0 +1,27 @@
+---
+
+# GrimoireLab image and container
+grimoirelab_docker_image: grimoirelab/grimoirelab
+grimoirelab_version: 0.7.2-rc.1
+
+# GrimoireLab configuration
+mordred_workdir: "/docker/mordred"
+mordred_setups_dir: "{{ mordred_workdir }}/setups"
+mordred_ssh_dir: "{{ mordred_workdir }}/ssh"
+mordred_instances_dir: "{{ mordred_workdir }}/instances"
+
+mordred_aliases_url: https://raw.githubusercontent.com/chaoss/grimoirelab-sirmordred/master/aliases.json
+
+# Set in your environments vars.yml
+#mordred_setups_repo_url: <SETUP_REPO_URL>
+#mordred_instances:
+#  - project: project1
+#    tenant: project1
+#    sources:
+#      repository: "<PROJECT1_SOURCE_REPO_URL>"
+#  - project: project2
+#    tenant: project2
+#    sources:
+#      repository: "<PROJECT2_SOURCE_REPO_URL>"
+
+mariadb_hosts: "{{ groups['mariadb'] }}"

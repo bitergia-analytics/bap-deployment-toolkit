@@ -1,0 +1,34 @@
+---
+# NGINX image and container
+nginx_docker_image: nginx
+nginx_version: stable
+nginx_docker_container: nginx
+
+# NGINX node configuration
+nginx_workdir: "/docker/nginx"
+nginx_virtualhosts_workdir: "{{ nginx_workdir }}/conf"
+
+virtualhost:
+  fqdn: example.com
+
+# Service hosts
+opensearch_dashboards_endpoint: "https://{{ hostvars[(groups['opensearch_dashboards'] | first)].ansible_default_ipv4.address }}:5601"
+opensearch_endpoint: "https://{{ hostvars[(groups['opensearch'] | first)].ansible_default_ipv4.address }}:9200"
+sortinghat_host: "{{ hostvars[(groups['sortinghat'] | first)].ansible_default_ipv4.address }}:9314"
+
+# Certificates configuration
+
+certs_dir: "{{ nginx_workdir }}/certs"
+
+## Uncomment to define custom certificates. Otherwise self-signed
+## certificates will be used.
+# custom_cert:
+#   cert: foo/cert.crt
+#   key: foo/cert.key
+
+
+# NGINX proxy buffer settings
+nginx_proxy_buffer_size: "128k"
+nginx_proxy_buffer_size_per_conn: "256k"
+nginx_proxy_total_buffers: 4
+nginx_proxy_busy_buffers_size: "256k"

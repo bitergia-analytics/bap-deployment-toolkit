@@ -1,0 +1,17 @@
+---
+
+# SortingHat image and container
+sortinghat_worker_docker_image: grimoirelab/sortinghat-worker
+sortinghat_worker_version: latest
+sortinghat_worker_docker_container: bap_sortinghat_worker
+
+# SortingHat network
+network:
+  bind_host: 0.0.0.0
+  publish_host: "{{ ansible_default_ipv4.address }}"
+
+# Database
+sortinghat_database: sortinghat_db
+mariadb_hosts: "{{ groups['mariadb'] | first }}"
+redis_database: "0"
+redis_hosts: "{{ groups['redis'] | first }}"

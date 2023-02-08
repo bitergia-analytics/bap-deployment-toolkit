@@ -1,0 +1,26 @@
+---
+
+- name: Create OpenSearch certificates directory
+  file:
+    path: "{{ certs_dir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: Generate self-signed certificates
+  shell: NODES_NUMBER=1 ./generate_certs.sh
+  become: false
+  args:
+    chdir: "{{ role_path }}/files"
+    creates: "{{ role_path }}/files/certs/root-ca-key.pem"
+  run_once: true
+  delegate_to: localhost
+
+- name: Copy self-signed certificates
+  copy:
+    src: "{{ role_path }}/files/certs/{{ item }}"
+    dest: "{{ certs_dir }}/"
+    owner: '1000'
+    group: '1000'
+    mode: 0600
+  loop: "{{ certs_files.values() | list }}"

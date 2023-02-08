@@ -1,0 +1,25 @@
+---
+
+- name: Configure Mordred
+  import_tasks: configure.yml
+
+- name: Remove old Mordred container(s)
+  docker_container:
+    name: "mordred_{{ item.project }}"
+    state: absent
+  with_items:
+    - "{{ mordred_instances }}"
+  
+- name: docker
+  docker_container:
+    name: "mordred_{{ item.project }}"
+    image: "{{ grimoirelab_docker_image }}:{{ grimoirelab_version }}"
+    volumes:
+    - "{{ mordred_ssh_dir }}:/home/grimoire/.ssh/"
+    - "{{ mordred_setups_dir }}/{{ item.project }}/setup.cfg:/home/grimoire/conf/setup.cfg"
+    - "{{ mordred_instances_dir }}/{{ item.project }}/conf/:/home/grimoire/conf/"
+    - "{{ mordred_instances_dir }}/{{ item.project }}/sources/:/home/grimoire/data-sources/"
+    - "{{ mordred_instances_dir }}/{{ item.project }}/logs/:/home/grimoire/logs/"
+    - "{{ mordred_instances_dir }}/{{ item.project }}/perceval-cache/:/home/grimoire/.perceval/"
+  with_items:
+    - "{{ mordred_instances }}"

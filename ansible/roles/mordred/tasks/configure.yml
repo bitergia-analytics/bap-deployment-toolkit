@@ -1,0 +1,51 @@
+---
+
+- name: Create Mordred directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    recurse: true
+  with_items:
+    - "{{ mordred_workdir }}"
+    - "{{ mordred_ssh_dir }}"
+    - "{{ mordred_instances_dir }}"
+    - "{{ mordred_setups_dir }}"
+
+- name: Check if SSH key exists
+  stat:
+    path: "{{ mordred_ssh_dir }}/id_rsa"
+  register: sshkey
+
+- name: Create SSH key pair
+  command: "ssh-keygen -t rsa -b 4096 -q -N '' -f {{ mordred_ssh_dir }}/id_rsa"
+  when:
+    - not sshkey.stat.exists
+
+- name: Set SSH default config for user 'git'
+  copy:
+    src: "{{ role_path }}/files/ssh_config"
+    dest: "{{ mordred_ssh_dir }}/config"
+
+- name: Set Aliases file
+  get_url:
+    url: "{{ mordred_aliases_url }}"
+    dest: "/tmp/aliases.json"
+    owner: '1000'
+    group: '1000'
+    mode: '0644'
+  register: upstream_aliases
+  delegate_to: localhost
+
+- name: Configure mordred instances
+  include_tasks: configure_instance.yml
+  loop: "{{ mordred_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.project }}"
+
+- name: Checkout mordred setups repo
+  git:
+    repo: "{{ mordred_setups_repo_url }}"
+    dest: "{{ mordred_setups_dir }}"
+    force: true

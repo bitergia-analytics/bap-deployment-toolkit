@@ -1,0 +1,23 @@
+---
+# Docker
+
+## Edition can be one of: 'ce' (Community Edition) or 'ee' (Enterprise Edition).
+docker_edition: 'ce'
+docker_package: "docker-{{ docker_edition }}"
+
+## Docker specific version. Uncomment to install it.
+# docker_version: 5:20.10.22~3-0~debian-bullseye
+
+docker_apt_release_repository: stable
+docker_apt_arch: amd64
+docker_apt_deb_ubuntu_repository: >-
+  deb [arch={{ docker_apt_arch }}]
+  https://download.docker.com/linux/{{ ansible_distribution|lower }}
+  {{ ansible_distribution_release }}
+  {{ docker_apt_release_repository }}
+
+# Python packages
+python_packages: 
+  - requests==2.28.1
+  - PyMySQL==1.0.2
+  - bcrypt==4.0.1

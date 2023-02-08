@@ -1,0 +1,19 @@
+---
+
+- name: Create NGINX virtualhost(s) directory
+  file:
+    path: "{{ nginx_virtualhosts_workdir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: "Create virtualhost configuration for {{ ansible_hostname }}"
+  template:
+    src: "{{ item.template }}"
+    dest: "{{ nginx_virtualhosts_workdir }}/{{ item.name }}"
+    backup: true
+  with_items:
+    - name: "{{ ansible_hostname }}.conf"
+      template: vhost.j2
+    - name: "{{ ansible_hostname }}_uwsgi_params"
+      template: uwsgi_params.j2

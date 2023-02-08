@@ -1,0 +1,19 @@
+---
+namespace: "bitergia"
+name: "bap_deployment_toolkit"
+version: "0.1.0"
+description: |
+  The BAP Deployment Toolkit is a set of tools for provisioning,
+  configuring, and deploying the Bitergia Analytics Platform
+  with Terraform and Ansible.
+authors:
+  - "Bitergia Engineering Team"
+dependencies:
+
+readme: "../README.md"
+license_file: '../LICENSE'
+tags:
+  - bitergia
+  - bap
+  - bap_deployment_toolkit
+repository: "https://github.com/Bitergia/bap-deployment-toolkit"

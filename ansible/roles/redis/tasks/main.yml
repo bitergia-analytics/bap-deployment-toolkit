@@ -1,0 +1,18 @@
+---
+
+- name: Remove old redis container
+  docker_container:
+    name: "{{ redis_docker_container }}"
+    state: absent
+
+- name: Start redis container
+  docker_container:
+    name: "{{ redis_docker_container }}"
+    image: "{{ redis_docker_image }}:{{ redis_version }}"
+    env:
+      REDIS_PASSWORD: "{{ redis_password }}"
+      REDIS_DISABLE_COMMANDS: FLUSHDB,FLUSHALL,CONFIG
+    volumes:
+      - redis_data:/bitnami/redis/data
+    ports:
+      - "{{ network.bind_host }}:6379:6379"

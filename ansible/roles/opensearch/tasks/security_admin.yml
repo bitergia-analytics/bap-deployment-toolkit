@@ -1,0 +1,51 @@
+---
+
+- name: Initialize OpenSearch security (retry until service is running)
+  command: >
+    docker exec {{ opensearch_docker_container }}
+    bash plugins/opensearch-security/tools/securityadmin.sh
+    -cd plugins/opensearch-security/securityconfig/
+    -cacert config/{{ certs_files.ca_cert }}
+    -cert config/{{ certs_files.admin_cert }}
+    -key config/{{ certs_files.admin_key }}
+    -icl -nhnv
+  register: securityadmin
+  changed_when: false
+  until: securityadmin.rc == 0
+  retries: 10
+  delay: 10
+  any_errors_fatal: true
+  run_once: true
+  when: not security_initialized_mark.stat.exists
+
+- name: Update OpenSearch security (keep role mappings and internal users)
+  command: >
+    docker exec {{ opensearch_docker_container }}
+    bash plugins/opensearch-security/tools/securityadmin.sh
+    -f plugins/opensearch-security/securityconfig/config.yml
+    -t config
+    -cacert config/{{ certs_files.ca_cert }}
+    -cert config/{{ certs_files.admin_cert }}
+    -key config/{{ certs_files.admin_key }}
+    -icl -nhnv
+  register: securityadmin
+  changed_when: false
+  until: securityadmin.rc == 0
+  retries: 10
+  delay: 10
+  any_errors_fatal: true
+  run_once: true
+  when: security_initialized_mark.stat.exists | bool
+
+- name: Show securityadmin output
+  debug:
+    msg: "{{ securityadmin.stdout }}"
+  run_once: true
+  when: securityadmin.stdout is defined
+
+- name: Mark OpenSearch security as initialized
+  copy:
+    content: ""
+    dest: "{{ opensearch_workdir }}/security_initialized"
+    mode: 0400
+    force: false

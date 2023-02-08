@@ -1,0 +1,12 @@
+# Editors
+.idea
+
+# Terraform state
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+
+# Keys
+.keys

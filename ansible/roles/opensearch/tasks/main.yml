@@ -1,0 +1,109 @@
+---
+
+- name: Create OpenSearch configuration directory
+  file:
+    path: "{{ opensearch_workdir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: Configure OpenSearch certificates
+  import_tasks: certificates.yml
+
+- name: Setup Opensearch configuration
+  template:
+    src: opensearch.yml.j2
+    dest: "{{ opensearch_workdir }}/opensearch.yml"
+    owner: '1000'
+    group: '1000'
+    mode: 0660
+
+- name: Configure OpenSearch security
+  import_tasks: security_config.yml
+
+- name: Configure Kernel vm.max_map_count setting
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    sysctl_set: true
+    state: present
+    reload: true
+  tags: sysctl
+
+- name: Remove old OpenSearch container
+  docker_container:
+    name: "{{ opensearch_docker_container }}"
+    state: absent
+
+- name: Start OpenSearch container
+  docker_container:
+    name: "{{ opensearch_docker_container }}"
+    image: "{{ opensearch_docker_image }}:{{ opensearch_version }}"
+    env:
+      DISABLE_INSTALL_DEMO_CONFIG=true
+      bootstrap.memory_lock=true
+      "OPENSEARCH_JAVA_OPTS=-Xms{{ heap_size }} -Xmx{{ heap_size }}"
+    ulimits:
+      memlock:-1:-1
+      nofile:65536:65536
+    volumes:
+      - odfe-data:/usr/share/opensearch/data
+      - "{{ certs_dir }}/{{ certs_files.ca_cert }}:/usr/share/opensearch/config/{{ certs_files.ca_cert }}"
+      - "{{ certs_dir }}/{{ certs_files.admin_cert }}:/usr/share/opensearch/config/{{ certs_files.admin_cert }}"
+      - "{{ certs_dir }}/{{ certs_files.admin_key }}:/usr/share/opensearch/config/{{ certs_files.admin_key }}"
+      - "{{ certs_dir }}/{{ certs_files.node_cert }}:/usr/share/opensearch/config/{{ certs_files.node_cert }}"
+      - "{{ certs_dir }}/{{ certs_files.node_key }}:/usr/share/opensearch/config/{{ certs_files.node_key }}"
+      - "{{ opensearch_workdir }}/opensearch.yml:/usr/share/opensearch/config/opensearch.yml"
+      - "{{ opensearch_workdir }}/securityconfig/config.yml:/usr/share/opensearch/plugins/opensearch-security/securityconfig/config.yml"
+      - "{{ opensearch_workdir }}/securityconfig/internal_users.yml:/usr/share/opensearch/plugins/opensearch-security/securityconfig/internal_users.yml"
+      - "{{ opensearch_workdir }}/securityconfig/roles_mapping.yml:/usr/share/opensearch/plugins/opensearch-security/securityconfig/roles_mapping.yml"
+    ports:
+      - "{{ network.publish_host }}:9200:9200"
+      - "{{ network.publish_host }}:9300:9300"
+      - "{{ network.publish_host }}:9600:9600"
+      - "127.0.0.1:9200:9200"
+      - "127.0.0.1:9300:9300"
+      - "127.0.0.1:9600:9600"
+    exposed_ports:
+      - "9200"
+      - "9300"
+      - "9600"
+
+- name: Init OpenSearch security plugin
+  import_tasks: security_admin.yml
+
+- name: Set default template for indices
+  uri:
+    url: "{{ opensearch_endpoint }}/_template/default"
+    method: PUT
+    status_code: 200
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    body_format: json
+    body:
+      template: "*"
+      order: -1
+      settings:
+        number_of_shards: "{{ number_of_shards }}"
+        auto_expand_replicas: "{{ auto_expand_replicas }}"
+    validate_certs: false
+  register: result
+  until: result.status == 200
+  retries: 10
+  delay: 2
+  run_once: true
+
+- name: Wait for OpenSearch container(s) to be available
+  uri:
+    url: "{{ opensearch_endpoint }}/_cluster/health?wait_for_status=yellow&timeout=60s"
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    timeout: 60
+    validate_certs: false
+  register: result
+  until: result.status == 200
+  retries: 20
+  delay: 5
+
+- name: Configure OpenSearch Snapshots
+  import_tasks: snapshots.yml
