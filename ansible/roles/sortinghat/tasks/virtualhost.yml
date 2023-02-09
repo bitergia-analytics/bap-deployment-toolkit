@@ -7,6 +7,45 @@
     mode: 0750
     recurse: true
 
+- name: Create certificates directory
+  file:
+    path: "{{ certs_dir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+  when: enable_ssl|bool == true
+
+- name: "Generate self-signed certificate for {{ ansible_hostname }}"
+  shell: "./generate_cert.sh {{ ansible_hostname }}"
+  become: false
+  args:
+    chdir: "{{ role_path }}/files"
+    creates: "{{ role_path }}/files/cert.crt"
+  delegate_to: localhost
+  when: (enable_ssl|bool == true) and (custom_cert is not defined)
+
+- name: "Copy SSL certificate for {{ ansible_hostname }}"
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - src: "{{ custom_cert.cert if custom_cert is defined else 'cert.crt' }}"
+      dest: "{{ certs_dir }}/{{ ansible_hostname }}.crt"
+      owner: '1000'
+      group: '1000'
+      mode: '0644'
+    - src: "{{ custom_cert.key if custom_cert is defined else 'cert.key' }}"
+      dest: "{{ certs_dir }}/{{ ansible_hostname }}.key"
+      owner: '1000'
+      group: '1000'
+      mode: '0600'
+  loop_control:
+    label: "{{ item.dest }}"
+  when: (enable_ssl|bool == true) and (certs_dir is defined)
+
 - name: "Create virtualhost configuration for {{ ansible_hostname }}"
   template:
     src: "{{ item.template }}"
