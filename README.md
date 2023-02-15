@@ -52,9 +52,10 @@ deploy and configure the platform.
 
 ## Acknowledgement
 
-This toolkit was inspired by the roles and recipes that Ángel Jara developed
-when he worked at Bitergia and by the amazing job the people of
-GitLab do with their [GitLab Environment Toolkit](https://gitlab.com/gitlab-org/gitlab-environment-toolkit).
+This toolkit was inspired by the roles and recipes that
+[Ángel Jara](https://github.com/ajaragz) developed when he worked at Bitergia
+and by the amazing job the people of GitLab do with their
+[GitLab Environment Toolkit](https://gitlab.com/gitlab-org/gitlab-environment-toolkit).
 
 ## License
 
