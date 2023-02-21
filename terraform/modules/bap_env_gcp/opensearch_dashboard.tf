@@ -1,7 +1,8 @@
 module "opensearch_dashboards" {
   source = "../bap_gcp_instance"
 
-  name_prefix             = "opensearch-dashboards"
+  prefix                  = var.prefix
+  name                    = "opensearch-dashboards"
   node_count              = var.opensearch_dashboards_node_count
   tags                    = ["opensearch-dashboards"]
   ansible_groups          = ["opensearch-dashboards"]

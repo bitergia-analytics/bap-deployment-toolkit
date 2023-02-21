@@ -1,6 +1,11 @@
-variable "name_prefix" {
+variable "prefix" {
   type        = string
-  description = "A prefix to add to the node name(s), e.g.: '<prefix>-x'"
+  description = "A prefix to add to the resource name(s), e.g.: '<prefix>-<name>-x'"
+}
+
+variable "name" {
+  type        = string
+  description = "Resource name(s), e.g.: '<prefix>-<name>-x'"
 }
 
 variable "tags" {

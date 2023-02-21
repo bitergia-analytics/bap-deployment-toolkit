@@ -21,6 +21,11 @@ variable "subnetwork" {
   default = "default"
 }
 
+variable "prefix" {
+  type        = string
+  description = "A prefix to add to the resource name(s), e.g.: '<prefix>-<name>-x'"
+}
+
 # MariaDB
 
 variable "mariadb_node_count" {

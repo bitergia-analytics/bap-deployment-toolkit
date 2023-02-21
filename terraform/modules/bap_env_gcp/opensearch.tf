@@ -1,7 +1,8 @@
 module "opensearch" {
   source = "../bap_gcp_instance"
 
-  name_prefix             = "opensearch"
+  prefix                  = var.prefix
+  name                    = "opensearch"
   node_count              = var.opensearch_node_count
   tags                    = ["opensearch"]
   ansible_groups          = ["opensearch"]

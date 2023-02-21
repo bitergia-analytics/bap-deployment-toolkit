@@ -49,6 +49,10 @@ variable "project" {
 variable "zone" {
   default = "<project_zone>"
 }
+
+variable "prefix" {
+  default = "<project_prefix>"
+}
 ```
 
 Replace the entries in `<>` with your values:
@@ -56,6 +60,7 @@ Replace the entries in `<>` with your values:
 - `project`: the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project.
 - `zone`: the GCP [zone](https://cloud.google.com/compute/docs/regions-zones)
    where the resources of the project will be created.
+- `prefix`: the prefix that is added to all resources created by Terraform (VM, Cloud Storage Bucket, firawall, etc).
 
 #### Terraform Settings (`main.tf`)
 
@@ -99,6 +104,8 @@ but adapt them to your necessities.
 ```tf
 module "bap_env_gcp" {
   source = "../../modules/bap_env_gcp"
+
+  prefix = "test"
 
   mariadb_node_count = 1
   mariadb_machine_type = "e2-standard-2"

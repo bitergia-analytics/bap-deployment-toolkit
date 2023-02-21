@@ -1,7 +1,8 @@
 module "mariadb" {
   source = "../bap_gcp_instance"
 
-  name_prefix             = "mariadb"
+  prefix                  = var.prefix
+  name                    = "mariadb"
   node_count              = var.mariadb_node_count
   tags                    = ["identities"]
   ansible_groups          = ["mariadb"]

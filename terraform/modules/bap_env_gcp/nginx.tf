@@ -1,7 +1,8 @@
 module "nginx" {
   source = "../bap_gcp_instance"
 
-  name_prefix             = "nginx"
+  prefix                  = var.prefix
+  name                    = "nginx"
   node_count              = var.nginx_node_count
   tags                    = ["nginx", "http-server", "https-server"]
   ansible_groups          = ["nginx"]
