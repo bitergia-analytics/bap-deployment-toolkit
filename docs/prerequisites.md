@@ -69,7 +69,7 @@ Once the account has been created, you will need to create a key file:
 1. Select `JSON` format.
 1. Click `Create` to download the key.
 1. Rename the file to a more descriptive name such as
-   `bap-sa-keys-<project-name>.json (e.g. bap-sa-keys-myproject.json).
+   `bap-sa-keys-<project-name>.json` (e.g. bap-sa-keys-myproject.json).
 
 Keep this file safe for now. You will need it when you run Terraform and Ansible
 later.
@@ -227,7 +227,7 @@ client ID.
 1. Download the toolkit repository with `git`.
 
    ```terminal
-   git clone https://github.com/bap-project/bap-deployment-toolkit.git
+   git clone https://github.com/bitergia-analytics/bap-deployment-toolkit.git
    ```
 
 1. Create a project directory (e.g. `myproject`) inside the `keys` directory
