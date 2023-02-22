@@ -28,3 +28,32 @@
     exposed_ports:
       - "80"
       - "443"
+
+- name: Remove old Gcsproxy container
+  docker_container:
+    name: "{{ gcsproxy_docker_container }}"
+    state: absent
+
+- name: Create Gcsproxy keys directory
+  file:
+    path: "{{ gcsproxy_workdir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: Copy service account key for gcsproxy
+  copy:
+    src: "{{ gcp_service_account_host_file }}"
+    dest: "{{ gcsproxy_workdir }}/key.json"
+
+- name: Start gcsproxy container
+  docker_container:
+    name: "{{ gcsproxy_docker_container }}"
+    image: "{{ gcsproxy_docker_image }}"
+    volumes:
+      - "{{ gcsproxy_workdir}}:/opt/gcsproxy/keys"
+    ports:
+      - "8010:8010"
+    exposed_ports:
+      - "8010"
+

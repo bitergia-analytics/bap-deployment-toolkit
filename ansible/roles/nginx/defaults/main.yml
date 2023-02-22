@@ -26,9 +26,13 @@ certs_dir: "{{ nginx_workdir }}/certs"
 #   cert: foo/cert.crt
 #   key: foo/cert.key
 
-
 # NGINX proxy buffer settings
 nginx_proxy_buffer_size: "128k"
 nginx_proxy_buffer_size_per_conn: "256k"
 nginx_proxy_total_buffers: 4
 nginx_proxy_busy_buffers_size: "256k"
+
+# Gcsproxy
+gcsproxy_docker_image: drodr/gcsproxy:latest
+gcsproxy_docker_container: gcsproxy
+gcsproxy_workdir: "/docker/nginx/keys"
