@@ -24,15 +24,3 @@ resource "google_storage_bucket" "sortinghat_assets" {
   force_destroy = true
 }
 
-resource "google_storage_bucket_access_control" "public_rule" {
-  bucket = google_storage_bucket.sortinghat_assets.name
-  role   = "READER"
-  entity = "allUsers"
-}
-
-resource "google_storage_bucket_iam_binding" "binding_allUsers" {
-  bucket = google_storage_bucket.sortinghat_assets.name
-  role = "roles/storage.objectViewer"
-  members = ["allUsers"]
-}
-
