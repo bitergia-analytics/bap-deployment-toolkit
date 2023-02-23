@@ -6,14 +6,15 @@ opensearch_docker_container: bap_opensearch
 
 # OpenSearch node configuration
 opensearch_workdir: "/docker/opensearch"
-heap_size: 512m
+opensearch_cluster_heap_size: 512m
 node_name: "{{ inventory_hostname }}"
 network:
   bind_host: 0.0.0.0
   publish_host: "{{ ansible_default_ipv4.address }}"
 
 # OpenSearch cluster configuration
-cluster_name: "{{ opensearch_cluster_name }}"
+opensearch_cluster_name: bap-opensearch
+cluster_name: "{{ opensearch_cluster_prefix }}-{{ opensearch_cluster_name }}"
 discovery_seed_hosts:
   "{{ groups['opensearch'] |
   map('extract', hostvars, ['ansible_default_ipv4','address']) | list | join(',') }}"
