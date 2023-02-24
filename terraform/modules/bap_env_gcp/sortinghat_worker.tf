@@ -1,7 +1,8 @@
 module "sortinghat_worker" {
   source = "../bap_gcp_instance"
 
-  name_prefix             = "sortinghat-worker"
+  prefix                  = var.prefix
+  name                    = "sortinghat-worker"
   node_count              = var.sortinghat_worker_node_count
   tags                    = ["sortinghat-worker"]
   ansible_groups          = ["sortinghat-worker"]

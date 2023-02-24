@@ -1,5 +1,5 @@
 resource "random_id" "backups_assets_bucket_id" {
-  prefix      = "bap-backups-"
+  prefix      = "${var.prefix}-bap-backups-"
   byte_length = 8
 }
 
@@ -12,7 +12,7 @@ resource "google_storage_bucket" "backups_assets" {
 }
 
 resource "random_id" "sortinghat_assets_bucket_id" {
-  prefix      = "bap-sortinghat-"
+  prefix      = "${var.prefix}-bap-sortinghat-"
   byte_length = 8
 }
 
@@ -35,4 +35,3 @@ resource "google_storage_bucket_iam_binding" "binding_allUsers" {
   role = "roles/storage.objectViewer"
   members = ["allUsers"]
 }
-

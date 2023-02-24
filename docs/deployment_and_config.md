@@ -99,8 +99,9 @@ all:
     redis_password: <redis_password>
 
     # OpenSearch Settings
-    opensearch_cluster_name: bap-opensearch
-    heap_size: 1g
+    opensearch_cluster_prefix: <opensearch_cluster_prefix>
+    opensearch_cluster_name: <opensearch_cluster_name>
+    opensearch_cluster_heap_size: <opensearch_cluster_heap_size>
 
     ## OpenSearch Credentials
     opensearch_admin_user: <admin_username>
@@ -156,6 +157,12 @@ Replace the entries in `<>` with your values:
 - `mariadb_service_account_password`: strong password for the MariaDB
   service account user.
 - `redis_password`: strong password for the redis server.
+- `opensearch_cluster_prefix`: prefix of the OpenSearch cluster.
+- `opensearch_cluster_name` (optional): name of the OpenSearch cluster.
+  This value will be used in combination with `<opensearch_cluster_prefix>`
+  to define the name of the cluster. Its default parameter is `bap-opensearch`.
+- `opensearch_cluster_heap_size` (optional): Java heap size for the OpenSearch cluster nodes (e.g. `1g`, `2g`).
+  If you don't set a value, its default value will be `512m`.
 - `opensearch_admin_user`: admin user on the OpenSearch cluster.
 - `opensearch_admin_password`: strong password for the admin user of OpenSearch.
 - `opensearch_dashboards_password`: strong password for internal communication.
@@ -167,8 +174,9 @@ Replace the entries in `<>` with your values:
 - `backups_assets_bucket`: this is the name of the bucket created by Terraform
   for storing the OpenSearch snapshots and MariaDB backups.
   Check your cloud provider to obtain the name of the bucket. If you didn't
-  change the configuration, it should be `bap-backups-<id>`, where `<id>`
-  is a random number.
+  change the configuration, it should be `<prefix>-bap-backups-<id>`, where
+  `<prefix>` is the [terraform prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf)
+  and `<id>` is a random number.
 - `sortinghat_secret_key`: strong password/key for the SortingHat service.
 - `sortinghat_superuser_name`: admin user of the SortingHat service.
 - `sortinghat_superuser_password`: strong password for the admin user
@@ -176,7 +184,8 @@ Replace the entries in `<>` with your values:
 - `sortinghat_assets_bucket`: this is the name of the bucket created by
   Terraform for storing the static files of the SortingHat's UI. Check your
   cloud provider to obtain the name of the bucket. It should start with
-  the prefix `bap-sortinghat-`.
+  the prefix `<prefix>-bap-sortinghat-`, where `<prefix>` is the
+  [terraform prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf).
 - `sortinghat_bucket_provider`: cloud provider type; valid values are: `gcp`.
 - `virtualhost.fqdn`: full qualified domain name (e.g. `bap.example.com`)
   where BAP will be available.

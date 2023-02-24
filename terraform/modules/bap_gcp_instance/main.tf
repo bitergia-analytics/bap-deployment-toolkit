@@ -17,13 +17,13 @@ data "google_project" "project" {
 
 resource "google_compute_address" "bap" {
   count = var.enable_external_ip ? var.node_count : 0
-  name  = "${var.name_prefix}-ip-${count.index}"
+  name  = "${var.prefix}-${var.name}-ip-${count.index}"
 }
 
 resource "google_compute_instance" "bap" {
   count                     = var.node_count
   project                   = data.google_project.project.project_id
-  name                      = "${var.name_prefix}-${count.index}"
+  name                      = "${var.prefix}-${var.name}-${count.index}"
   machine_type              = var.machine_type
   zone                      = var.zone
   allow_stopping_for_update = true
@@ -34,7 +34,7 @@ resource "google_compute_instance" "bap" {
   ])
 
   labels = merge({
-    bap_node_type = "${var.name_prefix}"
+    bap_node_type = "${var.name}"
   })
 
   boot_disk {

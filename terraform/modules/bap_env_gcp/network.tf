@@ -1,12 +1,12 @@
 resource "google_compute_router" "router" {
   count   = 1
-  name    = "bap-router"
+  name    = "${var.prefix}-bap-router"
   network = var.network
 }
 
 resource "google_compute_router_nat" "nat" {
   count  = 1
-  name   = "bap-nat"
+  name   = "${var.prefix}-bap-nat"
   router = google_compute_router.router[0].name
 
   nat_ip_allocate_option             = "AUTO_ONLY"
@@ -14,7 +14,7 @@ resource "google_compute_router_nat" "nat" {
 }
 
 resource "google_compute_firewall" "fw-nginx" {
-  name    = "fw-nginx"
+  name    = "${var.prefix}-fw-nginx"
   network = var.network
 
   allow {
@@ -46,7 +46,7 @@ target_tags = ["nginx", "http-server", "https-server"]
 #}
 
 resource "google_compute_firewall" "allow-ssh" {
-  name    = "allow-ssh"
+  name    = "${var.prefix}-allow-ssh"
   network = var.network
 
   allow {
@@ -58,7 +58,7 @@ source_ranges = ["35.235.240.0/20", "10.0.0.0/8"]
 }
 
 resource "google_compute_firewall" "allow-services" {
-  name    = "allow-services"
+  name    = "${var.prefix}-allow-services"
   network = var.network
 
   allow {

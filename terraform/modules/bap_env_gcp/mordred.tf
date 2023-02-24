@@ -1,7 +1,8 @@
 module "mordred" {
   source = "../bap_gcp_instance"
 
-  name_prefix             = "mordred"
+  prefix                  = var.prefix
+  name                    = "mordred"
   node_count              = var.mordred_node_count
   tags                    = ["mordred"]
   ansible_groups          = ["mordred"]

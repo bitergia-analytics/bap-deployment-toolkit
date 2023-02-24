@@ -42,7 +42,7 @@
     env:
       DISABLE_INSTALL_DEMO_CONFIG=true
       bootstrap.memory_lock=true
-      "OPENSEARCH_JAVA_OPTS=-Xms{{ heap_size }} -Xmx{{ heap_size }}"
+      "OPENSEARCH_JAVA_OPTS=-Xms{{ opensearch_cluster_heap_size }} -Xmx{{ opensearch_cluster_heap_size }}"
     ulimits:
       memlock:-1:-1
       nofile:65536:65536

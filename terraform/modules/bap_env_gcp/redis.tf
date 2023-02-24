@@ -1,7 +1,8 @@
 module "redis" {
   source = "../bap_gcp_instance"
 
-  name_prefix             = "redis"
+  prefix                  = var.prefix
+  name                    = "redis"
   node_count              = var.redis_node_count
   tags                    = ["identities"]
   ansible_groups          = ["redis"]
