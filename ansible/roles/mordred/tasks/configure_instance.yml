@@ -75,12 +75,12 @@
   become: false
   command: >-
     python3 {{ role_path }}/files/create_roles_tenant.py
-    https://{{ opensearch_admin_user }}:{{ opensearch_admin_password }}@opensearch-0:9200 {{ instance.tenant }}
+    https://{{ opensearch_admin_user }}:{{ opensearch_admin_password }}@{{ groups['opensearch'][0] }}:9200 {{ instance.tenant }}
   delegate_to: localhost
 
 - name: "Create mordred user for {{ instance.project }}"
   uri:
-    url: "https://opensearch-0:9200/_plugins/_security/api/internalusers/{{ instance.tenant }}_mordred"
+    url: "https://{{ groups['opensearch'][0] }}:9200/_plugins/_security/api/internalusers/{{ instance.tenant }}_mordred"
     url_username: "{{ opensearch_admin_user }}"
     url_password: "{{ opensearch_admin_password }}"
     method: PUT
