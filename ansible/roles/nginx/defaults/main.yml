@@ -31,9 +31,19 @@ certs_dir: "{{ nginx_workdir }}/certs"
 #   cert: foo/cert.crt
 #   key: foo/cert.key
 
-
 # NGINX proxy buffer settings
 nginx_proxy_buffer_size: "128k"
 nginx_proxy_buffer_size_per_conn: "256k"
 nginx_proxy_total_buffers: 4
 nginx_proxy_busy_buffers_size: "256k"
+
+# GCS bucket access
+## GCS directories
+nginx_gcs_workdir: /docker/nginx/gcs
+nginx_keys_workdir: /docker/nginx/keys
+
+## Gcloud repository
+gcloud_apt_deb_ubuntu_repository: >-
+  deb [signed-by=/usr/share/keyrings/cloud.google.gpg]
+  https://packages.cloud.google.com/apt cloud-sdk main
+
