@@ -5,7 +5,7 @@
     name: "{{ mariadb_service_account }}"
     host: "{{ ansible_default_ipv4.address }}"
     password: "{{ mariadb_service_account_password }}"
-    priv: "{{ sortinghat_database }}.*:ALL,GRANT"
+    priv: "{{ sortinghat_database }}%.*:ALL,GRANT"
     login_user: root
     login_password: "{{ mariadb_root_password }}"
     login_host: "{{ item }}"
