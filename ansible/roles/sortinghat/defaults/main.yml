@@ -30,8 +30,8 @@ redis_hosts: "{{ groups['redis'] | first }}"
 sortinghat_debug: "false"
 
 # CSRF and CORS configuration
-sortinghat_allowed_hosts: "{{ virtualhost.fqdn }},sortinghat-0,mordred-0"
-sortinghat_cors_allowed_origins: "https://{{ virtualhost.fqdn }},https://sortinghat-0,https://mordred-0"
+sortinghat_allowed_hosts: "{{ virtualhost.fqdn }},{{ groups['sortinghat'][0] }},{{ groups['mordred'][0] }}"
+sortinghat_cors_allowed_origins: "https://{{ virtualhost.fqdn }},https://{{ groups['sortinghat'][0] }},https://{{ groups['mordred'][0] }}"
 
 # NGINX
 
