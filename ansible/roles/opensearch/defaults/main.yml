@@ -58,7 +58,7 @@ opensearch_base_path: opensearch
 #backups_assets_bucket: bap-opensearch-snapshots-<XXXXXXXX>
 opensearch_snapshots_repo_type: gcs
 opensearch_snapshots_repository: os_backups
-opensearch_snapshots_es_url: https://localhost:9200
+opensearch_snapshots_url: https://localhost:9200
 opensearch_snapshots_index_list:
   - "*"
 
@@ -67,6 +67,8 @@ opensearch_snapshots_index_list:
 # Remember to remove or comment this section after the snapshot is restored.
 #restore_snapshot:
 #  bucket: <BUCKET-NAME>
+#  base_path: <BUCKET-BASE-PATH>
+#  repository: <SNAPSHOT-REPOSITORY>
 #  name: <SNAPSHOT-NAME>
 #  index_list: "-.opendistro_security,-security-auditlog*,-.kibana_1"
 
