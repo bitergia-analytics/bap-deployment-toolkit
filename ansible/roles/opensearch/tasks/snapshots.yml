@@ -36,7 +36,7 @@
 
 - name: Reload opensearch secure settings
   uri:
-    url: "{{ opensearch_snapshots_es_url }}/_nodes/reload_secure_settings"
+    url: "{{ opensearch_snapshots_url }}/_nodes/reload_secure_settings"
     method: POST
     client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
@@ -58,10 +58,9 @@
   ignore_errors: true
   changed_when: false
 
-- name: "Create snapshot repository '{{ opensearch_snapshots_repository }}' \
-    in GCS bucket '{{ backups_assets_bucket }}'"
+- name: "Create snapshot repository '{{ opensearch_snapshots_repository }}'"
   uri:
-    url: "{{ opensearch_snapshots_es_url }}/_snapshot/{{ opensearch_snapshots_repository }}"
+    url: "{{ opensearch_snapshots_url }}/_snapshot/{{ opensearch_snapshots_repository }}"
     method: PUT
     body_format: json
     body:
@@ -74,15 +73,25 @@
     validate_certs: false
   run_once: true
 
-- name: "Rsync OpenSearch snapshot bucket from {{ restore_snapshot.bucket }} to {{ backups_assets_bucket }}"
-  command: "gsutil -m rsync -r -d -p gs://{{ restore_snapshot.bucket }} gs://{{ backups_assets_bucket }}"
-  delegate_to: localhost
+- name: "Create snapshot repository '{{ restore_snapshot.repository }}'"
+  uri:
+    url: "{{ opensearch_snapshots_url }}/_snapshot/{{ restore_snapshot.repository }}"
+    method: PUT
+    body_format: json
+    body:
+      type: "{{ opensearch_snapshots_repo_type }}"
+      settings:
+        bucket: "{{ restore_snapshot.bucket }}"
+        base_path: "{{ restore_snapshot.base_path }}"
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
   run_once: true
   when: restore_snapshot is defined
 
-- name: "Restore indices from {{ opensearch_snapshots_repository }} of {{ backups_assets_bucket }} bucket"
+- name: "Restore indices from {{ restore_snapshot.repository }} of {{ restore_snapshot.bucket }} bucket"
   uri:
-    url: "{{ opensearch_snapshots_es_url }}/_snapshot/{{ opensearch_snapshots_repository }}/{{ restore_snapshot.name }}/_restore"
+    url: "{{ opensearch_snapshots_url }}/_snapshot/{{ restore_snapshot.repository }}/{{ restore_snapshot.name }}/_restore"
     method: POST
     body_format: json
     body:
