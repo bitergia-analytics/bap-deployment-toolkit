@@ -3,6 +3,9 @@
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
 
+- name: Configure Google Cloud Storage (GCS)
+  include_tasks: gcs.yml
+
 - name: Configure NGINX proxy buffer sizes
   template:
     src: proxy_buffer.conf.j2
@@ -19,6 +22,7 @@
     name: "{{ nginx_docker_container }}"
     image: "{{ nginx_docker_image }}:{{ nginx_version }}"
     volumes:
+      - "{{ nginx_gcs_workdir }}:/opt/gcs"
       - "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
       - "{{ certs_dir }}/{{ virtualhost.fqdn }}.crt:/etc/ssl/certs/{{ virtualhost.fqdn }}.crt"
       - "{{ certs_dir }}/{{ virtualhost.fqdn }}.key:/etc/ssl/private/{{ virtualhost.fqdn }}.key"
@@ -28,3 +32,7 @@
     exposed_ports:
       - "80"
       - "443"
+
+- name: Launch first rsync
+  shell: gsutil -m rsync -d -r "gs://{{ sortinghat_assets_bucket }}/" "{{ nginx_gcs_workdir }}"
+
