@@ -23,7 +23,6 @@ opensearch:
   username: kibanaserver
   password: "{{ opensearch_dashboards_password }}"
 
-anonymous_auth_enabled: false
 login:
   title: "Please login to Bitergia Analytics Dashboard."
   subtitle: "If you have forgotten your username or password, please contact the Bitergia staff."

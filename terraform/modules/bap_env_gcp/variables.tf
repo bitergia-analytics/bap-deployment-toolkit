@@ -129,6 +129,11 @@ variable "opensearch_dashboards_node_count" {
   default = 1
 }
 
+variable "opensearch_dashboards_anonymous_node_count" {
+  type    = number
+  default = 0
+}
+
 variable "opensearch_dashboards_machine_type" {
   type    = string
   # default = "e2-highmem-4" # 4vcpu, 32GB memory

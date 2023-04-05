@@ -15,12 +15,21 @@
     group: '1000'
     mode: 0644
 
-- name: Remove old OpenSearch Dashboards container
+- name: Remove old private OpenSearch Dashboards container
   docker_container:
     name: "{{ opensearch_dashboards_docker_container }}"
     state: absent
+  delegate_to: "{{ groups['opensearch_dashboards'][0] }}"
+  when: inventory_hostname in groups['opensearch_dashboards']
 
-- name: Start OpenSearch Dashboards container(s)
+- name: Remove old anonymous OpenSearch Dashboards container
+  docker_container:
+    name: "{{ opensearch_dashboards_docker_container }}_anonymous"
+    state: absent
+  delegate_to: "{{ groups['opensearch_dashboards_anonymous'][0] }}"
+  when: inventory_hostname in groups['opensearch_dashboards_anonymous']
+
+- name: Start private OpenSearch Dashboards container(s)
   docker_container:
     name: "{{ opensearch_dashboards_docker_container }}"
     image: "{{ opensearch_dashboards_docker_image }}:{{ opensearch_dashboards_version }}"
@@ -30,3 +39,18 @@
       - "{{ opensearch_dashboards_workdir }}/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
     ports:
       - "{{ network.bind_host }}:5601:5601"
+  delegate_to: "{{ groups['opensearch_dashboards'][0] }}"
+  when: inventory_hostname in groups['opensearch_dashboards']
+
+- name: Start anonymous OpenSearch Dashboards container(s)
+  docker_container:
+    name: "{{ opensearch_dashboards_docker_container }}_anonymous"
+    image: "{{ opensearch_dashboards_docker_image }}:{{ opensearch_dashboards_version }}"
+    env:
+      NODE_OPTIONS=--max-old-space-size=1000
+    volumes:
+      - "{{ opensearch_dashboards_workdir }}/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
+    ports:
+      - "{{ network.bind_host }}:5601:5601"
+  delegate_to: "{{ groups['opensearch_dashboards_anonymous'][0] }}"
+  when: inventory_hostname in groups['opensearch_dashboards_anonymous']

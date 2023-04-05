@@ -17,7 +17,12 @@ opensearch_security.readonly_mode.roles:
   - "kibana_read_only"
   - "bap_anonymous_access_role"
 
-opensearch_security.auth.anonymous_auth_enabled: {{ anonymous_auth_enabled }}
+# Anonymous user opendistro_security_anonymous
+{% if inventory_hostname in groups['opensearch_dashboards_anonymous'] %}
+opensearch_security.auth.anonymous_auth_enabled: true
+{% else %}
+opensearch_security.auth.anonymous_auth_enabled: false
+{% endif %}
 
 # Use this setting if you are running OpenSearch Dashboards without HTTPS
 opensearch_security.cookie.secure: false
@@ -44,7 +49,7 @@ server.ssl.key: "/usr/share/opensearch-dashboards/config/{{ opensearch_dashboard
 server.ssl.enabled: true
 {% endif %}
 
-{% if openid is defined %}
+{% if openid_dashboards is defined %}
 ### OpenID configuration
 opensearch_security.auth.type: "openid"
 opensearch_security.openid.connect_url: "{{ openid.connect_url }}"

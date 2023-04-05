@@ -1,5 +1,5 @@
 ---
-- hosts: opensearch_dashboards
+- hosts: opensearch_dashboards, opensearch_dashboards_anonymous
   pre_tasks:
     - name: Gather facts from OpenSearch nodes
       setup:

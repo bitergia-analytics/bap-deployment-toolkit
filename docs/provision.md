@@ -101,6 +101,22 @@ You can set the number of nodes and virtual machine type for each component
 of the architecture. Take the next example as reference for a large project
 but adapt them to your necessities.
 
+You can create different OpenSearch Dashboards machines depends on your needs.
+We have three scenarios for OpenSearch Dashboards:
+
+1. One OpenSearch Dashboards `without anonymous` access.
+    - `opensearch_dashboards_node_count = 1`
+    - `opensearch_dashboards_anonymous_node_count = 0`
+2. One OpenSearch Dashboards `with anonymous` access.
+    - `opensearch_dashboards_node_count = 0`
+    - `opensearch_dashboards_anonymous_node_count = 1`
+3. Two OpenSearch Dashboards `one with anonymous` access and the `other not`.
+    - `opensearch_dashboards_node_count = 1`
+    - `opensearch_dashboards_anonymous_node_count = 1`
+
+Ansible will provision the OpenSearch Dashboard machines depending on which
+group the hostname belongs to.
+
 ```tf
 module "bap_env_gcp" {
   source = "../../modules/bap_env_gcp"
@@ -117,6 +133,7 @@ module "bap_env_gcp" {
   opensearch_machine_type = "e2-highmem-4"
 
   opensearch_dashboards_node_count = 1
+  opensearch_dashboards_anonymous_node_count = 0
   opensearch_dashboards_machine_type = "e2-highmem-4"
 
   nginx_node_count = 1
