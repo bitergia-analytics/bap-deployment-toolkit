@@ -142,8 +142,14 @@ all:
       sources:
         repository: "<repo_teneant_b_projects.git>"
 
-    virtualhost:
-      fqdn: <fqdn>
+    # OpenSearch Dashboards Settings for Nginx
+    nginx_virtualhosts:
+      - fqdn: <fqdn-1>
+        public: false
+        tenant: <tenant_name_a>
+      - fqdn: <fqdn-2>
+        public: true
+        tenant: <tenant_name_b>
 ```
 
 Replace the entries in `<>` with your values:
@@ -191,8 +197,13 @@ Replace the entries in `<>` with your values:
   [terraform prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf).
 - `sortinghat_bucket_provider`: cloud provider type; valid values are: `gcp`.
 - `sortinghat_workers`: number of SortingHat Workers (by default is `1`)
-- `virtualhost.fqdn`: full qualified domain name (e.g. `bap.example.com`)
+- `nginx_virtualhosts`: Nginx virtual host configurations.
+- `nginx_virtualhosts.fqdn`: full qualified domain name (e.g. `bap.example.com`)
   where BAP will be available.
+- `nginx_virtualhosts.public`: OpenSearch Dashboards with anonymous access `true | false`. If
+  the variable is not defined the OpenSearch Dashboards is private.
+- `nginx_virtualhosts.tenant`: the name of the tenant for this OpenSearch Dashboards endpoint,
+  it must be same as `mordred_instances.tenant`.
 
 After configuring these parameters, you need to configure the instances of the
 task scheduler (Mordred). You need a task scheduler for each project you want

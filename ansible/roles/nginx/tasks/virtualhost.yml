@@ -14,8 +14,8 @@
     mode: 0750
     recurse: true
 
-- name: "Generate self-signed certificate for {{ virtualhost.fqdn }}"
-  shell: "./generate_cert.sh {{ virtualhost.fqdn }}"
+- name: "Generate self-signed certificate for {{ instance.fqdn }}"
+  shell: "./generate_cert.sh {{ instance.fqdn }}"
   become: false
   args:
     chdir: "{{ role_path }}/files"
@@ -23,7 +23,7 @@
   delegate_to: localhost
   when: custom_cert is not defined
 
-- name: "Copy SSL certificate for {{ virtualhost.fqdn }}"
+- name: "Copy SSL certificate for {{ instance.fqdn }}"
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -32,25 +32,25 @@
     mode: "{{ item.mode }}"
   loop:
     - src: "{{ custom_cert.cert if custom_cert is defined else 'cert.crt' }}"
-      dest: "{{ certs_dir }}/{{ virtualhost.fqdn }}.crt"
+      dest: "{{ certs_dir }}/{{ instance.fqdn }}.crt"
       owner: '1000'
       group: '1000'
       mode: '0644'
     - src: "{{ custom_cert.key if custom_cert is defined else 'cert.key' }}"
-      dest: "{{ certs_dir }}/{{ virtualhost.fqdn }}.key"
+      dest: "{{ certs_dir }}/{{ instance.fqdn }}.key"
       owner: '1000'
       group: '1000'
       mode: '0600'
   loop_control:
     label: "{{ item.dest }}"
 
-- name: "Create virtualhost configuration for {{ virtualhost.fqdn }}"
+- name: "Create virtualhost configuration for {{ instance.fqdn }}"
   template:
     src: "{{ item.template }}"
     dest: "{{ nginx_virtualhosts_workdir }}/{{ item.name }}"
     backup: true
   with_items:
-    - name: "{{ virtualhost.fqdn }}.conf"
+    - name: "{{ instance.fqdn }}.conf"
       template: vhost.j2
-    - name: "{{ virtualhost.fqdn }}_uwsgi_params"
+    - name: "{{ instance.fqdn }}_uwsgi_params"
       template: uwsgi_params.j2

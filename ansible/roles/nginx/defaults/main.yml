@@ -8,13 +8,18 @@ nginx_docker_container: nginx
 nginx_workdir: "/docker/nginx"
 nginx_virtualhosts_workdir: "{{ nginx_workdir }}/conf"
 
-virtualhost:
-  fqdn: example.com
+# Create your Nginx virtual host configurations
+## nginx_virtualhosts:
+##  - fqdn: example.com
+##    public: false
+##    tenant: example
+##  - fqdn: example-public.com
+##    public: true
+##    tenant: example-public
 
 # Service hosts
-opensearch_dashboards_endpoint: "https://{{ hostvars[(groups['opensearch_dashboards'] | first)].ansible_default_ipv4.address }}:5601"
-opensearch_endpoint: "https://{{ hostvars[(groups['opensearch'] | first)].ansible_default_ipv4.address }}:9200"
-sortinghat_host: "{{ hostvars[(groups['sortinghat'] | first)].ansible_default_ipv4.address }}:9314"
+opensearch_endpoint: "https://{{ hostvars[(groups['opensearch'][0])].ansible_default_ipv4.address }}:9200"
+sortinghat_host: "{{ hostvars[(groups['sortinghat'][0])].ansible_default_ipv4.address }}:9314"
 
 # Certificates configuration
 
