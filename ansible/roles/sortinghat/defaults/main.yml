@@ -16,8 +16,10 @@ network:
   bind_host: 0.0.0.0
   publish_host: "{{ ansible_default_ipv4.address }}"
 
-virtualhost:
-  fqdn: example.com
+# Nginx virtual hosts
+nginx_virtualhosts:
+  - fqdn: example.com
+  - fqdn: example2.com
 
 # Database
 sortinghat_database: sortinghat_db
@@ -30,8 +32,8 @@ redis_hosts: "{{ groups['redis'] | first }}"
 sortinghat_debug: "false"
 
 # CSRF and CORS configuration
-sortinghat_allowed_hosts: "{{ virtualhost.fqdn }},{{ groups['sortinghat'][0] }},{{ groups['mordred'][0] }}"
-sortinghat_cors_allowed_origins: "https://{{ virtualhost.fqdn }},https://{{ groups['sortinghat'][0] }},https://{{ groups['mordred'][0] }}"
+sortinghat_allowed_hosts: "{{ groups['sortinghat'][0] }},{{ groups['mordred'][0] }}"
+sortinghat_cors_allowed_origins: "https://{{ groups['sortinghat'][0] }},https://{{ groups['mordred'][0] }}"
 
 # NGINX
 

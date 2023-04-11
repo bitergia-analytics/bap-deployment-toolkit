@@ -35,6 +35,16 @@
     name: "{{ sortinghat_docker_container }}"
     state: absent
 
+- name: Add sortinghat_allowed_hosts
+  set_fact:
+    sortinghat_allowed_hosts: "{{ sortinghat_allowed_hosts + ',' + item.fqdn }}"
+  loop: "{{ nginx_virtualhosts }}"
+
+- name: Add sortinghat_cors_allowed_origins
+  set_fact:
+    sortinghat_cors_allowed_origins: "{{ sortinghat_cors_allowed_origins + ',' + 'https://'+item.fqdn }}"
+  loop: "{{ nginx_virtualhosts }}"
+
 - name: Start SortingHat container
   docker_container:
     name: "{{ sortinghat_docker_container }}"
