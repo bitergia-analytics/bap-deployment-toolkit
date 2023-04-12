@@ -71,11 +71,15 @@
   with_items:
     - "{{ mariadb_hosts }}"
 
+- name: Set anonymous role if opensearch_dashboards_anonymous is defined
+  set_fact:
+    anonymous: "{% if groups['opensearch_dashboards_anonymous'] %} '-a' {% else %} '' {% endif %}"
+
 - name: "Create roles and tenant for {{ instance.project }}"
   become: false
   command: >-
     python3 {{ role_path }}/files/create_roles_tenant.py
-    https://{{ opensearch_admin_user }}:{{ opensearch_admin_password }}@{{ groups['opensearch'][0] }}:9200 {{ instance.tenant }}
+    https://{{ opensearch_admin_user }}:{{ opensearch_admin_password }}@{{ groups['opensearch'][0] }}:9200 {{ instance.tenant }} {{ anonymous }}
   delegate_to: localhost
 
 - name: "Create mordred user for {{ instance.project }}"
@@ -83,6 +87,7 @@
     url: "https://{{ groups['opensearch'][0] }}:9200/_plugins/_security/api/internalusers/{{ instance.tenant }}_mordred"
     url_username: "{{ opensearch_admin_user }}"
     url_password: "{{ opensearch_admin_password }}"
+    force_basic_auth: yes
     method: PUT
     status_code: 200
     body_format: json
