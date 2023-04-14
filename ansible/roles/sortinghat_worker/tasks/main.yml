@@ -19,12 +19,13 @@
 
 - name: Remove old SortingHat worker container
   docker_container:
-    name: "{{ sortinghat_worker_docker_container }}"
+    name: "{{ sortinghat_worker_docker_container }}-{{ item }}"
     state: absent
+  with_sequence: start=1 end="{{ sortinghat_workers }}"
 
 - name: Start SortingHat worker container
   docker_container:
-    name: "{{ sortinghat_worker_docker_container }}"
+    name: "{{ sortinghat_worker_docker_container }}-{{ item }}"
     image: "{{ sortinghat_worker_docker_image }}:{{ sortinghat_worker_version }}"
     pull: yes
     env:
@@ -37,3 +38,4 @@
       SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
       SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
+  with_sequence: start=1 end="{{ sortinghat_workers }}"
