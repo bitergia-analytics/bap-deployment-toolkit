@@ -125,6 +125,9 @@ all:
     sortinghat_assets_bucket: <sortinghat_bucket_name>
     sortinghat_bucket_provider: <cloud provider>
 
+    # Sortinghat Workers
+    sortinghat_workers: <sortinghat_workers>
+
     # Mordred Settings
     mordred_setups_repo_url: <repo_mordred_config.git>
     mordred_instances:
@@ -187,6 +190,7 @@ Replace the entries in `<>` with your values:
   the prefix `<prefix>-bap-sortinghat-`, where `<prefix>` is the
   [terraform prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf).
 - `sortinghat_bucket_provider`: cloud provider type; valid values are: `gcp`.
+- `sortinghat_workers`: number of SortingHat Workers (by default is `1`)
 - `virtualhost.fqdn`: full qualified domain name (e.g. `bap.example.com`)
   where BAP will be available.
 

@@ -4,6 +4,7 @@
 sortinghat_worker_docker_image: grimoirelab/sortinghat-worker
 sortinghat_worker_version: latest
 sortinghat_worker_docker_container: bap_sortinghat_worker
+sortinghat_workers: 1
 
 # SortingHat network
 network:
