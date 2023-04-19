@@ -22,8 +22,14 @@ network:
 
 # Nginx virtual hosts
 nginx_virtualhosts:
-  - fqdn: example.com
-  - fqdn: example2.com
+- fqdn: example.com
+  tenant: example
+- fqdn: example2.com
+  tenant: example2
+
+# Multi tenant
+sortinghat_multi_tenant: "true"
+sortinghat_multi_tenant_list_path: "{{ sortinghat_workdir }}/sortinghat_multi_tenant_list_path.json"
 
 # Database
 sortinghat_database: sortinghat_db

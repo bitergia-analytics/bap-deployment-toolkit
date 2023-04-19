@@ -1,6 +1,3 @@
-upstream sortinghat {
-    server {{ sortinghat_host }};
-}
 {% if enable_ssl | bool %}
 server {
     listen 80;
@@ -40,9 +37,9 @@ server {
     location /identities/api/ {
         rewrite ^/identities/(.*) /$1 break;
 
-        include /etc/nginx/conf.d/{{ ansible_hostname }}_uwsgi_params;
+        include /etc/nginx/conf.d/uwsgi_params;
 
-        uwsgi_pass sortinghat;
+        uwsgi_pass {{ sortinghat_host }};
         uwsgi_param Host $host;
         uwsgi_param X-Real-IP $remote_addr;
         uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;

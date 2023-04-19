@@ -1,11 +1,25 @@
 ---
 
+- name: Create a list of priviledges
+  set_fact:
+    priviledges: |-
+      {
+      {% for item in nginx_virtualhosts %}
+        "{{ item.tenant }}.*":"ALL,GRANT",
+      {% endfor %}
+        "{{ sortinghat_database }}.*":"ALL,GRANT"
+      }
+
+- name: Check priviledges list
+  debug:
+    msg: "{{ priviledges }}"
+
 - name: Create MariaDB service account for SortingHat
   mysql_user:
     name: "{{ mariadb_service_account }}"
     host: "{{ ansible_default_ipv4.address }}"
     password: "{{ mariadb_service_account_password }}"
-    priv: "{{ sortinghat_database }}.*:ALL,GRANT"
+    priv: "{{ priviledges }}"
     login_user: root
     login_password: "{{ mariadb_root_password }}"
     login_host: "{{ item }}"
@@ -29,6 +43,19 @@
     src: "{{ gcp_service_account_host_file }}"
     dest: "{{ gcp_service_account_file }}"
     mode: 0644
+
+- name: "Create SortingHat multi tenant file"
+  copy:
+    dest: "{{ sortinghat_multi_tenant_list_path }}"
+    content: |-
+      {
+        "tenants": [
+          {% for item in nginx_virtualhosts %}
+            {{ "" if loop.first else "," }}
+            "{{ item.tenant }}"
+          {% endfor %}
+        ]
+      }
 
 - name: Remove old SortingHat container
   docker_container:
@@ -68,13 +95,35 @@
       SORTINGHAT_CORS_ALLOWED_ORIGINS: "{{ sortinghat_cors_allowed_origins }}"
       SORTINGHAT_STATICFILES_STORAGE: "{{ sortinghat_bucket_provider }}"
       SORTINGHAT_BUCKET_NAME: "{{ sortinghat_assets_bucket }}"
+      SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
+      SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
       GOOGLE_APPLICATION_CREDENTIALS: /home/sortinghat/gcp_credentials.json
       SORTINGHAT_UWSGI_WORKERS: "{{ sortinghat_uwsgi_workers }}"
       SORTINGHAT_UWSGI_THREADS: "{{ sortinghat_uwsgi_threads }}"
     volumes:
       - "{{ gcp_service_account_file }}:/home/sortinghat/gcp_credentials.json:ro"
+      - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
     ports:
       - "{{ network.bind_host }}:9314:9314"
+
+- name: "Add {{ sortinghat_superuser_name }} user to all tenants for {{ ansible_hostname }}"
+  command: >
+    docker exec {{ sortinghat_docker_container }} /opt/venv/bin/sortinghat-admin set-user-tenant {{ sortinghat_superuser_name }} {{ item.tenant }} {{ item.tenant }}
+  loop: "{{ nginx_virtualhosts }}"
+  when: sortinghat_multi_tenant is defined and sortinghat_multi_tenant == "true"
+
+- name: To create a user use this command
+  debug:
+    msg: >
+      docker exec -e SORTINGHAT_USER_USERNAME=<username> -e SORTINGHAT_USER_PASSWORD=<password>
+      {{ sortinghat_docker_container }} /opt/venv/bin/sortinghat-admin create-user --no-interactive
+
+- name: To assign a user to a tenant use this command
+  debug:
+    msg: >
+      docker exec {{ sortinghat_docker_container }} /opt/venv/bin/sortinghat-admin set-user-tenant
+      <username> <tenant> <tenant>
+  when: sortinghat_multi_tenant is defined and sortinghat_multi_tenant == "true"
 
 - name: Configure Nginx
   include_tasks: nginx.yml

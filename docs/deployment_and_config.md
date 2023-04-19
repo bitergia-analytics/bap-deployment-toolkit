@@ -121,6 +121,9 @@ all:
     sortinghat_superuser_name: <sortinghat_admin_username>
     sortinghat_superuser_password: <sortinghat_admin_password>
 
+    # SortingHat Multi tenant
+    sortinghat_multi_tenant: <sortinghat_multi_tenant>
+
     # Sortinghat Storage
     sortinghat_assets_bucket: <sortinghat_bucket_name>
     sortinghat_bucket_provider: <cloud provider>
@@ -199,6 +202,8 @@ Replace the entries in `<>` with your values:
 - `sortinghat_superuser_name`: admin user of the SortingHat service.
 - `sortinghat_superuser_password`: strong password for the admin user
   of the SortingHat server.
+- `sortinghat_multi_tenant`: activate SortingHat multi tenant (`"true" | "false"`,
+  by default is `"true"`).
 - `sortinghat_assets_bucket`: this is the name of the bucket created by
   Terraform for storing the static files of the SortingHat's UI. Check your
   cloud provider to obtain the name of the bucket. It should start with

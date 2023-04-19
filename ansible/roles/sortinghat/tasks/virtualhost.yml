@@ -54,5 +54,5 @@
   with_items:
     - name: "{{ ansible_hostname }}.conf"
       template: vhost.j2
-    - name: "{{ ansible_hostname }}_uwsgi_params"
+    - name: "uwsgi_params"
       template: uwsgi_params.j2
