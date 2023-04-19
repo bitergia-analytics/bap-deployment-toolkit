@@ -1,5 +1,8 @@
 ---
 
+# SortingHat Worker configuration
+sortinghat_worker_workdir: "/docker/sortinghat_worker"
+
 # SortingHat image and container
 sortinghat_worker_docker_image: bitergia/bitergia-analytics-sortinghat-worker
 sortinghat_worker_version: 0.8.0
@@ -20,3 +23,12 @@ redis_hosts: "{{ groups['redis'] | first }}"
 # OpenInfra
 sortinghat_openinfra_client_id: ""
 sortinghat_openinfra_client_secret: ""
+
+# Nginx virtual hosts
+nginx_virtualhosts:
+  - tenant: example
+  - tenant: example2
+
+# Multi tenant
+sortinghat_multi_tenant: "true"
+sortinghat_multi_tenant_list_path: "{{ sortinghat_worker_workdir }}/sortinghat_multi_tenant_list_path.json"
