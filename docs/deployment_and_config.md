@@ -128,6 +128,10 @@ all:
     # Sortinghat Workers
     sortinghat_workers: <sortinghat_workers>
 
+    # Import OpenInfra
+    sortinghat_openinfra_client_id: "<openinfra_client_id>"
+    sortinghat_openinfra_client_secret: "<openinfra_client_secret>"
+
     # Mordred Settings
     mordred_setups_repo_url: <repo_mordred_config.git>
     mordred_instances:
@@ -196,7 +200,11 @@ Replace the entries in `<>` with your values:
   the prefix `<prefix>-bap-sortinghat-`, where `<prefix>` is the
   [terraform prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf).
 - `sortinghat_bucket_provider`: cloud provider type; valid values are: `gcp`.
-- `sortinghat_workers`: number of SortingHat Workers (by default is `1`)
+- `sortinghat_workers`: number of SortingHat Workers (by default is `1`).
+- `sortinghat_openinfra_client_id`: OpenInfraID Oauth2 client ID for private API. When the
+  parameter is not set, it will only obtain members from the public API that doesn't contain
+  email information. (by default is "").
+- `sortinghat_openinfra_client_secret`: OpenInfraID Oauth2 client secret for private API (by default is "").
 - `nginx_virtualhosts`: Nginx virtual host configurations.
 - `nginx_virtualhosts.fqdn`: full qualified domain name (e.g. `bap.example.com`)
   where BAP will be available.

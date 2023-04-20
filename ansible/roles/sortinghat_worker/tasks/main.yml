@@ -38,4 +38,6 @@
       SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
       SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
+      SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ sortinghat_openinfra_client_id }}"
+      SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ sortinghat_openinfra_client_secret }}"
   with_sequence: start=1 end="{{ sortinghat_workers }}"
