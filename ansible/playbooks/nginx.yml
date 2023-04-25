@@ -9,6 +9,7 @@
       with_items:
         - "{{ groups['opensearch'] }}"
         - "{{ groups['opensearch_dashboards'] }}"
+        - "{{ groups['opensearch_dashboards_anonymous'] }}"
         - "{{ groups['sortinghat'] }}"
   roles:
     - nginx

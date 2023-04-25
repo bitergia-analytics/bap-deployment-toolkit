@@ -2,6 +2,9 @@
 
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
+  loop: "{{ nginx_virtualhosts }}"
+  loop_control:
+    loop_var: instance
 
 - name: Configure NGINX proxy buffer sizes
   template:
@@ -14,14 +17,26 @@
     name: "{{ nginx_docker_container }}"
     state: absent
 
+- name: Create docker volumes for certs and config
+  set_fact:
+    volumes_certs: |-
+      [
+      {% for instance in nginx_virtualhosts %}
+        "{{ certs_dir }}/{{ instance.fqdn }}.crt:/etc/ssl/certs/{{ instance.fqdn }}.crt",
+        "{{ certs_dir }}/{{ instance.fqdn }}.key:/etc/ssl/private/{{ instance.fqdn }}.key",
+      {% endfor %}
+        "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
+      ]
+
+- name: Check the list of volumes
+  debug:
+    msg: "{{ volumes_certs }}"
+
 - name: Start NGINX container
   docker_container:
     name: "{{ nginx_docker_container }}"
     image: "{{ nginx_docker_image }}:{{ nginx_version }}"
-    volumes:
-      - "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
-      - "{{ certs_dir }}/{{ virtualhost.fqdn }}.crt:/etc/ssl/certs/{{ virtualhost.fqdn }}.crt"
-      - "{{ certs_dir }}/{{ virtualhost.fqdn }}.key:/etc/ssl/private/{{ virtualhost.fqdn }}.key"
+    volumes: "{{ volumes_certs }}"
     ports:
       - "80:80"
       - "443:443"

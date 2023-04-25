@@ -1,5 +1,14 @@
 ---
 - hosts: sortinghat
+  pre_tasks:
+    - name: Gather facts from other service nodes
+      setup:
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      when: hostvars[item]['ansible_default_ipv4'] is not defined
+      with_items:
+        - "{{ groups['opensearch_dashboards'] }}"
+        - "{{ groups['opensearch_dashboards_anonymous'] }}"
   roles:
     - sortinghat
   become: true
