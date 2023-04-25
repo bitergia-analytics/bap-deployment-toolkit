@@ -157,10 +157,10 @@ Replace the entries in `<>` with your values:
 - `ansible_user`: SSH username for the Service Account, in the format of `sa_<ID>`.
 - `ansible_ssh_private_key_file`: Absolute path to the SSH private key file for
   the Service Account. If you followed this documentation, you should have it
-  stored under the `keys/<enviroment>/` directory.
-- `gcp_service_account_host_file`: Absoulute path to the Service Account
+  stored under the `keys/<environment>/` directory.
+- `gcp_service_account_host_file`: Absolute path to the Service Account
   credentials file. If you followed this documentation, you should have it
-  in a `.json` file under the `keys/<enviroment>/` directory.
+  in a `.json` file under the `keys/<environment>/` directory.
 - `project_id`: the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project.
 - `mariadb_root_password`: strong password for the MariaDB root user.
 - `mariadb_service_account_password`: strong password for the MariaDB

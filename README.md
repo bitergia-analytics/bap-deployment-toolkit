@@ -21,8 +21,8 @@ The current version of the toolkit requires:
 - Ansible 6.4 (or later)
 
 Take into account that other Linux distributions might work but the ones listed
-in this README file are the ones that have been used to test this particular toolkit. 
-For your convenience, this documentation contains also the steps necessary 
+in this README file are the ones that have been used to test this particular toolkit.
+For your convenience, this documentation contains also the steps necessary
 to install Terraform and Ansible.
 
 ## Structure of this repository
