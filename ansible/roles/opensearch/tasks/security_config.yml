@@ -2,7 +2,7 @@
 
 - name: Create OpenSearch security directory
   file:
-    path: "{{ opensearch_workdir }}/securityconfig"
+    path: "{{ opensearch_workdir }}/opensearch-security"
     state: directory
     mode: 0775
     recurse: true
@@ -37,9 +37,9 @@
     group: '1000'
     mode: 0644
   loop:
-    - path: securityconfig/config.yml
+    - path: opensearch-security/config.yml
       always_update: this
-    - path: securityconfig/internal_users.yml
-    - path: securityconfig/roles_mapping.yml
+    - path: opensearch-security/internal_users.yml
+    - path: opensearch-security/roles_mapping.yml
   when: item.always_update is defined or
         not security_initialized_mark.stat.exists

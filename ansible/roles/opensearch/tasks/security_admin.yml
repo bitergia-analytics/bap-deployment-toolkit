@@ -4,7 +4,7 @@
   command: >
     docker exec {{ opensearch_docker_container }}
     bash plugins/opensearch-security/tools/securityadmin.sh
-    -cd plugins/opensearch-security/securityconfig/
+    -cd config/opensearch-security/
     -cacert config/{{ certs_files.ca_cert }}
     -cert config/{{ certs_files.admin_cert }}
     -key config/{{ certs_files.admin_key }}
@@ -22,7 +22,7 @@
   command: >
     docker exec {{ opensearch_docker_container }}
     bash plugins/opensearch-security/tools/securityadmin.sh
-    -f plugins/opensearch-security/securityconfig/config.yml
+    -f config/opensearch-security/config.yml
     -t config
     -cacert config/{{ certs_files.ca_cert }}
     -cert config/{{ certs_files.admin_cert }}

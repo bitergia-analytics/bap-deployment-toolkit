@@ -54,9 +54,9 @@
       - "{{ certs_dir }}/{{ certs_files.node_cert }}:/usr/share/opensearch/config/{{ certs_files.node_cert }}"
       - "{{ certs_dir }}/{{ certs_files.node_key }}:/usr/share/opensearch/config/{{ certs_files.node_key }}"
       - "{{ opensearch_workdir }}/opensearch.yml:/usr/share/opensearch/config/opensearch.yml"
-      - "{{ opensearch_workdir }}/securityconfig/config.yml:/usr/share/opensearch/plugins/opensearch-security/securityconfig/config.yml"
-      - "{{ opensearch_workdir }}/securityconfig/internal_users.yml:/usr/share/opensearch/plugins/opensearch-security/securityconfig/internal_users.yml"
-      - "{{ opensearch_workdir }}/securityconfig/roles_mapping.yml:/usr/share/opensearch/plugins/opensearch-security/securityconfig/roles_mapping.yml"
+      - "{{ opensearch_workdir }}/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml"
+      - "{{ opensearch_workdir }}/opensearch-security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml"
+      - "{{ opensearch_workdir }}/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml"
     ports:
       - "{{ network.publish_host }}:9200:9200"
       - "{{ network.publish_host }}:9300:9300"
