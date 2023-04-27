@@ -24,9 +24,6 @@ opensearch_security.auth.anonymous_auth_enabled: true
 opensearch_security.auth.anonymous_auth_enabled: false
 {% endif %}
 
-# Use this setting if you are running OpenSearch Dashboards without HTTPS
-opensearch_security.cookie.secure: false
-
 opensearch_security.basicauth.login.brandimage: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_login_logo.png"
 opensearch_security.basicauth.login.title: {{ login.title }}
 opensearch_security.basicauth.login.subtitle: {{ login.subtitle }}
@@ -47,6 +44,9 @@ uiSettings:
 server.ssl.certificate: "/usr/share/opensearch-dashboards/config/{{ opensearch_dashboards_cert_fqdn }}.cert"
 server.ssl.key: "/usr/share/opensearch-dashboards/config/{{ opensearch_dashboards_cert_fqdn }}.key"
 server.ssl.enabled: true
+opensearch_security.cookie.secure: true
+{% else %}
+opensearch_security.cookie.secure: false
 {% endif %}
 
 {% if openid_dashboards is defined %}
