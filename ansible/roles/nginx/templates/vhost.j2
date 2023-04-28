@@ -47,7 +47,7 @@ server {
     }
 
     location /identities {
-        rewrite                 ^/identities/(.*) /$1 break;
+        rewrite ^/identities/(.*) /$1 break;
 
         include /etc/nginx/conf.d/{{ instance.fqdn }}_uwsgi_params;
         uwsgi_pass {{ sortinghat_host }};
@@ -57,35 +57,14 @@ server {
         uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
     }
 
+    location ~ ^/identities/favicon-grimoirelab.ico {
+      rewrite ^/identities/(.*)$ /$1 break;
+      root /opt/gcs/;
+    }
+
     location ~ ^/identities/(css|js|fonts)/ {
-        resolver                8.8.8.8 valid=300s ipv6=off;
-        resolver_timeout        10s;
-
-        rewrite                 ^/identities/(.*) /$1 break;
-
-        proxy_set_header        Host storage.googleapis.com;
-        proxy_pass              https://storage.googleapis.com:443/{{ sortinghat_assets_bucket }}$uri;
-        proxy_http_version      1.1;
-        proxy_set_header        Connection "";
-        proxy_set_header        Cookie "";
-        proxy_set_header        Authorization "";
-        proxy_hide_header       x-goog-hash;
-        proxy_hide_header       x-goog-generation;
-        proxy_hide_header       x-goog-metageneration;
-        proxy_hide_header       x-goog-stored-content-encoding;
-        proxy_hide_header       x-goog-stored-content-length;
-        proxy_hide_header       x-goog-storage-class;
-        proxy_hide_header       x-guploader-uploadid;
-        proxy_hide_header       x-xss-protection;
-        proxy_hide_header       x-goog-meta-goog-reserved-file-mtime;
-        proxy_hide_header       accept-ranges;
-        proxy_hide_header       alternate-protocol;
-        proxy_hide_header       Set-Cookie;
-        proxy_hide_header       Expires;
-        proxy_hide_header       Cache-Control;
-        proxy_ignore_headers    Set-Cookie;
-        proxy_intercept_errors  on;
-        proxy_method            GET;
-        proxy_pass_request_body off;
+      rewrite ^/identities/(.*)$ /$1 break;
+      root /opt/gcs/;
     }
 }
+

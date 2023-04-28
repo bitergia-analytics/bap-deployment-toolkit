@@ -11,6 +11,7 @@
       - python3-setuptools
       - python3-pip
     state: present
+    update_cache: true
   tags: packages
 
 - name: Install and configure Docker
@@ -20,3 +21,4 @@
 - name: Install Python packages
   pip:
     name: "{{ python_packages }}"
+

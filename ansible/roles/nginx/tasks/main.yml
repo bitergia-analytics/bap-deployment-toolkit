@@ -6,6 +6,9 @@
   loop_control:
     loop_var: instance
 
+- name: Configure Google Cloud Storage (GCS)
+  include_tasks: gcs.yml
+
 - name: Configure NGINX proxy buffer sizes
   template:
     src: proxy_buffer.conf.j2
@@ -19,27 +22,31 @@
 
 - name: Create docker volumes for certs and config
   set_fact:
-    volumes_certs: |-
+    nginx_volumes: |-
       [
       {% for instance in nginx_virtualhosts %}
         "{{ certs_dir }}/{{ instance.fqdn }}.crt:/etc/ssl/certs/{{ instance.fqdn }}.crt",
         "{{ certs_dir }}/{{ instance.fqdn }}.key:/etc/ssl/private/{{ instance.fqdn }}.key",
       {% endfor %}
-        "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
+        "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/",
+        "{{ nginx_gcs_workdir }}:/opt/gcs"
       ]
 
 - name: Check the list of volumes
   debug:
-    msg: "{{ volumes_certs }}"
+    msg: "{{ nginx_volumes }}"
 
 - name: Start NGINX container
   docker_container:
     name: "{{ nginx_docker_container }}"
     image: "{{ nginx_docker_image }}:{{ nginx_version }}"
-    volumes: "{{ volumes_certs }}"
+    volumes: "{{ nginx_volumes }}"
     ports:
       - "80:80"
       - "443:443"
     exposed_ports:
       - "80"
       - "443"
+
+- name: Launch first rsync
+  shell: gsutil -m rsync -d -r "gs://{{ sortinghat_assets_bucket }}/" "{{ nginx_gcs_workdir }}"

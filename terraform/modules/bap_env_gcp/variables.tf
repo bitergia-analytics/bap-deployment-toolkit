@@ -300,3 +300,9 @@ variable "sortinghat_storage_location" {
   type    = string
   default = "EUROPE-SOUTHWEST1"
 }
+
+variable "uniform_bucket_level_access" {
+  type = bool
+  default = false
+}
+
