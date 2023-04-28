@@ -58,5 +58,5 @@
   with_items:
     - name: "{{ instance.fqdn }}.conf"
       template: vhost.j2
-    - name: "{{ instance.fqdn }}_uwsgi_params"
+    - name: uwsgi_params
       template: uwsgi_params.j2
