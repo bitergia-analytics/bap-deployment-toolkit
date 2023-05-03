@@ -16,3 +16,7 @@ sortinghat_database: sortinghat_db
 mariadb_hosts: "{{ groups['mariadb'] | first }}"
 redis_database: "0"
 redis_hosts: "{{ groups['redis'] | first }}"
+
+# OpenInfra
+sortinghat_openinfra_client_id: ""
+sortinghat_openinfra_client_secret: ""
