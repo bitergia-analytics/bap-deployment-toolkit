@@ -73,7 +73,7 @@
 
 - name: Set anonymous role if opensearch_dashboards_anonymous is defined
   set_fact:
-    anonymous: "{% if groups['opensearch_dashboards_anonymous'] %} '-a' {% else %} '' {% endif %}"
+    anonymous: "{% if 'opensearch_dashboards_anonymous' in groups and groups['opensearch_dashboards_anonymous'] %} -a {% else %} {% endif %}"
 
 - name: "Create roles and tenant for {{ instance.project }}"
   become: false

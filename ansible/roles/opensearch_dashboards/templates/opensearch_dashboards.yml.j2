@@ -18,7 +18,7 @@ opensearch_security.readonly_mode.roles:
   - "bap_anonymous_access_role"
 
 # Anonymous user opendistro_security_anonymous
-{% if inventory_hostname in groups['opensearch_dashboards_anonymous'] %}
+{% if ('opensearch_dashboards_anonymous' in groups) and (inventory_hostname in groups['opensearch_dashboards_anonymous']) %}
 opensearch_security.auth.anonymous_auth_enabled: true
 {% else %}
 opensearch_security.auth.anonymous_auth_enabled: false
