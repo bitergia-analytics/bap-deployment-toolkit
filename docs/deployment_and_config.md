@@ -227,7 +227,7 @@ about how to setup the task scheduler.
 - `mordred_instances.mordred_password`: strong password for the modred user
    of this tenant.
 - `mordred_instances.sources.repository`: repository with the list of data
-   sources to analyze on this project
+   sources to analyze on this project.
 
 #### OpenID Configuration (Optional)
 
@@ -282,6 +282,29 @@ Replace the entries in `<>` with your values:
 
 - `custom_cert.cert`: path to your `.crt` or `.pem` certificate
 - `custom_cert.key`: path to your `.key` file
+
+#### SSH Keys for Non-Public Data Sources (Optional)
+
+Sometimes, data sources such as `git` or `gerrit` would require access using
+SSH protocol. For those cases, the platform generates a SSH key pair when it's
+deployed for the first time. However, these keys won't work for private
+repositories which require authentication. For those cases, you can provide your
+own SSH keys, setting their location on the `vars.yml` file under the
+`all.vars` section.
+
+As with other keys and certificates, we recommend to store the certificates under
+the `keys/<environment>` directory of this toolkit.
+
+```yaml
+    mordred_ssh_key:
+      private: "<path_to_private_ssh_key>"
+      public: "<path_to_public_ssh_key>"
+```
+
+Replace the entries in `<>` with your values:
+
+- `mordred_ssh_key.private`: path to your SSH private key file
+- `mordred_ssh_key.public`: path to your SSH public key file
 
 ## 3. Setup Ansible Authentication
 

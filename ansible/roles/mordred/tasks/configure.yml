@@ -17,10 +17,27 @@
     path: "{{ mordred_ssh_dir }}/id_rsa"
   register: sshkey
 
+- name: Copy a custom SSH key pair
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - src: "{{ mordred_ssh_key.private }}"
+      dest: "{{ mordred_ssh_dir }}/id_rsa"
+      mode: '0750'
+    - src: "{{ mordred_ssh_key.public }}"
+      dest: "{{ mordred_ssh_dir }}/id_rsa.pub"
+      mode: '0750'
+  when:
+    - not sshkey.stat.exists
+    - mordred_ssh_key is defined
+
 - name: Create SSH key pair
   command: "ssh-keygen -t rsa -b 4096 -q -N '' -f {{ mordred_ssh_dir }}/id_rsa"
   when:
     - not sshkey.stat.exists
+    - mordred_ssh_key is not defined
 
 - name: Set SSH default config for user 'git'
   copy:
