@@ -8,6 +8,10 @@ bap_version: 0.7.1
 mordred_workdir: "/docker/mordred"
 mordred_setups_dir: "{{ mordred_workdir }}/setups"
 mordred_ssh_dir: "{{ mordred_workdir }}/ssh"
+# Set in your environments vars.yml to add a custom SSH pair keys
+#mordred_ssh_key:
+#  private: "id_rsa"
+#  public: "id_rsa.pub"
 mordred_instances_dir: "{{ mordred_workdir }}/instances"
 
 mordred_aliases_url: https://raw.githubusercontent.com/chaoss/grimoirelab-sirmordred/master/aliases.json
