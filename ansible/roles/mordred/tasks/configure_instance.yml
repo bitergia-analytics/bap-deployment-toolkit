@@ -8,8 +8,8 @@
   file:
     state: directory
     path: "{{ item }}"
-    owner: root
-    group: '1000'
+    owner: grimoire
+    group: grimoire
     mode: '0774'
   with_items:
     - "{{ instance_dir }}/conf"
@@ -29,11 +29,13 @@
   copy:
     src: "/tmp/{{ instance.tenant }}_aliases.json"
     dest: "{{ instance_dir }}/conf/aliases.json"
-    owner: '1000'
-    group: '1000'
+    owner: grimoire
+    group: grimoire
     mode: '0640'
 
 - name: Checkout sources repo
+  become: true
+  become_user: grimoire
   git:
     repo: "{{ instance.sources.repository }}"
     dest: "{{ instance_dir }}/sources"
@@ -44,8 +46,8 @@
   file:
     state: directory
     path: "{{ instance_dir }}/sources"
-    owner: root
-    group: '1000'
+    owner: grimoire
+    group: grimoire
     mode: '0774'
 
 - name: "Create cron job to pull changes from {{ instance.project }} sources repo"
