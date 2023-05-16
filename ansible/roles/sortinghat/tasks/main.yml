@@ -69,6 +69,8 @@
       SORTINGHAT_STATICFILES_STORAGE: "{{ sortinghat_bucket_provider }}"
       SORTINGHAT_BUCKET_NAME: "{{ sortinghat_assets_bucket }}"
       GOOGLE_APPLICATION_CREDENTIALS: /home/sortinghat/gcp_credentials.json
+      SORTINGHAT_UWSGI_WORKERS: "{{ sortinghat_uwsgi_workers }}"
+      SORTINGHAT_UWSGI_THREADS: "{{ sortinghat_uwsgi_threads }}"
     volumes:
       - "{{ gcp_service_account_file }}:/home/sortinghat/gcp_credentials.json:ro"
     ports:

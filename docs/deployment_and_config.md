@@ -128,6 +128,10 @@ all:
     # Sortinghat Workers
     sortinghat_workers: <sortinghat_workers>
 
+    # SortingHat uWSGI workers and threads
+    sortinghat_uwsgi_workers: "<sortinghat_uwsgi_workers>"
+    sortinghat_uwsgi_threads: "<sortinghat_uwsgi_threads>"
+
     # Import OpenInfra
     sortinghat_openinfra_client_id: "<openinfra_client_id>"
     sortinghat_openinfra_client_secret: "<openinfra_client_secret>"
@@ -202,6 +206,8 @@ Replace the entries in `<>` with your values:
   [terraform prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf).
 - `sortinghat_bucket_provider`: cloud provider type; valid values are: `gcp`.
 - `sortinghat_workers`: number of SortingHat Workers (by default is `1`).
+- `sortinghat_uwsgi_workers`: number of SortingHat uWSGI workers (by default is `1`).
+- `sortinghat_uwsgi_threads`: number of SortingHat uWSGI threads (by default is `4`).
 - `sortinghat_openinfra_client_id`: OpenInfraID Oauth2 client ID for private API. When the
   parameter is not set, it will only obtain members from the public API that doesn't contain
   email information. (by default is "").
