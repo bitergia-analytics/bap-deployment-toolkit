@@ -22,6 +22,7 @@
 
 
 import argparse
+from enum import Enum
 from string import Template
 
 import requests
@@ -200,14 +201,20 @@ ROLES_MAPPING = {
 }
 
 
+class Query(Enum):
+    ROLE = API_ROLES
+    TENANT = API_TENANT
+
+
 def main():
     args = args_parser()
     opensearch_url = args.opensearch_url
     tenant = args.tenant
     anonymous = args.anonymous
+    force = args.force
 
-    create_roles(anonymous, opensearch_url, tenant)
-    create_tenant(opensearch_url, tenant)
+    create_roles(anonymous, opensearch_url, tenant, force)
+    create_tenant(opensearch_url, tenant, force)
 
 
 def args_parser():
@@ -220,17 +227,23 @@ def args_parser():
     parser.add_argument("-a", "--anonymous",
                         action="store_true",
                         help="Create bap_anonymous_access role")
+    parser.add_argument("-f", "--force",
+                        action="store_true",
+                        help="Overwrite roles and tenant")
     args = parser.parse_args()
 
     return args
 
 
-def create_roles(anonymous, opensearch_url, tenant):
+def create_roles(anonymous, opensearch_url, tenant, force=False):
     for role in ROLES_MAPPING:
         if not anonymous and role == "bap_tenant_anonymous_access_role":
             continue
 
         role_name = role.replace("tenant", tenant)
+        if not force and exists(opensearch_url, role_name, Query.ROLE):
+            print("The role '{}' already exists".format(role_name))
+            continue
         data = ROLES_MAPPING[role]
         data = data.substitute(tenant=tenant)
         base_url = opensearch_url + API_ROLES + role_name
@@ -238,11 +251,26 @@ def create_roles(anonymous, opensearch_url, tenant):
         print("{}: {}".format(response['status'], response['message']))
 
 
-def create_tenant(opensearch_url, tenant):
+def create_tenant(opensearch_url, tenant, force=False):
+    if not force and exists(opensearch_url, tenant, Query.TENANT):
+        print("The tenant '{}' already exists".format(tenant))
+        return
     base_url = opensearch_url + API_TENANT + tenant
     data = '{"description": "Tenant created automatically."}'
     response = run_requests("PUT", base_url, data=data)
     print("{}: {}".format(response['status'], response['message']))
+
+
+def exists(url, name, query_api):
+    if not isinstance(query_api, Query):
+        raise TypeError('query_api must be an instance of Query Enum')
+
+    base_url = url + query_api.value + name
+    try:
+        _ = run_requests("GET", base_url)
+        return True
+    except requests.exceptions.HTTPError:
+        return False
 
 
 def run_requests(method, url, data=None, verify=False):

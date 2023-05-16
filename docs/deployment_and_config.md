@@ -137,6 +137,7 @@ all:
     mordred_instances:
     - project: <project_a>
       tenant: <tenant_name_a>
+      overwrite_roles: <overwrite_roles>
       mordred_password: <mordred_tenant_a_password>
       sources:
         repository: "<repo_teneant_a_projects.git>"
@@ -224,6 +225,7 @@ about how to setup the task scheduler.
 - `mordred_instances.project`: name of the project to analyze.
 - `mordred_instances.tenant`: the name used here will be used to store the
    data from this project in a separate tenant from the others.
+- `mordred_instances.overwrite_roles` (optional): overwrite roles and tenant `true | false`.
 - `mordred_instances.mordred_password`: strong password for the modred user
    of this tenant.
 - `mordred_instances.sources.repository`: repository with the list of data
