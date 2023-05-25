@@ -14,6 +14,12 @@
     mode: 0750
     recurse: true
 
+- name: Create NGINX log directory
+  file:
+    path: "{{ nginx_log_dir }}"
+    state: directory
+    mode: 0755
+
 - name: "Generate self-signed certificate for {{ instance.fqdn }}"
   shell: "./generate_cert.sh {{ instance.fqdn }}"
   become: false

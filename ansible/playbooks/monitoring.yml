@@ -1,7 +1,32 @@
-- name: Add GCP Ops Agent on hosts
-  hosts: all
+---
+- hosts: all, !ungrouped, !redis, !nginx, !mariadb
   become: true
-  roles:
-    - role: google-cloud-ops-agents-ansible
-      vars:
-        agent_type: ops-agent
+  tasks:
+    - name: All hosts except Redis, NGINX, and MariaDB
+      include_role:
+        name: monitoring
+        tasks_from: main
+
+- hosts: nginx
+  become: true
+  tasks:
+    - name: NGINX monitoring
+      include_role:
+        name: monitoring
+        tasks_from: nginx
+
+- hosts: redis
+  become: true
+  tasks:
+    - name: Redis monitoring
+      include_role:
+        name: monitoring
+        tasks_from: redis
+
+- hosts: mariadb
+  become: true
+  tasks:
+    - name: MariaDB monitoring
+      include_role:
+        name: monitoring
+        tasks_from: mariadb

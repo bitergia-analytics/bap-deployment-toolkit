@@ -1,0 +1,25 @@
+logging:
+  receivers:
+    nginx_access:
+      type: nginx_access
+      include_paths: {{ nginx_logging_access_include_paths }}
+    nginx_error:
+      type: nginx_error
+      include_paths: {{ nginx_logging_error_include_paths }}
+  service:
+    pipelines:
+      nginx:
+        receivers:
+          - nginx_access
+          - nginx_error
+metrics:
+  receivers:
+    nginx:
+      type: nginx
+      stub_status_url: {{ nginx_metric_stub_status_url }}
+      collection_interval: 60s
+  service:
+    pipelines:
+      nginx:
+        receivers:
+          - nginx

@@ -1,0 +1,17 @@
+# Docker logs
+docker_logging_include_paths: [/var/lib/docker/containers/*/*-json.log]
+
+# MariaDB
+mariadb_metric_endpoint: "{{ hostvars[groups['mariadb'][0]]['ansible_default_ipv4']['address'] }}:3306"
+mariadb_root_password: ""
+mariadb_root_user: root
+
+# NGINX
+nginx_logging_access_include_paths: ["/docker/nginx/log/access.log"]
+nginx_logging_error_include_paths: ["/docker/nginx/log/error.log"]
+nginx_metric_stub_status_url: "http://{{ hostvars[groups['nginx'][0]]['ansible_default_ipv4']['address'] }}:80/nginx_status"
+
+# Redis
+redis_logging_include_paths: ["/docker/redis/log/redis.log"]
+redis_metric_address: "{{ hostvars[groups['redis'][0]]['ansible_default_ipv4']['address'] }}:6379"
+redis_password: ""
