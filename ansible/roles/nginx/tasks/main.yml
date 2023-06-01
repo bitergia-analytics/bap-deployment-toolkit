@@ -1,5 +1,10 @@
 ---
 
+- name: Configure NGINX status page
+  template:
+    src: status.conf.j2
+    dest: "{{ nginx_virtualhosts_workdir }}/status.conf"
+
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
   loop: "{{ nginx_virtualhosts }}"
@@ -29,7 +34,8 @@
         "{{ certs_dir }}/{{ instance.fqdn }}.key:/etc/ssl/private/{{ instance.fqdn }}.key",
       {% endfor %}
         "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/",
-        "{{ nginx_gcs_workdir }}:/opt/gcs"
+        "{{ nginx_gcs_workdir }}:/opt/gcs",
+        "{{ nginx_log_dir }}:/var/log/nginx"
       ]
 
 - name: Check the list of volumes

@@ -1,0 +1,20 @@
+---
+
+- name: Create NGINX Ops Agent YAML file
+  template:
+    src: nginx_ops_agent.yaml.j2
+    dest: /tmp/nginx_ops_agent.yaml
+  delegate_to: localhost
+
+- name: Add GCP NGINX Ops Agent
+  include_role:
+    name: google-cloud-ops-agents-ansible
+  vars:
+    agent_type: ops-agent
+    main_config_file: /tmp/nginx_ops_agent.yaml
+
+- name: Clean up NGINX Ops Agent YAML file
+  file:
+    path: /tmp/nginx_ops_agent.yaml
+    state: absent
+  delegate_to: localhost

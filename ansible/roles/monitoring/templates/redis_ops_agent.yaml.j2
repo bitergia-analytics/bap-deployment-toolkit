@@ -1,0 +1,21 @@
+logging:
+  receivers:
+    redis:
+      type: redis
+      include_paths: {{ redis_logging_include_paths }}
+  service:
+    pipelines:
+      redis:
+        receivers:
+        - redis
+metrics:
+  receivers:
+    redis:
+      type: redis
+      address: {{ redis_metric_address }}
+      password: {{ redis_password }}
+  service:
+    pipelines:
+      redis:
+        receivers:
+        - redis

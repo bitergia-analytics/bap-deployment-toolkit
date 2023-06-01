@@ -1,0 +1,16 @@
+logging:
+  receivers:
+    docker-logs:
+      type: files
+      include_paths: {{ docker_logging_include_paths }}
+      record_log_file_path: true
+  processors:
+    parse_json:
+      type: parse_json
+      time_key: time
+      time_format: "%Y-%m-%dT%H:%M:%S.%L"
+  service:
+    pipelines:
+      pipeline:
+        receivers: [docker-logs]
+        processors: [parse_json]

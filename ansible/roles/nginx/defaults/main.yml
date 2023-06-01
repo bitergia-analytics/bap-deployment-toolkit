@@ -7,6 +7,7 @@ nginx_docker_container: nginx
 # NGINX node configuration
 nginx_workdir: "/docker/nginx"
 nginx_virtualhosts_workdir: "{{ nginx_workdir }}/conf"
+nginx_log_dir: "{{ nginx_workdir }}/log"
 
 # Create your Nginx virtual host configurations
 ## nginx_virtualhosts:

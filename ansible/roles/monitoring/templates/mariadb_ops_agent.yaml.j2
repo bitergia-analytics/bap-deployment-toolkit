@@ -1,0 +1,14 @@
+{% include 'docker_ops_agent.yaml.j2' %}
+
+metrics:
+  receivers:
+    mysql:
+      type: mysql
+      endpoint: {{ mariadb_metric_endpoint }}
+      password: {{ mariadb_root_password }}
+      username: {{ mariadb_root_user }}
+  service:
+    pipelines:
+      mysql:
+        receivers:
+          - mysql

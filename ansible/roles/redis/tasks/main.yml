@@ -1,5 +1,24 @@
 ---
 
+- name: Create redis configuration directory
+  file:
+    path: "{{ redis_workdir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: Create redis log directory
+  file:
+    path: "{{ redis_log_dir }}"
+    state: directory
+    mode: 0755
+
+- name: Copy redis overrides.conf
+  copy:
+    src: "{{ role_path }}/files/overrides.conf"
+    dest: "{{ redis_workdir }}/overrides.conf"
+    mode: 0664
+
 - name: Remove old redis container
   docker_container:
     name: "{{ redis_docker_container }}"
@@ -14,5 +33,7 @@
       REDIS_DISABLE_COMMANDS: FLUSHDB,FLUSHALL,CONFIG
     volumes:
       - redis_data:/bitnami/redis/data
+      - "{{ redis_workdir }}/overrides.conf:/opt/bitnami/redis/mounted-etc/overrides.conf"
+      - "{{ redis_log_dir }}:/opt/bitnami/redis/logs/"
     ports:
       - "{{ network.bind_host }}:6379:6379"
