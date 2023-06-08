@@ -70,6 +70,16 @@
     - not sshkey.stat.exists
     - mordred_ssh_key is not defined
 
+- name: Ensure the SSH key pair has the correct permissions
+  file:
+    path: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ mordred_ssh_dir }}/id_rsa"
+      mode: '0600'
+    - path: "{{ mordred_ssh_dir }}/id_rsa.pub"
+      mode: '0644'
+
 - name: Set SSH default config for user 'git'
   copy:
     src: "{{ role_path }}/files/ssh_config"
