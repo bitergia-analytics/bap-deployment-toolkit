@@ -1,15 +1,15 @@
 ---
 
-- name: Configure NGINX status page
-  template:
-    src: status.conf.j2
-    dest: "{{ nginx_virtualhosts_workdir }}/status.conf"
-
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
   loop: "{{ nginx_virtualhosts }}"
   loop_control:
     loop_var: instance
+
+- name: Configure NGINX status page
+  template:
+    src: status.conf.j2
+    dest: "{{ nginx_virtualhosts_workdir }}/status.conf"
 
 - name: Configure Google Cloud Storage (GCS)
   include_tasks: gcs.yml
