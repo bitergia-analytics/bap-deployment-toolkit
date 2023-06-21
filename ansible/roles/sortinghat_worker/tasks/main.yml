@@ -1,11 +1,25 @@
 ---
 
+- name: Create a list of priviledges
+  set_fact:
+    priviledges: |-
+      {
+      {% for item in nginx_virtualhosts %}
+        "{{ item.tenant }}.*":"ALL,GRANT",
+      {% endfor %}
+        "{{ sortinghat_database }}.*":"ALL,GRANT"
+      }
+
+- name: Check priviledges list
+  debug:
+    msg: "{{ priviledges }}"
+
 - name: Create MariaDB service account for SortingHat worker
   mysql_user:
     name: "{{ mariadb_service_account }}"
     host: "{{ ansible_default_ipv4.address }}"
     password: "{{ mariadb_service_account_password }}"
-    priv: "{{ sortinghat_database }}.*:ALL,GRANT"
+    priv: "{{ priviledges }}"
     login_user: root
     login_password: "{{ mariadb_root_password }}"
     login_host: "{{ item }}"
@@ -16,6 +30,27 @@
   until: result is success
   with_items:
     - "{{ mariadb_hosts }}"
+
+- name: Create SortingHat Worker directory
+  file:
+    path: "{{ sortinghat_worker_workdir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
+- name: "Create SortingHat multi tenant file"
+  copy:
+    mode: '0644'
+    dest: "{{ sortinghat_multi_tenant_list_path }}"
+    content: |-
+      {
+        "tenants": [
+          {% for item in nginx_virtualhosts %}
+            {{ "" if loop.first else "," }}
+            "{{ item.tenant }}"
+          {% endfor %}
+        ]
+      }
 
 - name: Remove old SortingHat worker container
   docker_container:
@@ -40,4 +75,8 @@
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
       SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ sortinghat_openinfra_client_id }}"
       SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ sortinghat_openinfra_client_secret }}"
+      SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
+      SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
+    volumes:
+      - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
   with_sequence: start=1 end="{{ sortinghat_workers }}"

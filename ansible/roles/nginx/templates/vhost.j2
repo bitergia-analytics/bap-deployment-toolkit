@@ -15,7 +15,7 @@ server {
     # Needed by OpenSearch Dashboards queries
     client_max_body_size 2000M;
 
-    ssl    on;
+    # ssl    on;
 
     ssl_certificate /etc/ssl/certs/{{ instance.fqdn }}.crt;
     ssl_certificate_key /etc/ssl/private/{{ instance.fqdn }}.key;
@@ -49,12 +49,13 @@ server {
     location /identities {
         rewrite ^/identities/(.*) /$1 break;
 
-        include /etc/nginx/conf.d/{{ instance.fqdn }}_uwsgi_params;
+        include /etc/nginx/conf.d/uwsgi_params;
         uwsgi_pass {{ sortinghat_host }};
         uwsgi_param Host $host;
         uwsgi_param X-Real-IP $remote_addr;
         uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
         uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
+        uwsgi_param HTTP_sortinghat-tenant {{ instance.tenant }};
     }
 
     location ~ ^/identities/favicon-grimoirelab.ico {

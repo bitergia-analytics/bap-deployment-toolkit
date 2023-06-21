@@ -1,3 +1,5 @@
+---
+
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
 
