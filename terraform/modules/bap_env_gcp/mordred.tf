@@ -4,7 +4,10 @@ module "mordred" {
   prefix                  = var.prefix
   name                    = "mordred"
   node_count              = var.mordred_node_count
-  tags                    = ["mordred"]
+  tags                    = flatten([
+                              "mordred",
+                              var.custom_tags
+                            ])
   ansible_groups          = ["mordred"]
 
   machine_type            = var.mordred_machine_type

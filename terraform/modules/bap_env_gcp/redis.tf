@@ -4,7 +4,10 @@ module "redis" {
   prefix                  = var.prefix
   name                    = "redis"
   node_count              = var.redis_node_count
-  tags                    = ["identities"]
+  tags                    = flatten([
+                              "identities",
+                              var.custom_tags
+                            ])
   ansible_groups          = ["redis"]
 
   machine_type            = var.redis_machine_type

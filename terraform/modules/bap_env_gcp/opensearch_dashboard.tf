@@ -4,7 +4,10 @@ module "opensearch_dashboards" {
   prefix                  = var.prefix
   name                    = "opensearch-dashboards"
   node_count              = var.opensearch_dashboards_node_count
-  tags                    = ["opensearch-dashboards"]
+  tags                    = flatten([
+                              "opensearch-dashboards",
+                              var.custom_tags
+                            ])
   ansible_groups          = ["opensearch-dashboards"]
 
   machine_type            = var.opensearch_dashboards_machine_type
