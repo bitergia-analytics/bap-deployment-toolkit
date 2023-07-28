@@ -4,7 +4,10 @@ module "sortinghat" {
   prefix                  = var.prefix
   name                    = "sortinghat"
   node_count              = var.sortinghat_node_count
-  tags                    = ["sortinghat"]
+  tags                    = flatten([
+                              "sortinghat",
+                              var.custom_tags
+                            ])
   ansible_groups          = ["sortinghat"]
 
   machine_type            = var.sortinghat_machine_type

@@ -4,7 +4,10 @@ module "nginx" {
   prefix                  = var.prefix
   name                    = "nginx"
   node_count              = var.nginx_node_count
-  tags                    = ["nginx", "http-server", "https-server"]
+  tags                    = flatten([
+                              "nginx", "http-server", "https-server",
+                              var.custom_tags
+                            ])
   ansible_groups          = ["nginx"]
 
   machine_type            = var.nginx_machine_type

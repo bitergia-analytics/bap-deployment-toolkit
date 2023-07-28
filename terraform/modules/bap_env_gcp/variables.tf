@@ -26,6 +26,12 @@ variable "prefix" {
   description = "A prefix to add to the resource name(s), e.g.: '<prefix>-<name>-x'"
 }
 
+variable "custom_tags" {
+  type        = list(any)
+  description = "A list of extra tags for each compute engine"
+  default     = []
+}
+
 # MariaDB
 
 variable "mariadb_node_count" {
@@ -305,4 +311,3 @@ variable "uniform_bucket_level_access" {
   type = bool
   default = false
 }
-

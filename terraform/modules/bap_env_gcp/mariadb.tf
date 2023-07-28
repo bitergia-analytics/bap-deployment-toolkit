@@ -4,7 +4,10 @@ module "mariadb" {
   prefix                  = var.prefix
   name                    = "mariadb"
   node_count              = var.mariadb_node_count
-  tags                    = ["identities"]
+  tags                    = flatten([
+                              "identities",
+                              var.custom_tags
+                            ])
   ansible_groups          = ["mariadb"]
 
   machine_type            = var.mariadb_machine_type

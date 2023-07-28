@@ -4,7 +4,10 @@ module "opensearch" {
   prefix                  = var.prefix
   name                    = "opensearch"
   node_count              = var.opensearch_node_count
-  tags                    = ["opensearch"]
+  tags                    = flatten([
+                              "opensearch",
+                              var.custom_tags
+                            ])
   ansible_groups          = ["opensearch"]
 
   machine_type            = var.opensearch_machine_type

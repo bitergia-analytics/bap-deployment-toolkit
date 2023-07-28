@@ -123,6 +123,8 @@ module "bap_env_gcp" {
 
   prefix = "test"
 
+  custom_tags = ["devel", "research"]
+
   mariadb_node_count = 1
   mariadb_machine_type = "e2-standard-2"
 

@@ -4,7 +4,10 @@ module "opensearch_dashboards_anonymous" {
   prefix                  = var.prefix
   name                    = "opensearch-dashboards-anonymous"
   node_count              = var.opensearch_dashboards_anonymous_node_count
-  tags                    = ["opensearch-dashboards-anonymous"]
+  tags                    = flatten([
+                              "opensearch-dashboards-anonymous",
+                              var.custom_tags
+                            ])
   ansible_groups          = ["opensearch-dashboards-anonymous"]
 
   machine_type            = var.opensearch_dashboards_machine_type
