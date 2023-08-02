@@ -50,6 +50,14 @@
   loop_control:
     label: "{{ item.dest }}"
 
+- name: "Create load balancer configuration for OpenSearch nodes"
+  run_once: true
+  template:
+    src: "opensearch_nodes.j2"
+    dest: "{{ nginx_virtualhosts_workdir }}/opensearch_nodes.conf"
+    backup: true
+  when: instance.http_rest_api is defined and instance.http_rest_api
+
 - name: "Create virtualhost configuration for {{ instance.fqdn }}"
   template:
     src: "{{ item.template }}"

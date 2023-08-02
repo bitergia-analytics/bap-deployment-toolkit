@@ -14,9 +14,11 @@ nginx_log_dir: "{{ nginx_workdir }}/log"
 ##  - fqdn: example.com
 ##    public: false
 ##    tenant: example
+##    http_rest_api: true
 ##  - fqdn: example-public.com
 ##    public: true
 ##    tenant: example-public
+##    http_rest_api: false
 
 # Service hosts
 opensearch_endpoint: "https://{{ hostvars[(groups['opensearch'][0])].ansible_default_ipv4.address }}:9200"
@@ -47,4 +49,3 @@ nginx_keys_workdir: /docker/nginx/keys
 gcloud_apt_deb_ubuntu_repository: >-
   deb [signed-by=/usr/share/keyrings/cloud.google.gpg]
   https://packages.cloud.google.com/apt cloud-sdk main
-
