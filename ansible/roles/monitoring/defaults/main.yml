@@ -3,8 +3,20 @@ docker_logging_include_paths: [/var/lib/docker/containers/*/*-json.log]
 
 # MariaDB
 mariadb_metric_endpoint: "{{ hostvars[groups['mariadb'][0]]['ansible_default_ipv4']['address'] }}:3306"
+mariadb_logging_error_include_paths: ["/docker/mariadb/log/error.log"]
+mariadb_logging_slow_include_paths: ["/docker/mariadb/log/slow.log"]
 mariadb_root_password: ""
 mariadb_root_user: root
+
+# OpenSearch
+opensearch_logging_include_paths: [
+  "/docker/opensearch/log/*_server.json",
+  "/docker/opensearch/log/*__deprecation.json",
+  "/docker/opensearch/log/*_index_search_slowlog.json",
+  "/docker/opensearch/log/*_index_indexing_slowlog.json",
+  "/docker/opensearch/log/*_audit.json"
+]
+opensearch_logging_gc_include_paths: ["/docker/opensearch/log/gc.json"]
 
 # NGINX
 nginx_logging_access_include_paths: ["/docker/nginx/log/access.log"]
