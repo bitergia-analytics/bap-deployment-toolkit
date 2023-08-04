@@ -60,6 +60,10 @@ resource "google_compute_instance" "bap" {
   }
 
   service_account {
-    scopes = var.service_account_scopes
+    scopes = flatten([
+      "logging-write",
+      "monitoring-write",
+      var.service_account_extra_scopes
+    ])
   }
 }

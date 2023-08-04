@@ -20,6 +20,8 @@ module "nginx" {
   subnetwork              = var.subnetwork
   enable_external_ip      = true
   ansible_use_external_ip = var.nginx_ansible_use_external_ip
+
+  service_account_extra_scopes  = ["storage-ro"]
 }
 
 output "nginx" {

@@ -69,13 +69,10 @@ variable "enable_external_ip" {
   default     = false
 }
 
-variable "service_account_scopes" {
+variable "service_account_extra_scopes" {
   type        = list(string)
-  description = "List of Service Account scopes to apply to the instances"
-  default = [
-    "logging-write",
-    "monitoring-write"
-  ]
+  description = "List of Service Account extra scopes to apply to the instances"
+  default = []
 }
 
 variable "ansible_use_external_ip" {
