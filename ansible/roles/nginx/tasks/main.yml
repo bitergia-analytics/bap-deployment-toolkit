@@ -2,6 +2,7 @@
 
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
+  run_once: "{{ bap_single_host|bool }}"
   loop: "{{ nginx_virtualhosts }}"
   loop_control:
     loop_var: instance

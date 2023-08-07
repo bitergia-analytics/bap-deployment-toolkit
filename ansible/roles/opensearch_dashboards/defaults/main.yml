@@ -63,3 +63,7 @@ opensearch_dashboards_cert_fqdn: opensearch.example.org
 #   base_redirect_url: {{ openid_redirect_url }}
 #   logout_url: "{{ openid_logout_url }}"
 #
+
+# All instances under the same host and selector tenant enabled.
+# If this is `true` add only one entry in `nginx_virtualhost`.
+bap_single_host: false

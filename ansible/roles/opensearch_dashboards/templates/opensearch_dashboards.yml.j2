@@ -60,3 +60,9 @@ opensearch_security.openid.base_redirect_url: "{{ openid.base_redirect_url }}"
 opensearch_security.openid.logout_url: "{{ openid.logout_url }}"
 {% endif %}
 {% endif %}
+
+{% if bap_single_host|bool %}
+bitergia_analytics.hideTenantSelector: false
+{% else %}
+bitergia_analytics.hideTenantSelector: true
+{% endif %}
