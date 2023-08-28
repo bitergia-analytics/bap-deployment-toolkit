@@ -8,6 +8,10 @@ python_packages:
 mariadb_docker_image: mariadb
 mariadb_version: latest
 
+# Number of seconds the server waits for activity of a non-interactive
+# connection before closing it. The default value is 28800 seconds (8 hours).
+mariadb_wait_timeout: 28800
+
 mariadb_workdir: "/docker/mariadb"
 gcp_service_account_file: "{{ mariadb_workdir }}/gcs_credentials.json"
 
