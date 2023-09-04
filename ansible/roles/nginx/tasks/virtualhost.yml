@@ -3,16 +3,26 @@
 - name: Create NGINX virtualhost(s) directory
   file:
     path: "{{ nginx_virtualhosts_workdir }}"
-    state: directory
+    state: "{{ item.state }}"
     mode: 0750
-    recurse: true
+    recurse: "{{ item.recurse }}"
+  with_items:
+    - state: absent
+      recurse: false
+    - state: directory
+      recurse: true
 
 - name: Create certificates directory
   file:
     path: "{{ certs_dir }}"
-    state: directory
+    state: "{{ item.state }}"
     mode: 0750
-    recurse: true
+    recurse: "{{ item.recurse }}"
+  with_items:
+    - state: absent
+      recurse: false
+    - state: directory
+      recurse: true
 
 - name: Create NGINX log directory
   file:

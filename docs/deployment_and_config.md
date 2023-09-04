@@ -154,6 +154,12 @@ all:
       sources:
         repository: "<repo_teneant_b_projects.git>"
 
+    # All instances under the same host and the selector tenant enabled
+    # on the OpenSearch Dashboards.
+    # If this is `true` add only one entry in `nginx_virtualhost` because
+    # it will use the first one and ignore the rest.
+    bap_single_host: "<bap_single_host>"
+
     # OpenSearch Dashboards Settings for Nginx
     nginx_virtualhosts:
       - fqdn: <fqdn-1>
@@ -224,6 +230,9 @@ Replace the entries in `<>` with your values:
   the variable is not defined the OpenSearch Dashboards is private.
 - `nginx_virtualhosts.tenant`: the name of the tenant for this OpenSearch Dashboards endpoint,
   it must be same as `mordred_instances.tenant`.
+- `bap_single_host`: All instances under the same host and the selector tenant enabled on the
+  OpenSearch Dashboards (by default is `false`). If this is `true` add only one entry in
+  `nginx_virtualhost` because it will use the first one and ignore the rest.
 
 After configuring these parameters, you need to configure the instances of the
 task scheduler (Mordred). You need a task scheduler for each project you want

@@ -43,7 +43,9 @@ server {
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
+{% if not bap_single_host|bool %}
         proxy_set_header securitytenant {{ instance.tenant }};
+{% endif %}
     }
 
     location /identities {
@@ -55,7 +57,9 @@ server {
         uwsgi_param X-Real-IP $remote_addr;
         uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
         uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
+{% if not bap_single_host|bool %}
         uwsgi_param HTTP_sortinghat-tenant {{ instance.tenant }};
+{% endif %}
     }
 
     location ~ ^/identities/favicon-grimoirelab.ico {

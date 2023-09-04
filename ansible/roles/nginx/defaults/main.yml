@@ -9,6 +9,10 @@ nginx_workdir: "/docker/nginx"
 nginx_virtualhosts_workdir: "{{ nginx_workdir }}/conf"
 nginx_log_dir: "{{ nginx_workdir }}/log"
 
+# All instances under the same host and selector tenant enabled.
+# If this is `true` add only one entry in `nginx_virtualhost`.
+bap_single_host: false
+
 # Create your Nginx virtual host configurations
 ## nginx_virtualhosts:
 ##  - fqdn: example.com
@@ -47,4 +51,3 @@ nginx_keys_workdir: /docker/nginx/keys
 gcloud_apt_deb_ubuntu_repository: >-
   deb [signed-by=/usr/share/keyrings/cloud.google.gpg]
   https://packages.cloud.google.com/apt cloud-sdk main
-
