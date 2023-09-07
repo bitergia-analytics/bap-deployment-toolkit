@@ -1,12 +1,29 @@
 #!/bin/bash
 
-DUMP_FOLDER="/tmp"
+USER={{ mariadb_backup_service_account }}
+PASSWORD="{{ mariadb_backup_service_account_password }}"
+HOST={{ groups['mariadb'][0] }}
 
+DUMP_FOLDER="/tmp"
 DATE=$(date "+%Y%m%d")
 
-filename="mariadb_${DATE}.sql"
-output_file="${DUMP_FOLDER}/${filename}"
+DATABASES=`mysql --user=$USER --password=$PASSWORD --host=$HOST -se "show databases;"`
+BLACK_LIST="Database performance_schema information_schema"
 
-mysqldump --user=root --password={{ mariadb_root_password }} --host={{ groups['mariadb'][0] }} --all-databases > "$output_file"
-gsutil cp "$output_file" "gs://{{ backups_assets_bucket }}/${filename}"
-rm "${output_file}"
+list_not_include_item () {
+  local item=$1
+  [[ "$BLACK_LIST" =~ (^|[[:space:]])"$item"($|[[:space:]]) ]] && result=1 || result=0
+  return $result
+}
+
+for database in $DATABASES
+do
+    if list_not_include_item $database
+    then
+       filename="${database}_${DATE}.sql"
+       output_file="${DUMP_FOLDER}/${filename}"
+       mysqldump --user=$USER --password=$PASSWORD --host=$HOST $database > "$output_file"
+       gsutil cp "$output_file" "gs://{{ backups_assets_bucket }}/mariadb/${filename}"
+       rm "${output_file}"
+    fi
+done
