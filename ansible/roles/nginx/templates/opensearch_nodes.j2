@@ -1,0 +1,5 @@
+upstream opensearch_nodes {
+{% for node in groups['opensearch'] %}
+    server {{ hostvars[node].ansible_default_ipv4.address }}:9200;
+{% endfor %}
+}

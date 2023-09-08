@@ -161,9 +161,11 @@ all:
       - fqdn: <fqdn-1>
         public: false
         tenant: <tenant_name_a>
+        http_rest_api: true
       - fqdn: <fqdn-2>
         public: true
         tenant: <tenant_name_b>
+        http_rest_api: false
 ```
 
 Replace the entries in `<>` with your values:
@@ -227,6 +229,8 @@ Replace the entries in `<>` with your values:
   the variable is not defined the OpenSearch Dashboards is private.
 - `nginx_virtualhosts.tenant`: the name of the tenant for this OpenSearch Dashboards endpoint,
   it must be same as `mordred_instances.tenant`.
+- `nginx_virtualhosts.http_rest_api`: Open OpenSearch HTTP rest API only if the variable is defined
+  with the value `true`.
 
 After configuring these parameters, you need to configure the instances of the
 task scheduler (Mordred). You need a task scheduler for each project you want
