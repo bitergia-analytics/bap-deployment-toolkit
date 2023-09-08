@@ -37,3 +37,7 @@ mariadb_backup_cronjob_time:
   minute: "0"
   weekday: "0"
 mariadb_backup_script: /usr/local/bin/mariadb_backup.sh
+
+# Improve MariaDB performance. A good value is 70%-80% of available memory.
+# By default it use e2-standard-2 8G of memory. 6.4G is the 80% of 8G -> 6871947673
+mariadb_innodb_buffer_pool_size: 6871947673

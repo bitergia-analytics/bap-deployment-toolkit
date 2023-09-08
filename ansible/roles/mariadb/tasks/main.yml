@@ -22,7 +22,7 @@
   docker_container:
     name: mariadb
     image: "{{ mariadb_docker_image }}:{{ mariadb_version }}"
-    command: --wait_timeout={{ mariadb_wait_timeout }} --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: "--wait_timeout={{ mariadb_wait_timeout }} --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb_buffer_pool_size={{ mariadb_innodb_buffer_pool_size }}"
     pull: true
     restart_policy: always
     state: started

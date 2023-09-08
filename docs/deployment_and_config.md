@@ -100,6 +100,9 @@ all:
     mariadb_service_account_password: <sortinghat_password>
     redis_password: <redis_password>
 
+    # MariaDB Settings
+    mariadb_innodb_buffer_pool_size: <innodb_buffer_pool_size>
+
     # OpenSearch Settings
     opensearch_cluster_prefix: <opensearch_cluster_prefix>
     opensearch_cluster_name: <opensearch_cluster_name>
@@ -183,6 +186,9 @@ Replace the entries in `<>` with your values:
 - `mariadb_service_account_password`: strong password for the MariaDB
   service account user.
 - `redis_password`: strong password for the redis server.
+- `mariadb_innodb_buffer_pool_size`: The size in bytes of the buffer pool, the memory
+  area where InnoDB caches table and index data. A good value is 70%-80% of available
+  memory (by default is `6871947673` 6.4G)
 - `opensearch_cluster_prefix`: prefix of the OpenSearch cluster.
 - `opensearch_cluster_name` (optional): name of the OpenSearch cluster.
   This value will be used in combination with `<opensearch_cluster_prefix>`
