@@ -67,6 +67,20 @@
   tags:
     - test
 
+- name: Create backup service account with the minimum required permissions
+  mysql_user:
+    name: "{{ mariadb_backup_service_account }}"
+    host: "{{ ansible_default_ipv4.address }}"
+    password: "{{ mariadb_backup_service_account_password }}"
+    priv: '*.*:SELECT,SHOW VIEW,TRIGGER,LOCK TABLES,GRANT'
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    state: present
+  register: result
+  retries: 2
+  delay: 5
+  until: result is success
+
 - name: Copy MariaDB backup script
   template:
     src: mariadb_backup.sh.j2

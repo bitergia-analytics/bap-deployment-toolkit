@@ -94,6 +94,8 @@ all:
 
     # Passwords and credentials
     mariadb_root_password: <mariadb_root_password>
+    mariadb_backup_service_account: backup
+    mariadb_backup_service_account_password: <mariadb_backup_password>
     mariadb_service_account: sortinghat
     mariadb_service_account_password: <sortinghat_password>
     redis_password: <redis_password>
@@ -175,6 +177,7 @@ Replace the entries in `<>` with your values:
   in a `.json` file under the `keys/<environment>/` directory.
 - `project_id`: the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project.
 - `mariadb_root_password`: strong password for the MariaDB root user.
+- `mariadb_backup_service_account_password`: strong password for the MariaDB backup service account.
 - `mariadb_service_account_password`: strong password for the MariaDB
   service account user.
 - `redis_password`: strong password for the redis server.
