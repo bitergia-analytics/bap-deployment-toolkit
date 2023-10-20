@@ -42,8 +42,8 @@ redis_hosts: "{{ groups['redis'] | first }}"
 sortinghat_debug: "false"
 
 # CSRF and CORS configuration
-sortinghat_allowed_hosts: "{{ groups['sortinghat'][0] }},{{ groups['mordred'][0] }}"
-sortinghat_cors_allowed_origins: "https://{{ groups['sortinghat'][0] }},https://{{ groups['mordred'][0] }}"
+sortinghat_allowed_hosts: "localhost,{{ groups['sortinghat'][0] }},{{ groups['mordred'][0] }}"
+sortinghat_cors_allowed_origins: "https://localhost,https://{{ groups['sortinghat'][0] }},https://{{ groups['mordred'][0] }}"
 
 # NGINX
 

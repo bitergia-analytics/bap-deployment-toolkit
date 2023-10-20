@@ -117,11 +117,16 @@ We have three scenarios for OpenSearch Dashboards:
 Ansible will provision the OpenSearch Dashboard machines depending on which
 group the hostname belongs to.
 
+You can activate IAP tunnel:
+  - `network_iap_tunnel = true`
+  - `network_nginx_iap_tunnel_members = ["user:example@example.com"]` (More info about [members](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_tunnel_instance_iam#argument-reference))
+
 ```tf
 module "bap_env_gcp" {
   source = "../../modules/bap_env_gcp"
 
   prefix = "test"
+  zone = var.zone
 
   custom_tags = ["devel", "research"]
 
@@ -149,6 +154,9 @@ module "bap_env_gcp" {
 
   sortinghat_worker_node_count = 2
   sortinghat_worker_machine_type = "e2-standard-2"
+
+  network_iap_tunnel = false
+  network_nginx_iap_tunnel_members = ["user:example@example.com"]
 }
 
 output "bap_env_gcp" {

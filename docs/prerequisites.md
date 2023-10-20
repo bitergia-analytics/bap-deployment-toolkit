@@ -30,6 +30,7 @@ to some service accounts. These are the APIs to enable:
 - `compute.googleapis.com`
 - `iam.googleapis.com`
 - `cloudresourcemanager.googleapis.com`
+- `iap.googleapis.com` (**Note**: Only if you want to activate IAP tunnel)
 
 By default, the services above aren't activated when a GCP project is created,
 but they might be already activated on your project if it's been used for other
@@ -42,6 +43,12 @@ commands:
 gcloud services enable compute.googleapis.com
 gcloud services enable iam.googleapis.com
 gcloud services enable cloudresourcemanager.googleapis.com
+```
+
+Activate IAP service (Optional)
+
+```terminal
+gcloud services enable iap.googleapis.com
 ```
 
 The services should now been activated.
@@ -59,6 +66,7 @@ for these tasks. To create one, follow these steps:
    - `Compute Admin`
    - `Storage Admin` (**Note**: not `Compute Storage Admin`)
    - `Service Account User`
+   - `IAP Policy Admin` (**Note**: Only if you want to activate IAP tunnel)
 
 Once the account has been created, you will need to create a key file:
 

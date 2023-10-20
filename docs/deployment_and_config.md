@@ -362,3 +362,34 @@ ansible-playbook -i environments/<environment>/inventory/ playbooks/all.yml
 
 After some minutes, the platform will be accessible in the domain you configured
 on the previous step.
+
+### IAP tunnel (Opcional)
+
+Only if IAP tunnel is activated (`network_iap_tunnel = true`).
+
+- Check if the project is already configured.
+```terminal
+gcloud config configurations list
+gcloud config configurations activate [NAME]
+```
+
+- Configure it if it is not.
+```terminal
+gcloud config configurations create [NAME]
+gcloud config set project [PROJECT-ID]
+gcloud auth login
+```
+
+- Tunneling other TCP connections, more info at https://cloud.google.com/iap/docs/using-tcp-forwarding
+```terminal
+gcloud compute start-iap-tunnel <NGINX_INSTANCE_NAME> 443 --local-host-port=localhost:<LOCAL_PORT> --zone=<ZONE>
+```
+
+- Open your browser with `https://localhost:<LOCAL_PORT>`
+
+For example:
+```terminal
+gcloud compute start-iap-tunnel test-nginx-0 443 --local-host-port=localhost:8443 --zone=europe-southwest1-a
+```
+
+Open your browser with https://localhost:8443
