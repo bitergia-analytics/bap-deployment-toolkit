@@ -30,7 +30,6 @@ to some service accounts. These are the APIs to enable:
 - `compute.googleapis.com`
 - `iam.googleapis.com`
 - `cloudresourcemanager.googleapis.com`
-- `iap.googleapis.com` (**Note**: Only if you want to activate IAP tunnel)
 
 By default, the services above aren't activated when a GCP project is created,
 but they might be already activated on your project if it's been used for other
@@ -43,12 +42,6 @@ commands:
 gcloud services enable compute.googleapis.com
 gcloud services enable iam.googleapis.com
 gcloud services enable cloudresourcemanager.googleapis.com
-```
-
-Activate IAP service (Optional)
-
-```terminal
-gcloud services enable iap.googleapis.com
 ```
 
 The services should now been activated.
@@ -66,7 +59,6 @@ for these tasks. To create one, follow these steps:
    - `Compute Admin`
    - `Storage Admin` (**Note**: not `Compute Storage Admin`)
    - `Service Account User`
-   - `IAP Policy Admin` (**Note**: Only if you want to activate IAP tunnel)
 
 Once the account has been created, you will need to create a key file:
 
@@ -222,6 +214,41 @@ client ID.
      - `https://<domain>/` (e.g. `https://myproject.example.com`)
      - `https://<domain>/auth/openid/login` (e.g. `https://myproject.example.com/auth/openid/login`)
 1. Click on `CREATE` and save JSON file with the credentials for later usage.
+
+#### Setup IAP (Optional)
+
+IAP allows to _establish a central authorization layer for applications
+accessed by HTTPS_. You can define which users or groups in your organization
+can access which resources.
+[Google documentation](https://cloud.google.com/iap/docs/concepts-overview)
+provides a extensive description of how IAP works and how you can configure
+to limit the access to your resources.
+
+If you want to restrict the access to BAP, using IAP, for users or groups
+within your GCP organization, you will have to give some permissions
+to the project. IAP requires of:
+
+- `iap.googleapis.com` (service)
+- `IAP Policy Admin` (IAM policy)
+
+Activate the service from the Cloud Shell terminal with:
+
+```terminal
+gcloud services enable iap.googleapis.com
+```
+
+And assign the policy to the service account created in the previous steps:
+
+1. Access GCP's [IAM permissions](https://console.cloud.google.com/iam-admin/iam) page.
+1. Select the correct project in the dropdown at the top of the page.
+1. Click on the pencil icon of the BAP service account created for this project.
+1. Click on `+ ADD ANOTHER ROLE`.
+1. Select the role `IAP Policy Admin`.
+1. Click on `SAVE`.
+
+On the next sections, you will be able to create a IAP tunnel through TCP,
+so the front-end of the platform will only be accessible selected users
+from their local computers.
 
 ## 2. Setup the Control Node
 
