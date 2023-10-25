@@ -362,3 +362,47 @@ ansible-playbook -i environments/<environment>/inventory/ playbooks/all.yml
 
 After some minutes, the platform will be accessible in the domain you configured
 on the previous step.
+
+### Connection to the platform using a IAP tunnel (GCP only)
+
+If you configured an IAP tunnel to secure the access of the platform, you will
+have to run some commands in your computer, in order to connect to front-end.
+This configuration requires to have installed [gcloud CLI](https://cloud.google.com/sdk/docs/install).
+
+First, you will need to check if the GCP project where you installed
+the platform is active in your local configuration.
+
+```terminal
+gcloud config configurations list
+gcloud config configurations activate [NAME]
+```
+
+If it's not, you will have to set it as active.
+
+```terminal
+gcloud config configurations create [NAME]
+gcloud config set project [PROJECT-ID]
+gcloud auth login
+```
+
+Once the project is configured in your local machine, you will need to create
+a tunnel for your TCP connections. This tunnel goes from your local machine
+to the to the NGINX instance, where the front-end is served.
+
+```terminal
+gcloud compute start-iap-tunnel <NGINX_INSTANCE_NAME> 443 --local-host-port=localhost:<LOCAL_PORT> --zone=<ZONE>
+```
+
+Then, connect to the dashboard with your browser
+with the URL `https://localhost:<LOCAL_PORT>`.
+
+For example, to connect to the dashboard using the port `8443` of your local
+machine, you will have to run the following command:
+
+```terminal
+gcloud compute start-iap-tunnel test-nginx-0 443 --local-host-port=localhost:8443 --zone=europe-southwest1-a
+```
+
+Then, open your browser with the URL `https://localhost:8443`.
+
+You can also find more info about TCP tunnels on [this doc](https://cloud.google.com/iap/docs/using-tcp-forwarding).

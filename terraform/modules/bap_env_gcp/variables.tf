@@ -194,6 +194,11 @@ variable "nginx_disk_type" {
   default = "pd-standard"
 }
 
+variable "nginx_enable_external_ip" {
+  type    = bool
+  default = true
+}
+
 variable "nginx_ansible_use_external_ip" {
   type    = bool
   default = false
@@ -310,4 +315,24 @@ variable "sortinghat_storage_location" {
 variable "uniform_bucket_level_access" {
   type = bool
   default = false
+}
+
+# Network
+
+variable "network_fw_nginx_source_ranges" {
+  type = list(any)
+  description = "A list of source ranges"
+  default     = ["0.0.0.0/0"]
+}
+
+variable "network_nginx_iap_tunnel_members" {
+  type = list(any)
+  description = "A list of IAP members, e.g.: ['user:example@example.com', 'group:dev@example.com']"
+  default     = []
+}
+
+variable "network_iap_tunnel" {
+  type        = bool
+  description = "Activate IAP tunnel"
+  default     = false
 }

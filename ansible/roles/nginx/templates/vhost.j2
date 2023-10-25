@@ -29,7 +29,7 @@ server {
     ssl_session_timeout 10m;
     add_header Strict-Transport-Security "max-age=63072000;" always;
 
-    rewrite ^/$ /app/dashboards#/view/Overview permanent;
+    rewrite ^/$ $scheme://$http_host/app/dashboards#/view/Overview permanent;
     location / {
 {% if instance.public is defined and instance.public == true %}
         proxy_pass https://{{ hostvars[(groups['opensearch_dashboards_anonymous'][0])].ansible_default_ipv4.address }}:5601/;

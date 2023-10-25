@@ -215,6 +215,41 @@ client ID.
      - `https://<domain>/auth/openid/login` (e.g. `https://myproject.example.com/auth/openid/login`)
 1. Click on `CREATE` and save JSON file with the credentials for later usage.
 
+#### Setup IAP (Optional)
+
+IAP allows to _establish a central authorization layer for applications
+accessed by HTTPS_. You can define which users or groups in your organization
+can access which resources.
+[Google documentation](https://cloud.google.com/iap/docs/concepts-overview)
+provides a extensive description of how IAP works and how you can configure
+to limit the access to your resources.
+
+If you want to restrict the access to BAP, using IAP, for users or groups
+within your GCP organization, you will have to give some permissions
+to the project. IAP requires of:
+
+- `iap.googleapis.com` (service)
+- `IAP Policy Admin` (IAM policy)
+
+Activate the service from the Cloud Shell terminal with:
+
+```terminal
+gcloud services enable iap.googleapis.com
+```
+
+And assign the policy to the service account created in the previous steps:
+
+1. Access GCP's [IAM permissions](https://console.cloud.google.com/iam-admin/iam) page.
+1. Select the correct project in the dropdown at the top of the page.
+1. Click on the pencil icon of the BAP service account created for this project.
+1. Click on `+ ADD ANOTHER ROLE`.
+1. Select the role `IAP Policy Admin`.
+1. Click on `SAVE`.
+
+On the next sections, you will be able to create a IAP tunnel through TCP,
+so the front-end of the platform will only be accessible selected users
+from their local computers.
+
 ## 2. Setup the Control Node
 
 1. Install and update the required packages.
