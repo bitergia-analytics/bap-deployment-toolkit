@@ -53,6 +53,10 @@ variable "zone" {
 variable "prefix" {
   default = "<project_prefix>"
 }
+
+variable "alerts" {
+  default = <true|false>
+}
 ```
 
 Replace the entries in `<>` with your values:
@@ -60,7 +64,9 @@ Replace the entries in `<>` with your values:
 - `project`: the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project.
 - `zone`: the GCP [zone](https://cloud.google.com/compute/docs/regions-zones)
    where the resources of the project will be created.
-- `prefix`: the prefix that is added to all resources created by Terraform (VM, Cloud Storage Bucket, firawall, etc).
+- `prefix`: the prefix that is added to all resources created by Terraform
+   (VM, Cloud Storage Bucket, firawall, etc).
+- `alerts`: to install (`true`) or uninstall (`false`) the alerts.
 
 #### Terraform Settings (`main.tf`)
 
@@ -170,6 +176,39 @@ output "bap_env_gcp" {
   value = module.bap_env_gcp
 }
 ```
+
+If you want to include the basic alerts this toolkit offers, then, add the
+following code at the end of the `environment.tf` file:
+
+```tf
+module "bap_alerting_gcp" {
+  source = "../../modules/bap_alerting_gcp"
+
+  project = var.project
+
+  alerts = var.alerts
+
+  notification_channels = <notification_channels>
+}
+
+output "bap_alerting_gcp" {
+  value = module.bap_alerting_gcp
+}
+```
+
+You will have to set the list of channels where notifications will be sent
+using the variable `notification_channels`. Each channel usually has the format
+`projects/<PROJECT_NAME>/notificationChannels/<CHANNEL_ID>`. For example:
+
+```tf
+  notification_channels = [
+    "projects/myproject/notificationChannels/123456789",
+    "projects/myproject/notificationChannels/987654321"
+  ]
+```
+
+You can find the name of the channel on the [Notifications](https://console.cloud.google.com/monitoring/alerting/notifications)
+page of your project.
 
 ## 3. Provision
 
