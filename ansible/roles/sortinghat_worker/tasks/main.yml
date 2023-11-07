@@ -5,9 +5,9 @@
     priviledges: |-
       {
       {% for item in nginx_virtualhosts %}
-        "{{ item.tenant }}.*":"ALL,GRANT",
+        "{{ item.tenant | replace('-','_') }}.*":"ALL,GRANT",
       {% endfor %}
-        "{{ sortinghat_database }}.*":"ALL,GRANT"
+        "{{ sortinghat_database | replace('-','_') }}.*":"ALL,GRANT"
       }
 
 - name: Check priviledges list
@@ -69,7 +69,7 @@
       SORTINGHAT_DB_HOST: "{{ mariadb_hosts }}"
       SORTINGHAT_DB_USER: "{{ mariadb_service_account }}"
       SORTINGHAT_DB_PASSWORD: "{{ mariadb_service_account_password }}"
-      SORTINGHAT_DB_DATABASE: "{{ sortinghat_database }}"
+      SORTINGHAT_DB_DATABASE: "{{ sortinghat_database | replace('-','_') }}"
       SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
       SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
