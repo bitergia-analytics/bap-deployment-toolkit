@@ -10,6 +10,13 @@
   pip:
     name: "{{ python_packages }}"
 
+- name: Create MariaDB logs directory
+  file:
+    path: "{{ mariadb_logs_dir }}"
+    state: directory
+    mode: 0777
+    recurse: true
+
 - name: Remove old MariaDB container
   docker_container:
     name: mariadb
@@ -22,7 +29,7 @@
   docker_container:
     name: mariadb
     image: "{{ mariadb_docker_image }}:{{ mariadb_version }}"
-    command: "--wait_timeout={{ mariadb_wait_timeout }} --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb_buffer_pool_size={{ mariadb_innodb_buffer_pool_size }}"
+    command: "--wait_timeout={{ mariadb_wait_timeout }} --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb_buffer_pool_size={{ mariadb_innodb_buffer_pool_size }} --long_query_time={{ mariadb_long_query_time }} --log-error=/var/log/mysql/error.log --slow-query-log=1 --slow-query-log-file=/var/log/mysql/slow.log"
     pull: true
     restart_policy: always
     state: started
@@ -34,6 +41,7 @@
       MARIADB_ROOT_PASSWORD: "{{ mariadb_root_password }}"
     volumes:
       - mariadb_data:/var/lib/mysql
+      - "{{ mariadb_logs_dir }}:/var/log/mysql/"
   register: result
   retries: 2
   delay: 5

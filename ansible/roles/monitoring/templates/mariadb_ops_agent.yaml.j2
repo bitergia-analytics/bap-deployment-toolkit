@@ -1,5 +1,17 @@
-{% include 'docker_ops_agent.yaml.j2' %}
-
+logging:
+  receivers:
+    mysql_error:
+      type: mysql_error
+      include_paths: {{ mariadb_logging_error_include_paths }}
+    mysql_slow:
+      type: mysql_slow
+      include_paths: {{ mariadb_logging_slow_include_paths }}
+  service:
+    pipelines:
+      mysql:
+        receivers:
+          - mysql_error
+          - mysql_slow
 metrics:
   receivers:
     mysql:

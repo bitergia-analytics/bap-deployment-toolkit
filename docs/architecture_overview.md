@@ -1,10 +1,10 @@
-## Architecture Overview
+# Architecture Overview
 
-[Bitergia Analytics Platform]() fetches, stores, and analyzes data from software
-development repositories or platforms. Data is processed in several ways to produce
-metrics such as the evolution over time of activity, people, or organizations;
-time to respond on issues and pull requests; diversity; BMI; elephant factor;
-onion model analysis, among others.
+[Bitergia Analytics Platform](https://github.com/bitergia-analytics/) fetches,
+stores, and analyzes data from software development repositories or platforms.
+Data is processed in several ways to produce metrics such as the evolution over
+time of activity, people, or organizations; time to respond on issues and pull
+requests; diversity; BMI; elephant factor; onion model analysis, among others.
 
 The platform is built on top of [GrimoireLab](https://chaoss.github.io/grimoirelab/),
 an open source project developed in Python and JavaScript, that provides the core

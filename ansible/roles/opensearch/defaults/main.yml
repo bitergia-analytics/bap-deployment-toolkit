@@ -6,6 +6,7 @@ opensearch_docker_container: bap_opensearch
 
 # OpenSearch node configuration
 opensearch_workdir: "/docker/opensearch"
+opensearch_logs_dir: "{{ opensearch_workdir }}/log"
 opensearch_cluster_heap_size: 512m
 node_name: "{{ inventory_hostname }}"
 network:

@@ -1,0 +1,26 @@
+logging:
+  receivers:
+    elasticsearch_json:
+      type: elasticsearch_json
+      include_paths: {{ opensearch_logging_include_paths }}
+    elasticsearch_gc:
+      type: elasticsearch_gc
+      include_paths: {{ opensearch_logging_gc_include_paths }}
+  service:
+    pipelines:
+      elasticsearch:
+        receivers:
+          - elasticsearch_json
+          - elasticsearch_gc
+metrics:
+  receivers:
+    elasticsearch:
+      type: elasticsearch
+      endpoint: {{ hostvars[groups['opensearch'][0]]['ansible_default_ipv4']['address'] }}
+      username: {{ opensearch_monitoring_username }}
+      password: {{ opensearch_monitoring_password }}
+  service:
+    pipelines:
+      elasticsearch:
+        receivers:
+          - elasticsearch

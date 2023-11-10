@@ -12,7 +12,12 @@ mariadb_version: latest
 # connection before closing it. The default value is 28800 seconds (8 hours).
 mariadb_wait_timeout: 28800
 
+# Log all queries that have taken more than the number of seconds defined
+# on this parameter.
+mariadb_long_query_time: 30
+
 mariadb_workdir: "/docker/mariadb"
+mariadb_logs_dir: "{{ mariadb_workdir }}/log"
 gcp_service_account_file: "{{ mariadb_workdir }}/gcs_credentials.json"
 
 # Set in your environments vars.yml copying the name of the bucket created by terraform
