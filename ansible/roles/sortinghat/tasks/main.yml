@@ -14,6 +14,17 @@
   debug:
     msg: "{{ priviledges }}"
 
+- name: Create databases
+  mysql_db:
+    name: "{{ item }}"
+    collation: utf8mb4_unicode_ci
+    encoding: utf8mb4
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+  delegate_to: "{{ groups['mariadb'][0] }}"
+  loop: "{{ databases }}"
+
 - name: Create MariaDB service account for SortingHat
   mysql_user:
     name: "{{ mariadb_service_account }}"
