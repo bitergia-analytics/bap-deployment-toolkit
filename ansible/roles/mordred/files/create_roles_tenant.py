@@ -22,6 +22,7 @@
 
 
 import argparse
+import json
 from enum import Enum
 from string import Template
 
@@ -30,6 +31,12 @@ import requests
 
 API_ROLES = "/_plugins/_security/api/roles/"
 API_TENANT = "/_plugins/_security/api/tenants/"
+API_ROLESMAPPING = "/_plugins/_security/api/rolesmapping/"
+
+# Backend roles
+BACKEND_ROLE_ANONYMOUS = "opendistro_security_anonymous_backendrole"
+BACKEND_ROLE_PRIVILEGED = "{}_privileged"
+BACKEND_ROLE_USER = "{}_user"
 
 # ROLES
 BAP_TENANT_ANONYMOUS_ACCESS_ROLE = Template('''{
@@ -204,6 +211,7 @@ ROLES_MAPPING = {
 class Query(Enum):
     ROLE = API_ROLES
     TENANT = API_TENANT
+    ROLESMAPPING = API_ROLESMAPPING
 
 
 def main():
@@ -215,6 +223,17 @@ def main():
 
     create_roles(anonymous, opensearch_url, tenant, force)
     create_tenant(opensearch_url, tenant, force)
+    roles = get_roles(opensearch_url, tenant)
+    for role in roles:
+        if "privileged" in role:
+            user = BACKEND_ROLE_PRIVILEGED.format(tenant)
+        elif "user" in role:
+            user = BACKEND_ROLE_USER.format(tenant)
+        elif "anonymous" in role:
+            user = BACKEND_ROLE_ANONYMOUS
+        elif "mordred" in role:
+            continue
+        map_user(opensearch_url, role, user)
 
 
 def args_parser():
@@ -250,6 +269,15 @@ def create_roles(anonymous, opensearch_url, tenant, force=False):
         response = run_requests("PUT", base_url, data=data)
         print("{}: {}".format(response['status'], response['message']))
 
+def get_roles(opensearch_url, tenant):
+    roles = []
+    base_url = opensearch_url + API_ROLES
+    response = run_requests("GET", base_url)
+    for role in response:
+        if tenant in role:
+            roles.append(role)
+    
+    return roles
 
 def create_tenant(opensearch_url, tenant, force=False):
     if not force and exists(opensearch_url, tenant, Query.TENANT):
@@ -260,6 +288,12 @@ def create_tenant(opensearch_url, tenant, force=False):
     response = run_requests("PUT", base_url, data=data)
     print("{}: {}".format(response['status'], response['message']))
 
+def map_user(opensearch_url, role_name, user):
+    if not exists(opensearch_url, role_name, Query.ROLESMAPPING):
+        base_url = opensearch_url + API_ROLESMAPPING + role_name
+        data = {"backend_roles" : [user]}
+        response = run_requests("PUT", base_url, data=json.dumps(data))
+        print("{}: {}".format(response['status'], response['message']))
 
 def exists(url, name, query_api):
     if not isinstance(query_api, Query):
