@@ -1,11 +1,29 @@
 ---
 
+- name: Create a list of databases
+  set_fact:
+    databases: |-
+      [
+      {% for item in instances %}
+        {{ "" if loop.first else "," }}
+        {% if item.nginx.sortinghat_tenant is defined and item.nginx.sortinghat_tenant != "" %}
+          "{{ item.nginx.sortinghat_tenant | replace('-','_') }}"
+        {% else %}
+          "{{ item.tenant | replace('-','_') }}"
+        {% endif %}
+      {% endfor %}
+      ]
+
+- name: Check databases list
+  debug:
+    msg: "{{ databases }}"
+
 - name: Create a list of priviledges
   set_fact:
     priviledges: |-
       {
-      {% for item in nginx_virtualhosts %}
-        "{{ item.tenant | replace('-','_') }}.*":"ALL,GRANT",
+      {% for item in databases %}
+        "{{ item }}.*":"ALL,GRANT",
       {% endfor %}
         "{{ sortinghat_database | replace('-','_') }}.*":"ALL,GRANT"
       }
@@ -40,14 +58,13 @@
 
 - name: "Create SortingHat multi tenant file"
   copy:
-    mode: '0644'
     dest: "{{ sortinghat_multi_tenant_list_path }}"
     content: |-
       {
         "tenants": [
-          {% for item in nginx_virtualhosts %}
+          {% for item in databases %}
             {{ "" if loop.first else "," }}
-            "{{ item.tenant }}"
+            "{{ item }}"
           {% endfor %}
         ]
       }

@@ -146,29 +146,30 @@ all:
 
     # Mordred Settings
     mordred_setups_repo_url: <repo_mordred_config.git>
-    mordred_instances:
+
+    # Instances Settings
+    instances:
     - project: <project_a>
       tenant: <tenant_name_a>
-      overwrite_roles: <overwrite_roles>
-      mordred_password: <mordred_tenant_a_password>
-      sources:
-        repository: "<repo_teneant_a_projects.git>"
+      public: false
+      mordred:
+        password: <mordred_tenant_a_password>
+        overwrite_roles: <overwrite_roles>
+        sources_repository: "<repo_teneant_a_projects.git>"
+      nginx:
+        fqdn: <fqdn-1>
+        http_rest_api: false
     - project: <project_b>
       tenant: <tenant_name_b>
-      mordred_password: <mordred_tenant_b_password>
-      sources:
-        repository: "<repo_teneant_b_projects.git>"
-
-    # OpenSearch Dashboards Settings for Nginx
-    nginx_virtualhosts:
-      - fqdn: <fqdn-1>
-        public: false
-        tenant: <tenant_name_a>
+      public: true
+      mordred:
+        password: <mordred_tenant_b_password>
+        overwrite_roles: <overwrite_roles>
+        sources_repository: "<repo_teneant_b_projects.git>"
+      nginx:
+        fqdn: <fqdn-2>
+        sortinghat_tenant: <sortinghat_tenant>
         http_rest_api: true
-      - fqdn: <fqdn-2>
-        public: true
-        tenant: <tenant_name_b>
-        http_rest_api: false
 ```
 
 Replace the entries in `<>` with your values:
@@ -228,32 +229,30 @@ Replace the entries in `<>` with your values:
   parameter is not set, it will only obtain members from the public API that doesn't contain
   email information. (by default is "").
 - `sortinghat_openinfra_client_secret`: OpenInfraID Oauth2 client secret for private API (by default is "").
-- `nginx_virtualhosts`: Nginx virtual host configurations.
-- `nginx_virtualhosts.fqdn`: full qualified domain name (e.g. `bap.example.com`)
-  where BAP will be available.
-- `nginx_virtualhosts.public`: OpenSearch Dashboards with anonymous access `true | false`. If
-  the variable is not defined the OpenSearch Dashboards is private.
-- `nginx_virtualhosts.tenant`: the name of the tenant for this OpenSearch Dashboards endpoint,
-  it must be same as `mordred_instances.tenant`.
-- `nginx_virtualhosts.http_rest_api`: Open OpenSearch HTTP rest API only if the variable is defined
-  with the value `true`.
 
 After configuring these parameters, you need to configure the instances of the
-task scheduler (Mordred). You need a task scheduler for each project you want
-to analyze. Check the section about configuring Mordred for more information
+task scheduler (Mordred) and Nginx virtual host. You need a task scheduler for each project
+you want to analyze. Check the section about configuring Mordred for more information
 about how to setup the task scheduler.
-
 - `mordred_setups_repo_url`: URL of the git repository where the configuration
   for each project/mordred instance are stored.
-- `mordred_instances`: create as many entries of project as you might need.
-- `mordred_instances.project`: name of the project to analyze.
-- `mordred_instances.tenant`: the name used here will be used to store the
-   data from this project in a separate tenant from the others.
-- `mordred_instances.overwrite_roles` (optional): overwrite roles and tenant `true | false`.
-- `mordred_instances.mordred_password`: strong password for the modred user
+- `instances`: Mordred and Nginx virtual host configurations. Create as many entries of
+  project as you might need.
+- `instances.project`: name of the project to analyze.
+- `instances.tenant`: the name of the tenant for this OpenSearch Dashboards endpoint..
+- `instances.public`: OpenSearch Dashboards with anonymous access `true | false`. If
+  the variable is not defined the OpenSearch Dashboards is private.
+- `instances.mordred.overwrite_roles` (optional): overwrite roles and tenant `true | false`.
+- `instances.mordred.password`: strong password for the modred user
    of this tenant.
-- `mordred_instances.sources.repository`: repository with the list of data
+- `instances.mordred.sources_repository`: repository with the list of data
    sources to analyze on this project.
+- `instances.nginx.fqdn`: full qualified domain name (e.g. `bap.example.com`)
+  where BAP will be available.
+- `instances.nginx.tenant` (optional): the name used here will be used to store the data from
+  this project in a separate tenant from the others. By default it will use `instances.tenant`.
+- `instances.nginx.http_rest_api`: Open OpenSearch HTTP rest API only if the variable is defined
+  with the value `true`.
 
 #### OpenID Configuration (Optional)
 

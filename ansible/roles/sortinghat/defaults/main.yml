@@ -20,12 +20,22 @@ network:
   bind_host: 0.0.0.0
   publish_host: "{{ ansible_default_ipv4.address }}"
 
-# Nginx virtual hosts
-nginx_virtualhosts:
-- fqdn: example.com
-  tenant: example
-- fqdn: example2.com
-  tenant: example2
+# Instances
+## instances:
+## - project: example
+##   tenant: example
+##   public: false
+##   nginx:
+##   - fqdn: example.com
+##     sortinghat_tenant: example
+##     http_rest_api: true
+## - project: example-public
+##   tenant: example-public
+##   public: true
+##   nginx:
+##   - fqdn: example-public.com
+##     sortinghat_tenant: example-public
+##     http_rest_api: false
 
 # Multi tenant
 sortinghat_multi_tenant: "true"

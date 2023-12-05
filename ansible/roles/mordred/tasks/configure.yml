@@ -97,7 +97,7 @@
 
 - name: Configure mordred instances
   include_tasks: configure_instance.yml
-  loop: "{{ mordred_instances }}"
+  loop: "{{ instances }}"
   loop_control:
     loop_var: instance
     label: "{{ instance.project }}"

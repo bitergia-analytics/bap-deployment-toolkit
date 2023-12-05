@@ -20,8 +20,8 @@
     state: directory
     mode: 0755
 
-- name: "Generate self-signed certificate for {{ instance.fqdn }}"
-  shell: "./generate_cert.sh {{ instance.fqdn }}"
+- name: "Generate self-signed certificate for {{ instance.nginx.fqdn }}"
+  shell: "./generate_cert.sh {{ instance.nginx.fqdn }}"
   become: false
   args:
     chdir: "{{ role_path }}/files"
@@ -29,7 +29,7 @@
   delegate_to: localhost
   when: custom_cert is not defined
 
-- name: "Copy SSL certificate for {{ instance.fqdn }}"
+- name: "Copy SSL certificate for {{ instance.nginx.fqdn }}"
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -38,12 +38,12 @@
     mode: "{{ item.mode }}"
   loop:
     - src: "{{ custom_cert.cert if custom_cert is defined else 'cert.crt' }}"
-      dest: "{{ certs_dir }}/{{ instance.fqdn }}.crt"
+      dest: "{{ certs_dir }}/{{ instance.nginx.fqdn }}.crt"
       owner: '1000'
       group: '1000'
       mode: '0644'
     - src: "{{ custom_cert.key if custom_cert is defined else 'cert.key' }}"
-      dest: "{{ certs_dir }}/{{ instance.fqdn }}.key"
+      dest: "{{ certs_dir }}/{{ instance.nginx.fqdn }}.key"
       owner: '1000'
       group: '1000'
       mode: '0600'
@@ -56,15 +56,15 @@
     src: "opensearch_nodes.j2"
     dest: "{{ nginx_virtualhosts_workdir }}/opensearch_nodes.conf"
     backup: true
-  when: instance.http_rest_api is defined and instance.http_rest_api
+  when: instance.nginx.http_rest_api is defined and instance.nginx.http_rest_api
 
-- name: "Create virtualhost configuration for {{ instance.fqdn }}"
+- name: "Create virtualhost configuration for {{ instance.nginx.fqdn }}"
   template:
     src: "{{ item.template }}"
     dest: "{{ nginx_virtualhosts_workdir }}/{{ item.name }}"
     backup: true
   with_items:
-    - name: "{{ instance.fqdn }}.conf"
+    - name: "{{ instance.nginx.fqdn }}.conf"
       template: vhost.j2
     - name: uwsgi_params
       template: uwsgi_params.j2

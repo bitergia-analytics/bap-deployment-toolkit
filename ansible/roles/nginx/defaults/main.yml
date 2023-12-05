@@ -10,15 +10,21 @@ nginx_virtualhosts_workdir: "{{ nginx_workdir }}/conf"
 nginx_log_dir: "{{ nginx_workdir }}/log"
 
 # Create your Nginx virtual host configurations
-## nginx_virtualhosts:
-##  - fqdn: example.com
-##    public: false
-##    tenant: example
-##    http_rest_api: true
-##  - fqdn: example-public.com
-##    public: true
-##    tenant: example-public
-##    http_rest_api: false
+## instances:
+## - project: example
+##   tenant: example
+##   public: false
+##   nginx:
+##   - fqdn: example.com
+##     sortinghat_tenant: example
+##     http_rest_api: true
+## - project: example-public
+##   tenant: example-public
+##   public: true
+##   nginx:
+##   - fqdn: example-public.com
+##     sortinghat_tenant: example-public
+##     http_rest_api: false
 
 # Service hosts
 opensearch_endpoint: "https://{{ hostvars[(groups['opensearch'][0])].ansible_default_ipv4.address }}:9200"
