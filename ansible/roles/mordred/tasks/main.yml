@@ -21,7 +21,7 @@
     name: "mordred_{{ item.project }}"
     state: absent
   with_items:
-    - "{{ mordred_instances }}"
+    - "{{ instances }}"
 
 - name: docker
   docker_container:
@@ -35,4 +35,4 @@
     - "{{ mordred_instances_dir }}/{{ item.project }}/logs/:/home/grimoire/logs/"
     - "{{ mordred_instances_dir }}/{{ item.project }}/perceval-cache/:/home/grimoire/.perceval/"
   with_items:
-    - "{{ mordred_instances }}"
+    - "{{ instances }}"

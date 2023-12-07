@@ -24,10 +24,22 @@ redis_hosts: "{{ groups['redis'] | first }}"
 sortinghat_openinfra_client_id: ""
 sortinghat_openinfra_client_secret: ""
 
-# Nginx virtual hosts
-nginx_virtualhosts:
-  - tenant: example
-  - tenant: example2
+# Instances
+## instances:
+## - project: example
+##   tenant: example
+##   public: false
+##   nginx:
+##   - fqdn: example.com
+##     sortinghat_tenant: example
+##     http_rest_api: true
+## - project: example-public
+##   tenant: example-public
+##   public: true
+##   nginx:
+##   - fqdn: example-public.com
+##     sortinghat_tenant: example-public
+##     http_rest_api: false
 
 # Multi tenant
 sortinghat_multi_tenant: "true"

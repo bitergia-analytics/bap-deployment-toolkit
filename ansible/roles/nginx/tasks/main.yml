@@ -2,7 +2,7 @@
 
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
-  loop: "{{ nginx_virtualhosts }}"
+  loop: "{{ instances }}"
   loop_control:
     loop_var: instance
 
@@ -29,9 +29,9 @@
   set_fact:
     nginx_volumes: |-
       [
-      {% for instance in nginx_virtualhosts %}
-        "{{ certs_dir }}/{{ instance.fqdn }}.crt:/etc/ssl/certs/{{ instance.fqdn }}.crt",
-        "{{ certs_dir }}/{{ instance.fqdn }}.key:/etc/ssl/private/{{ instance.fqdn }}.key",
+      {% for instance in instances %}
+        "{{ certs_dir }}/{{ instance.nginx.fqdn }}.crt:/etc/ssl/certs/{{ instance.nginx.fqdn }}.crt",
+        "{{ certs_dir }}/{{ instance.nginx.fqdn }}.key:/etc/ssl/private/{{ instance.nginx.fqdn }}.key",
       {% endfor %}
         "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/",
         "{{ nginx_gcs_workdir }}:/opt/gcs",

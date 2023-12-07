@@ -1,11 +1,29 @@
 ---
 
+- name: Create a list of databases
+  set_fact:
+    databases: |-
+      [
+      {% for item in instances %}
+        {{ "" if loop.first else "," }}
+        {% if item.nginx.sortinghat_tenant is defined and item.nginx.sortinghat_tenant != "" %}
+          "{{ item.nginx.sortinghat_tenant | replace('-','_') }}"
+        {% else %}
+          "{{ item.tenant | replace('-','_') }}"
+        {% endif %}
+      {% endfor %}
+      ]
+
+- name: Check databases list
+  debug:
+    msg: "{{ databases }}"
+
 - name: Create a list of priviledges
   set_fact:
     priviledges: |-
       {
-      {% for item in nginx_virtualhosts %}
-        "{{ item.tenant | replace('-','_') }}.*":"ALL,GRANT",
+      {% for item in databases %}
+        "{{ item }}.*":"ALL,GRANT",
       {% endfor %}
         "{{ sortinghat_database | replace('-','_') }}.*":"ALL,GRANT"
       }
@@ -13,6 +31,17 @@
 - name: Check priviledges list
   debug:
     msg: "{{ priviledges }}"
+
+- name: Create databases
+  mysql_db:
+    name: "{{ item }}"
+    collation: utf8mb4_unicode_ci
+    encoding: utf8mb4
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+  delegate_to: "{{ groups['mariadb'][0] }}"
+  loop: "{{ databases }}"
 
 - name: Create MariaDB service account for SortingHat
   mysql_user:
@@ -50,9 +79,9 @@
     content: |-
       {
         "tenants": [
-          {% for item in nginx_virtualhosts %}
+          {% for item in databases %}
             {{ "" if loop.first else "," }}
-            "{{ item.tenant | replace('-','_') }}"
+            "{{ item }}"
           {% endfor %}
         ]
       }
@@ -64,13 +93,21 @@
 
 - name: Add sortinghat_allowed_hosts
   set_fact:
-    sortinghat_allowed_hosts: "{{ sortinghat_allowed_hosts + ',' + item.fqdn }}"
-  loop: "{{ nginx_virtualhosts }}"
+    sortinghat_allowed_hosts: "{{ sortinghat_allowed_hosts + ',' + item.nginx.fqdn }}"
+  loop: "{{ instances }}"
+
+- name: Check sortinghat_allowed_hosts list
+  debug:
+    msg: "{{ sortinghat_allowed_hosts }}"
 
 - name: Add sortinghat_cors_allowed_origins
   set_fact:
-    sortinghat_cors_allowed_origins: "{{ sortinghat_cors_allowed_origins + ',' + 'https://'+item.fqdn }}"
-  loop: "{{ nginx_virtualhosts }}"
+    sortinghat_cors_allowed_origins: "{{ sortinghat_cors_allowed_origins + ',' + 'https://'+item.nginx.fqdn }}"
+  loop: "{{ instances }}"
+
+- name: Check sortinghat_cors_allowed_origins list
+  debug:
+    msg: "{{ sortinghat_cors_allowed_origins }}"
 
 - name: Start SortingHat container
   docker_container:
@@ -108,8 +145,8 @@
 
 - name: "Add {{ sortinghat_superuser_name }} user to all tenants for {{ ansible_hostname }}"
   command: >
-    docker exec {{ sortinghat_docker_container }} /opt/venv/bin/sortinghat-admin set-user-tenant {{ sortinghat_superuser_name }} {{ item.tenant | replace('-','_') }} {{ item.tenant | replace('-','_') }}
-  loop: "{{ nginx_virtualhosts }}"
+    docker exec {{ sortinghat_docker_container }} /opt/venv/bin/sortinghat-admin set-user-tenant {{ sortinghat_superuser_name }} {{ item }} {{ item }}
+  loop: "{{ databases }}"
   when: sortinghat_multi_tenant is defined and sortinghat_multi_tenant == "true"
 
 - name: To create a user use this command

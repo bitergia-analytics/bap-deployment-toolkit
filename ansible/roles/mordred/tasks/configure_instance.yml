@@ -37,10 +37,10 @@
   become: true
   become_user: grimoire
   git:
-    repo: "{{ instance.sources.repository }}"
+    repo: "{{ instance.mordred.sources_repository }}"
     dest: "{{ instance_dir }}/sources"
     force: true
-  when: instance.sources.repository is defined
+  when: instance.mordred.sources_repository is defined
 
 - name: Change sources permissions
   file:
@@ -73,9 +73,9 @@
   with_items:
     - "{{ mariadb_hosts }}"
 
-- name: Set anonymous role if opensearch_dashboards_anonymous is defined
+- name: Set anonymous role if opensearch_dashboards_anonymous is defined and the instance is public
   set_fact:
-    anonymous: "{% if 'opensearch_dashboards_anonymous' in groups and groups['opensearch_dashboards_anonymous'] %} -a {% else %} {% endif %}"
+    anonymous: "{% if 'opensearch_dashboards_anonymous' in groups and groups['opensearch_dashboards_anonymous'] and 'instance.public' %} -a {% else %} {% endif %}"
 
 - name: Add --force option (create_roles_tenat.py) if overwrite_roles is defined and the value is true
   set_fact:
@@ -100,7 +100,7 @@
     body_format: json
     body:
       opendistro_security_roles: ["bap_{{ instance.tenant }}_mordred_role"]
-      password: "{{ instance.mordred_password }}"
+      password: "{{ instance.mordred.password }}"
     validate_certs: false
   register: result
   until: result.status == 200
