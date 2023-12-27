@@ -156,6 +156,7 @@ all:
         password: <mordred_tenant_a_password>
         overwrite_roles: <overwrite_roles>
         sources_repository: "<repo_teneant_a_projects.git>"
+        host: <mordred_host_a>
       nginx:
         fqdn: <fqdn-1>
         http_rest_api: false
@@ -166,6 +167,7 @@ all:
         password: <mordred_tenant_b_password>
         overwrite_roles: <overwrite_roles>
         sources_repository: "<repo_teneant_b_projects.git>"
+        host: <mordred_host_b>
       nginx:
         fqdn: <fqdn-2>
         sortinghat_tenant: <sortinghat_tenant>
@@ -247,6 +249,7 @@ about how to setup the task scheduler.
    of this tenant.
 - `instances.mordred.sources_repository`: repository with the list of data
    sources to analyze on this project.
+- `instances.mordred.host`: on which mordred VM host will deploy the container (e.g. `0`).
 - `instances.nginx.fqdn`: full qualified domain name (e.g. `bap.example.com`)
   where BAP will be available.
 - `instances.nginx.tenant` (optional): the name used here will be used to store the data from

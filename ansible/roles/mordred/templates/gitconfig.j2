@@ -1,0 +1,4 @@
+[safe]
+{% for instance in instances %}
+    directory = {{ mordred_instances_dir }}/{{ instance.project }}/sources
+{% endfor %}

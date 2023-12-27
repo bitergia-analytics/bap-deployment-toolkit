@@ -102,6 +102,11 @@
     loop_var: instance
     label: "{{ instance.project }}"
 
+- name: Create ~/.gitconfig setting with safe directories
+  template:
+    src: gitconfig.j2
+    dest: ~/.gitconfig
+
 - name: Checkout mordred setups repo
   become: true
   become_user: grimoire
