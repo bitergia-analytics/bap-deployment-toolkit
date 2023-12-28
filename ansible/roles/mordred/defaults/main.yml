@@ -26,11 +26,13 @@ mordred_aliases_url: https://raw.githubusercontent.com/chaoss/grimoirelab-sirmor
 ##   - password: "<PASSWORD>"
 ##     overwrite_roles: true
 ##     sources_repository: "<PROJECT1_SOURCE_REPO_URL>"
+##     host: 0
 ## - project: project2
 ##   tenant: project2
 ##   mordred:
 ##   - password: "<PASSWORD>"
 ##     overwrite_roles: true
 ##     sources_repository: "<PROJECT2_SOURCE_REPO_URL>"
+##     host: 1
 
 mariadb_hosts: "{{ groups['mariadb'] }}"

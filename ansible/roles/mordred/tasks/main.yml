@@ -22,6 +22,8 @@
     state: absent
   with_items:
     - "{{ instances }}"
+  delegate_to: "{{ groups['mordred'][item.mordred.host] }}"
+  run_once: true
 
 - name: docker
   docker_container:
@@ -36,3 +38,5 @@
     - "{{ mordred_instances_dir }}/{{ item.project }}/perceval-cache/:/home/grimoire/.perceval/"
   with_items:
     - "{{ instances }}"
+  delegate_to: "{{ groups['mordred'][item.mordred.host] }}"
+  run_once: true
