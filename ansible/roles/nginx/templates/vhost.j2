@@ -67,7 +67,7 @@ server {
         uwsgi_param X-Real-IP $remote_addr;
         uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
         uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
-{% if instance.nignx.sortinghat_tenant is defined and instance.nginx.sortinghat_tenant != "" %}
+{% if instance.nginx.sortinghat_tenant is defined and instance.nginx.sortinghat_tenant != "" %}
         uwsgi_param HTTP_sortinghat-tenant {{ instance.nginx.sortinghat_tenant | replace('-','_') }};
 {% else %}
         uwsgi_param HTTP_sortinghat-tenant {{ instance.tenant | replace('-','_') }};
