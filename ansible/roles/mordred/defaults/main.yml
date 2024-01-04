@@ -34,5 +34,6 @@ mordred_aliases_url: https://raw.githubusercontent.com/chaoss/grimoirelab-sirmor
 ##     overwrite_roles: true
 ##     sources_repository: "<PROJECT2_SOURCE_REPO_URL>"
 ##     host: 1
+##     deploy: true
 
 mariadb_hosts: "{{ groups['mariadb'] }}"
