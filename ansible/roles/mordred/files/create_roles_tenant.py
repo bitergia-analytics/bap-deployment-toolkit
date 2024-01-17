@@ -35,10 +35,17 @@ API_ROLESMAPPING = "/_plugins/_security/api/rolesmapping/"
 
 # Backend roles
 BACKEND_ROLE_ANONYMOUS = "opendistro_security_anonymous_backendrole"
+BACKEND_ROLE_HIDE_PLUGINS = "hide_plugins"
 BACKEND_ROLE_PRIVILEGED = "{}_privileged"
+BACKEND_ROLE_PSEUDONYMIZE = "{}_pseudonymize"
 BACKEND_ROLE_USER = "{}_user"
 
 # ROLES
+BAP_PLUGINS_ROLE = Template('''{
+    "cluster_permissions": [],
+    "index_permissions": [],
+    "tenant_permissions": []
+}''')
 BAP_TENANT_ANONYMOUS_ACCESS_ROLE = Template('''{
     "cluster_permissions": [
         "cluster_composite_ops_ro"
@@ -131,6 +138,60 @@ BAP_TENANT_PRIVILEGED_USER_ROLE = Template('''{
         }
     ]
 }''')
+BAP_TENANT_PSEUDONYMIZE_ROLE = Template('''{
+    "cluster_permissions": [
+        "cluster_composite_ops_ro"
+    ],
+    "index_permissions": [
+        {
+            "index_patterns": [
+                "grimoirelab_${tenant}_*",
+                "bap_${tenant}_*",
+                "custom_${tenant}_*",
+                "c_${tenant}_*"
+            ],
+            "allowed_actions": [
+                "read"
+            ],
+            "dls": "",
+            "fls": [],
+            "masked_fields": [
+                "committer",
+                "owner",
+                "*data_name",
+                "*multi_names",
+                "*ommitter_name",
+                "*ommit_name",
+                "*ssignee_name",
+                "*user_name",
+                "*uthor_name",
+                "*username",
+                "*_login"
+            ]
+        },
+        {
+            "index_patterns": [
+                ".kibana",
+                ".kibana_*_${tenant}_*",
+                ".opensearch_dashboards",
+                ".opensearch_dashboards_*_${tenant}_*"
+            ],
+            "allowed_actions": [
+                "read"
+            ]
+        }
+    ],
+    "tenant_permissions": [
+        {
+            "tenant_patterns": [
+                "${tenant}"
+            ],
+            "allowed_actions": [
+                "kibana_all_read"
+            ]
+        }
+    ]
+}''')
 BAP_TENANT_USER_ROLE = Template('''{
     "cluster_permissions": [
         "cluster_composite_ops_ro"
@@ -201,8 +262,10 @@ BAP_TENANT_MORDRED_ROLE = Template('''{
 }''')
 
 ROLES_MAPPING = {
+    "bap_plugins_visibility": BAP_PLUGINS_ROLE,
     "bap_tenant_anonymous_access_role": BAP_TENANT_ANONYMOUS_ACCESS_ROLE,
     "bap_tenant_privileged_user_role": BAP_TENANT_PRIVILEGED_USER_ROLE,
+    "bap_tenant_pseudonymize_role": BAP_TENANT_PSEUDONYMIZE_ROLE,
     "bap_tenant_user_role": BAP_TENANT_USER_ROLE,
     "bap_tenant_mordred_role": BAP_TENANT_MORDRED_ROLE
 }
@@ -231,6 +294,10 @@ def main():
             user = BACKEND_ROLE_USER.format(tenant)
         elif "anonymous" in role:
             user = BACKEND_ROLE_ANONYMOUS
+        elif "pseudonymize" in role:
+            user = BACKEND_ROLE_PSEUDONYMIZE.format(tenant)
+        elif "plugins_visibility" in role:
+            user = BACKEND_ROLE_HIDE_PLUGINS
         elif "mordred" in role:
             continue
         map_user(opensearch_url, role, user)
@@ -274,7 +341,7 @@ def get_roles(opensearch_url, tenant):
     base_url = opensearch_url + API_ROLES
     response = run_requests("GET", base_url)
     for role in response:
-        if tenant in role:
+        if "plugins_visibility" in role or tenant in role:
             roles.append(role)
     
     return roles
