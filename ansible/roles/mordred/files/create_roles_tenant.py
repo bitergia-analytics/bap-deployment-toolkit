@@ -46,45 +46,6 @@ BAP_PLUGINS_ROLE = Template('''{
     "index_permissions": [],
     "tenant_permissions": []
 }''')
-BAP_TENANT_ANONYMOUS_ACCESS_ROLE = Template('''{
-    "cluster_permissions": [
-        "cluster_composite_ops_ro"
-    ],
-    "index_permissions": [
-        {
-            "index_patterns": [
-                "grimoirelab_${tenant}_*",
-                "bap_${tenant}_*",
-                "custom_${tenant}_*",
-                "c_${tenant}_*"
-            ],
-            "allowed_actions": [
-                "read"
-            ]
-        },
-        {
-            "index_patterns": [
-                ".kibana",
-                ".kibana_*_${tenant}_*",
-                ".opensearch_dashboards",
-                ".opensearch_dashboards_*_${tenant}_*"
-            ],
-            "allowed_actions": [
-                "read"
-            ]
-        }
-    ],
-    "tenant_permissions": [
-        {
-            "tenant_patterns": [
-                "${tenant}"
-            ],
-            "allowed_actions": [
-                "kibana_all_read"
-            ]
-        }
-    ]
-}''')
 BAP_TENANT_PRIVILEGED_USER_ROLE = Template('''{
     "cluster_permissions": [
         "cluster_composite_ops"
@@ -263,7 +224,7 @@ BAP_TENANT_MORDRED_ROLE = Template('''{
 
 ROLES_MAPPING = {
     "bap_plugins_visibility": BAP_PLUGINS_ROLE,
-    "bap_tenant_anonymous_access_role": BAP_TENANT_ANONYMOUS_ACCESS_ROLE,
+    "bap_tenant_anonymous_access_role": BAP_TENANT_USER_ROLE,
     "bap_tenant_privileged_user_role": BAP_TENANT_PRIVILEGED_USER_ROLE,
     "bap_tenant_pseudonymize_role": BAP_TENANT_PSEUDONYMIZE_ROLE,
     "bap_tenant_user_role": BAP_TENANT_USER_ROLE,
