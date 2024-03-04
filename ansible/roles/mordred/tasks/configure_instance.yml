@@ -90,7 +90,7 @@
 
 - name: Set anonymous role if opensearch_dashboards_anonymous is defined and the instance is public
   set_fact:
-    anonymous: "{% if 'opensearch_dashboards_anonymous' in groups and groups['opensearch_dashboards_anonymous'] and 'instance.public' %} -a {% else %} {% endif %}"
+    anonymous: "{% if 'opensearch_dashboards_anonymous' in groups and groups['opensearch_dashboards_anonymous'] and instance.public %} -a {% else %} {% endif %}"
   delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
   run_once: true
 
