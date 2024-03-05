@@ -20,25 +20,27 @@ mariadb_hosts: "{{ groups['mariadb'] | first }}"
 redis_database: "0"
 redis_hosts: "{{ groups['redis'] | first }}"
 
-# OpenInfra
-sortinghat_openinfra_client_id: ""
-sortinghat_openinfra_client_secret: ""
-
-# Instances
+# Create your instances configurations
 ## instances:
 ## - project: example
 ##   tenant: example
 ##   public: false
+##   sortinghat:
+##     tenant: example
+##     dedicated_queue: true
+##     openinfra_client_id: ""
+##     openinfra_client_secret: ""
 ##   nginx:
-##   - fqdn: example.com
-##     sortinghat_tenant: example
+##     fqdn: example.com
 ##     http_rest_api: true
 ## - project: example-public
 ##   tenant: example-public
 ##   public: true
+##   sortinghat:
+##     tenant: example-public
+##     dedicated_queue: false
 ##   nginx:
-##   - fqdn: example-public.com
-##     sortinghat_tenant: example-public
+##     fqdn: example-public.com
 ##     http_rest_api: false
 
 # Multi tenant

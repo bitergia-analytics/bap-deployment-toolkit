@@ -6,11 +6,7 @@
       [
       {% for item in instances %}
         {{ "" if loop.first else "," }}
-        {% if item.nginx.sortinghat_tenant is defined and item.nginx.sortinghat_tenant != "" %}
-          "{{ item.nginx.sortinghat_tenant | replace('-','_') }}"
-        {% else %}
-          "{{ item.tenant | replace('-','_') }}"
-        {% endif %}
+        "{{ item.sortinghat.tenant | replace('-','_') }}"
       {% endfor %}
       ]
 
@@ -22,9 +18,9 @@
   debug:
     msg: "{{ databases }}"
 
-- name: Create a list of priviledges
+- name: Create a list of privileges
   set_fact:
-    priviledges: |-
+    privileges: |-
       {
       {% for item in databases %}
         "{{ item }}.*":"ALL,GRANT",
@@ -32,9 +28,9 @@
         "{{ sortinghat_database | replace('-','_') }}.*":"ALL,GRANT"
       }
 
-- name: Check priviledges list
+- name: Check privileges list
   debug:
-    msg: "{{ priviledges }}"
+    msg: "{{ privileges }}"
 
 - name: Create databases
   mysql_db:
@@ -53,7 +49,7 @@
     name: "{{ mariadb_service_account }}"
     host: "{{ ansible_default_ipv4.address }}"
     password: "{{ mariadb_service_account_password }}"
-    priv: "{{ priviledges }}"
+    priv: "{{ privileges }}"
     login_user: root
     login_password: "{{ mariadb_root_password }}"
     login_host: "{{ item }}"
@@ -81,12 +77,16 @@
 - name: "Create SortingHat multi tenant file"
   copy:
     dest: "{{ sortinghat_multi_tenant_list_path }}"
+    mode: 0644
     content: |-
       {
         "tenants": [
-          {% for item in databases %}
+          {% for item in instances %}
             {{ "" if loop.first else "," }}
-            "{{ item }}"
+            {
+               "name": "{{ item.sortinghat.tenant }}",
+               "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }}
+            }
           {% endfor %}
         ]
       }

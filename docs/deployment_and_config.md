@@ -140,10 +140,6 @@ all:
     sortinghat_uwsgi_workers: "<sortinghat_uwsgi_workers>"
     sortinghat_uwsgi_threads: "<sortinghat_uwsgi_threads>"
 
-    # Import OpenInfra
-    sortinghat_openinfra_client_id: "<openinfra_client_id>"
-    sortinghat_openinfra_client_secret: "<openinfra_client_secret>"
-
     # Mordred Settings
     mordred_setups_repo_url: <repo_mordred_config.git>
 
@@ -157,6 +153,11 @@ all:
         overwrite_roles: <overwrite_roles>
         sources_repository: "<repo_teneant_a_projects.git>"
         host: <mordred_host_a>
+      sortinghat:
+        tenant: <tenant_name_a>
+        dedicated_queue: true
+        openinfra_client_id: "<openinfra_client_id>"
+        openinfra_client_secret: "<openinfra_client_secret>"
       nginx:
         fqdn: <fqdn-1>
         http_rest_api: false
@@ -168,9 +169,11 @@ all:
         overwrite_roles: <overwrite_roles>
         sources_repository: "<repo_teneant_b_projects.git>"
         host: <mordred_host_b>
+      sortinghat:
+        tenant: <sortinghat_tenant>
+        dedicated_queue: false
       nginx:
         fqdn: <fqdn-2>
-        sortinghat_tenant: <sortinghat_tenant>
         http_rest_api: true
 ```
 
@@ -227,15 +230,12 @@ Replace the entries in `<>` with your values:
 - `sortinghat_workers`: number of SortingHat Workers (by default is `1`).
 - `sortinghat_uwsgi_workers`: number of SortingHat uWSGI workers (by default is `1`).
 - `sortinghat_uwsgi_threads`: number of SortingHat uWSGI threads (by default is `4`).
-- `sortinghat_openinfra_client_id`: OpenInfraID Oauth2 client ID for private API. When the
-  parameter is not set, it will only obtain members from the public API that doesn't contain
-  email information. (by default is "").
-- `sortinghat_openinfra_client_secret`: OpenInfraID Oauth2 client secret for private API (by default is "").
 
 After configuring these parameters, you need to configure the instances of the
 task scheduler (Mordred) and Nginx virtual host. You need a task scheduler for each project
 you want to analyze. Check the section about configuring Mordred for more information
 about how to setup the task scheduler.
+
 - `mordred_setups_repo_url`: URL of the git repository where the configuration
   for each project/mordred instance are stored.
 - `instances`: Mordred and Nginx virtual host configurations. Create as many entries of
@@ -250,10 +250,17 @@ about how to setup the task scheduler.
 - `instances.mordred.sources_repository`: repository with the list of data
    sources to analyze on this project.
 - `instances.mordred.host`: on which mordred VM host will deploy the container (e.g. `0`).
+- `instances.sortingaht.tenant`: the name used here will be used to store the data from
+- `instances.sortinghat.dedicated_queue` (optional): to run identities jobs on a dedicated queue.
+   This will also create a dedicated worker for these tasks. The possible values are `true`
+   or `false`. By default is set to `false`.
+- `instances.sortinghat.openinfra_client_id` (optional): OpenInfraID Oauth2 client ID for private API. When the
+  parameter is not set, it will only obtain members from the public API that doesn't contain
+  email information. (by default is ""). Only works with dedicated queues.
+- `instances.sortinghat.openinfra_client_secret` (optional): OpenInfraID Oauth2 client secret for private
+   API (by default is ""). Only works with dedicated queues.
 - `instances.nginx.fqdn`: full qualified domain name (e.g. `bap.example.com`)
   where BAP will be available.
-- `instances.nginx.tenant` (optional): the name used here will be used to store the data from
-  this project in a separate tenant from the others. By default it will use `instances.tenant`.
 - `instances.nginx.http_rest_api`: Open OpenSearch HTTP rest API only if the variable is defined
   with the value `true`.
 

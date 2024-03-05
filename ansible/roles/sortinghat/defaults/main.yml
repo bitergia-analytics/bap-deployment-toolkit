@@ -20,21 +20,27 @@ network:
   bind_host: 0.0.0.0
   publish_host: "{{ ansible_default_ipv4.address }}"
 
-# Instances
+# Create your instances configurations
 ## instances:
 ## - project: example
 ##   tenant: example
 ##   public: false
+##   sortinghat:
+##     tenant: example
+##     dedicated_queue: true
+##     openinfra_client_id: ""
+##     openinfra_client_secret: ""
 ##   nginx:
-##   - fqdn: example.com
-##     sortinghat_tenant: example
+##     fqdn: example.com
 ##     http_rest_api: true
 ## - project: example-public
 ##   tenant: example-public
 ##   public: true
+##   sortinghat:
+##     tenant: example-public
+##     dedicated_queue: false
 ##   nginx:
-##   - fqdn: example-public.com
-##     sortinghat_tenant: example-public
+##     fqdn: example-public.com
 ##     http_rest_api: false
 
 # Multi tenant
