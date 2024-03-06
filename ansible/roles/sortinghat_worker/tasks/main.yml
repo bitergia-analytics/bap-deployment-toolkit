@@ -6,11 +6,7 @@
       [
       {% for item in instances %}
         {{ "" if loop.first else "," }}
-        {% if item.nginx.sortinghat_tenant is defined and item.nginx.sortinghat_tenant != "" %}
-          "{{ item.nginx.sortinghat_tenant | replace('-','_') }}"
-        {% else %}
-          "{{ item.tenant | replace('-','_') }}"
-        {% endif %}
+        "{{ item.sortinghat.tenant | replace('-','_') }}"
       {% endfor %}
       ]
 
@@ -18,9 +14,9 @@
   debug:
     msg: "{{ databases }}"
 
-- name: Create a list of priviledges
+- name: Create a list of privileges
   set_fact:
-    priviledges: |-
+    privileges: |-
       {
       {% for item in databases %}
         "{{ item }}.*":"ALL,GRANT",
@@ -28,16 +24,16 @@
         "{{ sortinghat_database | replace('-','_') }}.*":"ALL,GRANT"
       }
 
-- name: Check priviledges list
+- name: Check privileges list
   debug:
-    msg: "{{ priviledges }}"
+    msg: "{{ privileges }}"
 
 - name: Create MariaDB service account for SortingHat worker
   mysql_user:
     name: "{{ mariadb_service_account }}"
     host: "{{ ansible_default_ipv4.address }}"
     password: "{{ mariadb_service_account_password }}"
-    priv: "{{ priviledges }}"
+    priv: "{{ privileges }}"
     login_user: root
     login_password: "{{ mariadb_root_password }}"
     login_host: "{{ item }}"
@@ -59,12 +55,16 @@
 - name: "Create SortingHat multi tenant file"
   copy:
     dest: "{{ sortinghat_multi_tenant_list_path }}"
+    mode: 0644
     content: |-
       {
         "tenants": [
-          {% for item in databases %}
+          {% for item in instances %}
             {{ "" if loop.first else "," }}
-            "{{ item }}"
+            {
+               "name": "{{ item.sortinghat.tenant }}",
+               "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }}
+            }
           {% endfor %}
         ]
       }
@@ -90,10 +90,48 @@
       SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
       SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
-      SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ sortinghat_openinfra_client_id }}"
-      SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ sortinghat_openinfra_client_secret }}"
       SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
       SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
     volumes:
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
   with_sequence: start=1 end="{{ sortinghat_workers }}"
+
+- name: "Remove old SortingHat dedicated workers {{ item.sortinghat.tenant }}"
+  docker_container:
+    name: "{{ sortinghat_worker_docker_container }}-{{ item.sortinghat.tenant }}"
+    state: absent
+  loop: "{{ instances }}"
+  when:
+    - sortinghat_multi_tenant is defined
+    - sortinghat_multi_tenant == "true"
+    - item.sortinghat.dedicated_queue is defined
+    - item.sortinghat.dedicated_queue == true
+
+- name: "Start SortingHat dedicated worker {{ item.sortinghat.tenant }}"
+  docker_container:
+    name: "{{ sortinghat_worker_docker_container }}-{{ item.sortinghat.tenant }}"
+    image: "{{ sortinghat_worker_docker_image }}:{{ sortinghat_worker_version }}"
+    pull: yes
+    command: "{{ item.sortinghat.tenant }}"
+    env:
+      SORTINGHAT_CONFIG: sortinghat.config.settings
+      SORTINGHAT_SECRET_KEY: "{{ sortinghat_secret_key }}"
+      SORTINGHAT_DB_HOST: "{{ mariadb_hosts }}"
+      SORTINGHAT_DB_USER: "{{ mariadb_service_account }}"
+      SORTINGHAT_DB_PASSWORD: "{{ mariadb_service_account_password }}"
+      SORTINGHAT_DB_DATABASE: "{{ sortinghat_database | replace('-','_') }}"
+      SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
+      SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
+      SORTINGHAT_REDIS_DB: "{{ redis_database }}"
+      SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ item.sortinghat.openinfra_client_id | default('') }}"
+      SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ item.sortinghat.openinfra_client_secret | default('') }}"
+      SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
+      SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
+    volumes:
+      - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
+  loop: "{{ instances }}"
+  when:
+    - sortinghat_multi_tenant is defined
+    - sortinghat_multi_tenant == "true"
+    - item.sortinghat.dedicated_queue is defined
+    - item.sortinghat.dedicated_queue == true
