@@ -264,6 +264,11 @@ about how to setup the task scheduler.
 - `instances.nginx.http_rest_api`: Open OpenSearch HTTP rest API only if the variable is defined
   with the value `true`.
 
+**IMPORTANT**: When there are multiple instances that will use the same
+SortingHat tenant, be sure the `instances.sortinghat` configuration is exactly
+the same on all those entries. Unexpected errors can appear, if the parameters
+are different.
+
 #### OpenID Configuration (Optional)
 
 If you're using OpenID/OAuth 2.0 for authenticating the users that will access

@@ -1,12 +1,49 @@
 ---
 
+- name: "Create SortingHat tenants info"
+  set_fact:
+    tenants_info: |-
+      [
+      {% for item in instances %}
+        {{ "" if loop.first else "," }}
+        {
+          "tenant": "{{ item.sortinghat.tenant | replace('-','_') }}",
+          "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }},
+          "openinfra_client_id": "{{ item.sortinghat.openinfra_client_id | default("") }}",
+          "openinfra_secret_id": "{{ item.sortinghat.openinfra_secret_id | default("") }}"
+        }
+      {% endfor %}
+      ]
+
+- name: Filter out duplicated entries of tenants info
+  set_fact:
+    tenants: |-
+      {{
+        tenants_info
+        | json_query('[].{
+          "tenant": tenant,
+          "dedicated_queue": dedicated_queue,
+          "openinfra_client_id": openinfra_client_id,
+          "openinfra_secret_id": openinfra_secret_id
+          }')
+       | unique
+      }}
+
+- name: Check multi-tenancy configuration
+  assert:
+    that:
+      - "{{ tenants|length }} | int == 1"
+    fail_msg: "Multi-tenancy is deactivated but multiple configurations were found."
+  when:
+    - sortinghat_multi_tenant is undefined or sortinghat_multi_tenant == "false"
+
 - name: Create a list of databases
   set_fact:
     databases: |-
       [
-      {% for item in instances %}
+      {% for item in tenants %}
         {{ "" if loop.first else "," }}
-        "{{ item.sortinghat.tenant | replace('-','_') }}"
+        "{{ item.tenant | replace('-','_') }}"
       {% endfor %}
       ]
 
@@ -52,18 +89,18 @@
     mode: 0750
     recurse: true
 
-- name: "Create SortingHat multi tenant file"
+- name: "Create SortingHat multi-tenant file"
   copy:
     dest: "{{ sortinghat_multi_tenant_list_path }}"
     mode: 0644
     content: |-
       {
         "tenants": [
-          {% for item in instances %}
+          {% for item in tenants %}
             {{ "" if loop.first else "," }}
             {
-               "name": "{{ item.sortinghat.tenant }}",
-               "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }}
+               "name": "{{ item.tenant }}",
+               "dedicated_queue": {{ item.dedicated_queue }}
             }
           {% endfor %}
         ]
@@ -96,23 +133,23 @@
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
   with_sequence: start=1 end="{{ sortinghat_workers }}"
 
-- name: "Remove old SortingHat dedicated workers {{ item.sortinghat.tenant }}"
+- name: "Remove old SortingHat dedicated workers {{ item.tenant }}"
   docker_container:
-    name: "{{ sortinghat_worker_docker_container }}-{{ item.sortinghat.tenant }}"
+    name: "{{ sortinghat_worker_docker_container }}-{{ item.tenant }}"
     state: absent
-  loop: "{{ instances }}"
+  loop: "{{ tenants }}"
   when:
     - sortinghat_multi_tenant is defined
     - sortinghat_multi_tenant == "true"
-    - item.sortinghat.dedicated_queue is defined
-    - item.sortinghat.dedicated_queue == true
+    - item.dedicated_queue is defined
+    - item.dedicated_queue == true
 
-- name: "Start SortingHat dedicated worker {{ item.sortinghat.tenant }}"
+- name: "Start SortingHat dedicated worker {{ item.tenant }}"
   docker_container:
-    name: "{{ sortinghat_worker_docker_container }}-{{ item.sortinghat.tenant }}"
+    name: "{{ sortinghat_worker_docker_container }}-{{ item.tenant }}"
     image: "{{ sortinghat_worker_docker_image }}:{{ sortinghat_worker_version }}"
     pull: yes
-    command: "{{ item.sortinghat.tenant }}"
+    command: "{{ item.tenant }}"
     env:
       SORTINGHAT_CONFIG: sortinghat.config.settings
       SORTINGHAT_SECRET_KEY: "{{ sortinghat_secret_key }}"
@@ -123,15 +160,15 @@
       SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
       SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
-      SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ item.sortinghat.openinfra_client_id | default('') }}"
-      SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ item.sortinghat.openinfra_client_secret | default('') }}"
+      SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ item.openinfra_client_id | default('') }}"
+      SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ item.openinfra_client_secret | default('') }}"
       SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
       SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
     volumes:
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
-  loop: "{{ instances }}"
+  loop: "{{ tenants }}"
   when:
     - sortinghat_multi_tenant is defined
     - sortinghat_multi_tenant == "true"
-    - item.sortinghat.dedicated_queue is defined
-    - item.sortinghat.dedicated_queue == true
+    - item.dedicated_queue is defined
+    - item.dedicated_queue == true

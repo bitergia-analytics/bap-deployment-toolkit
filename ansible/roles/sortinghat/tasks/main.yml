@@ -1,12 +1,49 @@
 ---
 
+- name: "Create SortingHat tenants info"
+  set_fact:
+    tenants_info: |-
+      [
+      {% for item in instances %}
+        {{ "" if loop.first else "," }}
+        {
+          "tenant": "{{ item.sortinghat.tenant | replace('-','_') }}",
+          "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }},
+          "openinfra_client_id": "{{ item.sortinghat.openinfra_client_id | default("") }}",
+          "openinfra_secret_id": "{{ item.sortinghat.openinfra_secret_id | default("") }}"
+        }
+      {% endfor %}
+      ]
+
+- name: Filter out duplicated entries
+  set_fact:
+    tenants: |-
+      {{
+        tenants_info
+        | json_query('[].{
+          "tenant": tenant,
+          "dedicated_queue": dedicated_queue,
+          "openinfra_client_id": openinfra_client_id,
+          "openinfra_secret_id": openinfra_secret_id
+          }')
+       | unique
+      }}
+
+- name: Check multi-tenancy configuration
+  assert:
+    that:
+      - "{{ tenants|length }} | int == 1"
+    fail_msg: "Multi-tenancy is deactivated but multiple configurations were found."
+  when:
+    - sortinghat_multi_tenant is undefined or sortinghat_multi_tenant == "false"
+
 - name: Create a list of databases
   set_fact:
     databases: |-
       [
-      {% for item in instances %}
+      {% for item in tenants %}
         {{ "" if loop.first else "," }}
-        "{{ item.sortinghat.tenant | replace('-','_') }}"
+        "{{ item.tenant | replace('-','_') }}"
       {% endfor %}
       ]
 
@@ -81,11 +118,11 @@
     content: |-
       {
         "tenants": [
-          {% for item in instances %}
+          {% for item in tenants %}
             {{ "" if loop.first else "," }}
             {
-               "name": "{{ item.sortinghat.tenant }}",
-               "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }}
+               "name": "{{ item.tenant }}",
+               "dedicated_queue": {{ item.dedicated_queue }}
             }
           {% endfor %}
         ]
