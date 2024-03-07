@@ -10,12 +10,12 @@
           "tenant": "{{ item.sortinghat.tenant | replace('-','_') }}",
           "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }},
           "openinfra_client_id": "{{ item.sortinghat.openinfra_client_id | default("") }}",
-          "openinfra_secret_id": "{{ item.sortinghat.openinfra_secret_id | default("") }}"
+          "openinfra_client_secret": "{{ item.sortinghat.openinfra_client_secret | default("") }}"
         }
       {% endfor %}
       ]
 
-- name: Filter out duplicated entries
+- name: Filter out duplicated entries of tenants info
   set_fact:
     tenants: |-
       {{
@@ -24,7 +24,7 @@
           "tenant": tenant,
           "dedicated_queue": dedicated_queue,
           "openinfra_client_id": openinfra_client_id,
-          "openinfra_secret_id": openinfra_secret_id
+          "openinfra_client_secret": openinfra_client_secret
           }')
        | unique
       }}
