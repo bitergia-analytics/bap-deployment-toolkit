@@ -10,7 +10,7 @@
           "tenant": "{{ item.sortinghat.tenant | replace('-','_') }}",
           "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }},
           "openinfra_client_id": "{{ item.sortinghat.openinfra_client_id | default("") }}",
-          "openinfra_secret_id": "{{ item.sortinghat.openinfra_secret_id | default("") }}"
+          "openinfra_client_secret": "{{ item.sortinghat.openinfra_client_secret | default("") }}"
         }
       {% endfor %}
       ]
@@ -24,7 +24,7 @@
           "tenant": tenant,
           "dedicated_queue": dedicated_queue,
           "openinfra_client_id": openinfra_client_id,
-          "openinfra_secret_id": openinfra_secret_id
+          "openinfra_client_secret": openinfra_client_secret
           }')
        | unique
       }}
@@ -160,8 +160,8 @@
       SORTINGHAT_REDIS_HOST: "{{ redis_hosts }}"
       SORTINGHAT_REDIS_PASSWORD: "{{ redis_password }}"
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
-      SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ item.openinfra_client_id | default('') }}"
-      SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ item.openinfra_client_secret | default('') }}"
+      SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ item.openinfra_client_id }}"
+      SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ item.openinfra_client_secret }}"
       SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
       SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
     volumes:
