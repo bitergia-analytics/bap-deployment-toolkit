@@ -134,6 +134,22 @@ the following config parameters. By default, the tunnel won't be created.
 If you have doubts about how to list the users, please check the following
 [link](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_tunnel_instance_iam#argument-reference).
 
+By default, all instances will create a boot disk with the same name of the instance.
+To make it persistent, you will have to set `persistent_disks` to true.
+
+- `persistent_disks = true`.
+
+You can also create an extra persistent disk that can be attached to any VMs.
+It will be attached to the same name of VM, by default. When the `<node>_disk_count`
+is not set or the value is `0`, it will use the `<node>_count` value.
+
+- `mariadb_disk_count = 2`
+- `mariadb_disk_attach = "<VM-NAME>"`
+
+You can also create a disk from a snapshot.
+
+- `redis_disk_snapshot = "<SNAPSHOT-DISK-NAME>"`
+
 ```tf
 module "bap_env_gcp" {
   source = "../../modules/bap_env_gcp"
@@ -143,11 +159,16 @@ module "bap_env_gcp" {
 
   custom_tags = ["devel", "research"]
 
+  persistent_disks = true
+
   mariadb_node_count = 1
   mariadb_machine_type = "e2-standard-2"
+  mariadb_disk_count = 2
+  mariadb_disk_attach = "<VM-NAME>"
 
   redis_node_count = 1
   redis_machine_type = "e2-standard-2"
+  redis_disk_snapshot = "<SNAPSHOT-DISK-NAME>
 
   opensearch_node_count = 3
   opensearch_machine_type = "e2-highmem-4"

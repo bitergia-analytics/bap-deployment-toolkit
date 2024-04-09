@@ -32,6 +32,16 @@ variable "custom_tags" {
   default     = []
 }
 
+variable "machine_image" {
+  type    = string
+  default = "debian-cloud/debian-11"
+}
+
+variable "persistent_disks" {
+  type        = bool
+  description = "Whether the disks will be auto-deleted when the instance is deleted"
+  default     = false
+}
 # MariaDB
 
 variable "mariadb_node_count" {
@@ -49,6 +59,16 @@ variable "mariadb_machine_image" {
   default = "debian-cloud/debian-11"
 }
 
+variable "mariadb_boot_disk_size" {
+  type    = number
+  default = 10
+}
+
+variable "mariadb_disk_count" {
+  type    = number
+  default = 0
+}
+
 variable "mariadb_disk_size" {
   type    = number
   default = 50
@@ -57,6 +77,18 @@ variable "mariadb_disk_size" {
 variable "mariadb_disk_type" {
   type    = string
   default = "pd-standard"
+}
+
+variable "mariadb_disk_attach" {
+  type        = string
+  description = "Instance ID to attach MariaDB disk"
+  default     = ""
+}
+
+variable "mariadb_disk_snapshot" {
+  type = string
+  description = "The source snapshot used to create this disk"
+  default = null
 }
 
 variable "mariadb_ansible_use_external_ip" {
@@ -81,6 +113,16 @@ variable "redis_machine_image" {
   default = "debian-cloud/debian-11"
 }
 
+variable "redis_boot_disk_size" {
+  type    = number
+  default = 10
+}
+
+variable "redis_disk_count" {
+  type    = number
+  default = 0
+}
+
 variable "redis_disk_size" {
   type    = number
   default = 50
@@ -89,6 +131,18 @@ variable "redis_disk_size" {
 variable "redis_disk_type" {
   type    = string
   default = "pd-standard"
+}
+
+variable "redis_disk_attach" {
+  type        = string
+  description = "Instance ID to attach Redis disk"
+  default     = ""
+}
+
+variable "redis_disk_snapshot" {
+  type = string
+  description = "The source snapshot used to create this disk"
+  default = null
 }
 
 variable "redis_ansible_use_external_ip" {
@@ -113,6 +167,16 @@ variable "opensearch_machine_image" {
   default = "debian-cloud/debian-11"
 }
 
+variable "opensearch_boot_disk_size" {
+  type    = number
+  default = 10
+}
+
+variable "opensearch_disk_count" {
+  type    = number
+  default = 0
+}
+
 variable "opensearch_disk_size" {
   type    = number
   default = 200
@@ -122,6 +186,19 @@ variable "opensearch_disk_type" {
   type    = string
   default = "pd-standard"
 }
+
+variable "opensearch_disk_attach" {
+  type        = string
+  description = "Instance ID to attach OpenSearch disk"
+  default     = ""
+}
+
+variable "opensearch_disk_snapshot" {
+  type = string
+  description = "The source snapshot used to create this disk"
+  default = null
+}
+
 
 variable "opensearch_ansible_use_external_ip" {
   type    = bool
@@ -151,9 +228,8 @@ variable "opensearch_dashboards_machine_image" {
   default = "debian-cloud/debian-11"
 }
 
-variable "opensearch_dashboards_disk_size" {
+variable "opensearch_dashboards_boot_disk_size" {
   type    = number
-  # default = 200
   default = 50
 }
 
@@ -184,7 +260,7 @@ variable "nginx_machine_image" {
   default = "debian-cloud/debian-11"
 }
 
-variable "nginx_disk_size" {
+variable "nginx_boot_disk_size" {
   type    = number
   default = 50
 }
@@ -221,6 +297,16 @@ variable "mordred_machine_image" {
   default = "debian-cloud/debian-11"
 }
 
+variable "mordred_boot_disk_size" {
+  type    = number
+  default = 10
+}
+
+variable "mordred_disk_count" {
+  type    = number
+  default = 0
+}
+
 variable "mordred_disk_size" {
   type    = number
   default = 50
@@ -229,6 +315,18 @@ variable "mordred_disk_size" {
 variable "mordred_disk_type" {
   type    = string
   default = "pd-standard"
+}
+
+variable "mordred_disk_attach" {
+  type        = string
+  description = "Instance ID to attach MariaDB disk"
+  default     = ""
+}
+
+variable "mordred_disk_snapshot" {
+  type = string
+  description = "The source snapshot used to create this disk"
+  default = null
 }
 
 variable "mordred_ansible_use_external_ip" {
@@ -253,7 +351,7 @@ variable "sortinghat_machine_image" {
   default = "debian-cloud/debian-11"
 }
 
-variable "sortinghat_disk_size" {
+variable "sortinghat_boot_disk_size" {
   type    = number
   default = 50
 }
@@ -285,7 +383,7 @@ variable "sortinghat_worker_machine_image" {
   default = "debian-cloud/debian-11"
 }
 
-variable "sortinghat_worker_disk_size" {
+variable "sortinghat_worker_boot_disk_size" {
   type    = number
   default = 50
 }

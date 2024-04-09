@@ -41,14 +41,44 @@ variable "machine_image" {
   default     = "debian-cloud/debian-11"
 }
 
+variable "boot_disk_persistent" {
+  type        = bool
+  description = "Whether the disk will be keep when the instance is deleted"
+  default     = false
+}
+
+variable "boot_disk_size" {
+  type        = number
+  description = "Boot disk size for each node"
+}
+
+variable "disk_count" {
+  type    = number
+  default = 0
+}
+
 variable "disk_size" {
   type        = number
   description = "Disk size for each node"
+  default     = 10
 }
 
 variable "disk_type" {
   type        = string
   description = "Disk type for each node"
+  default     = "pd-standard"
+}
+
+variable "disk_snapshot" {
+  type = string
+  description = "The source snapshot used to create this disk"
+  default = null
+}
+
+variable "disk_attach" {
+  type        = string
+  description = "Instance ID to attach MariaDB disk"
+  default     = ""
 }
 
 variable "network" {

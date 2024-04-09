@@ -15,3 +15,11 @@ output "external_ip" {
 output "project_id" {
   value = data.google_project.project.project_id
 }
+
+output "persistent_disk" {
+  value = google_compute_disk.bap.*.name
+}
+
+output "persistent_disk_attached" {
+  value = google_compute_attached_disk.bap.*.instance
+}
