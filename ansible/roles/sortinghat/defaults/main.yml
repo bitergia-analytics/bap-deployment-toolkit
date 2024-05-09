@@ -2,7 +2,7 @@
 
 # SortingHat image and container
 sortinghat_docker_image: bitergia/bitergia-analytics-sortinghat
-sortinghat_version: 0.19.2
+sortinghat_version: 0.20.0
 sortinghat_docker_container: bap_sortinghat
 
 # SortingHat node configuration
