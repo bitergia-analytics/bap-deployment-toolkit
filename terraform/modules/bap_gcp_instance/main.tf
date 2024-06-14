@@ -38,9 +38,10 @@ resource "google_compute_instance" "bap" {
   })
 
   boot_disk {
+    auto_delete = !var.boot_disk_persistent
     initialize_params {
       image = var.machine_image
-      size  = var.disk_size
+      size  = var.boot_disk_size
       type  = var.disk_type
     }
   }
@@ -59,6 +60,10 @@ resource "google_compute_instance" "bap" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [attached_disk]
+  }
+
   service_account {
     scopes = flatten([
       "logging-write",
@@ -66,4 +71,21 @@ resource "google_compute_instance" "bap" {
       var.service_account_extra_scopes
     ])
   }
+}
+
+resource "google_compute_disk" "bap" {
+  count    = var.disk_count
+  name     = "${var.prefix}-${var.name}-disk-${count.index}"
+  type     = var.disk_type
+  size     = var.disk_size
+  image    = var.disk_snapshot == null ? var.machine_image : ""
+  snapshot = var.disk_snapshot
+  zone     = var.zone
+
+}
+
+resource "google_compute_attached_disk" "bap" {
+  count    = var.disk_count
+  disk     = google_compute_disk.bap[count.index].id
+  instance = var.disk_attach != "" ? var.disk_attach : "${var.prefix}-${var.name}-${count.index}"
 }

@@ -12,14 +12,16 @@ module "sortinghat_worker" {
 
   machine_type            = var.sortinghat_worker_machine_type
   machine_image           = var.sortinghat_worker_machine_image
-  disk_size               = var.sortinghat_worker_disk_size
-  disk_type               = var.sortinghat_worker_disk_type
+  boot_disk_persistent    = var.persistent_disks
+  boot_disk_size          = var.sortinghat_worker_boot_disk_size
   zone                    = var.zone
 
   network                 = var.network
   subnetwork              = var.subnetwork
   enable_external_ip      = false
   ansible_use_external_ip = var.sortinghat_worker_ansible_use_external_ip
+
+  disk_count              = 0
 }
 
 output "sortinghat_worker" {

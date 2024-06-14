@@ -12,14 +12,16 @@ module "opensearch_dashboards_anonymous" {
 
   machine_type            = var.opensearch_dashboards_machine_type
   machine_image           = var.opensearch_dashboards_machine_image
-  disk_size               = var.opensearch_dashboards_disk_size
-  disk_type               = var.opensearch_dashboards_disk_type
+  boot_disk_persistent    = var.persistent_disks
+  boot_disk_size          = var.opensearch_dashboards_boot_disk_size
   zone                    = var.zone
 
   network                 = var.network
   subnetwork              = var.subnetwork
   enable_external_ip      = false
   ansible_use_external_ip = var.opensearch_dashboards_ansible_use_external_ip
+
+  disk_count              = 0
 }
 
 output "opensearch_dashboards_anonymous" {
