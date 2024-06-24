@@ -24,6 +24,8 @@
     - "{{ instances }}"
   delegate_to: "{{ groups['mordred'][item.mordred.host] }}"
   run_once: true
+  when:
+    - item.mordred.deploy is defined and item.mordred.deploy
 
 - name: docker
   docker_container:
@@ -40,3 +42,5 @@
     - "{{ instances }}"
   delegate_to: "{{ groups['mordred'][item.mordred.host] }}"
   run_once: true
+  when:
+    - item.mordred.deploy is defined and item.mordred.deploy
