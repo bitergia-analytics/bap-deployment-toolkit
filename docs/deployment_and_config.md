@@ -140,6 +140,9 @@ all:
     sortinghat_uwsgi_workers: "<sortinghat_uwsgi_workers>"
     sortinghat_uwsgi_threads: "<sortinghat_uwsgi_threads>"
 
+    # SortingHat Nginx max_conns
+    sortinghat_max_conns: "<sortinghat_max_conns>"
+
     # Mordred Settings
     mordred_setups_repo_url: <repo_mordred_config.git>
 
@@ -230,6 +233,8 @@ Replace the entries in `<>` with your values:
 - `sortinghat_workers`: number of SortingHat Workers (by default is `1`).
 - `sortinghat_uwsgi_workers`: number of SortingHat uWSGI workers (by default is `1`).
 - `sortinghat_uwsgi_threads`: number of SortingHat uWSGI threads (by default is `4`).
+- `sortinghat_max_conns`: limits the maximum number of simultaneous active connections
+  to the proxied server (by default is `75`).
 
 After configuring these parameters, you need to configure the instances of the
 task scheduler (Mordred) and Nginx virtual host. You need a task scheduler for each project

@@ -64,6 +64,7 @@ sortinghat_cors_allowed_origins: "https://localhost,https://{{ groups['sortingha
 # NGINX
 
 sortinghat_host: "{{ inventory_hostname }}:9314"
+sortinghat_max_conns: 75
 
 ## Image and container
 nginx_docker_image: nginx
