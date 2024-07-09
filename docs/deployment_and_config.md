@@ -146,6 +146,14 @@ all:
     # Mordred Settings
     mordred_setups_repo_url: <repo_mordred_config.git>
 
+    # Ngninx Certbot
+    letsencrypt_register_email: <letsencrypt_register_email>
+
+    ## Uncomment to define custom certificates. Otherwise it will create Let's Encrypt certificates.
+    #custom_cert:
+    #  cert: custom.crt
+    #  key: custom.key
+
     # Instances Settings
     instances:
     - project: <project_a>
@@ -235,6 +243,8 @@ Replace the entries in `<>` with your values:
 - `sortinghat_uwsgi_threads`: number of SortingHat uWSGI threads (by default is `4`).
 - `sortinghat_max_conns`: limits the maximum number of simultaneous active connections
   to the proxied server (by default is `75`).
+- `letsencrypt_register_email`: email used for registration, recovery contact,
+  and warnings about expired certs on Let's Encrypt.
 
 After configuring these parameters, you need to configure the instances of the
 task scheduler (Mordred) and Nginx virtual host. You need a task scheduler for each project
@@ -310,9 +320,11 @@ Replace the entries in `<>` with your values:
 
 #### Custom SSL Certificates (Optional)
 
-If you have custom SSL certificates for the domain where the platform will
-be serve, you will need to add some configuration to the `vars.yml` file under
-the `all.vars` section.
+By default, the toolkit uses [Let's Encrypt](https://letsencrypt.org/) as CA
+and to generate SSL certificates that will be renewed periodically. However,
+if you want to stop using **Let's Encrypt** and to use your own certificates
+instead, you will have to set some extra parameters to the `vars.yml` file
+under the `all.vars` section.
 
 We recommend to store all the certificates in the directory `keys/<environment>`
 of this toolkit.
