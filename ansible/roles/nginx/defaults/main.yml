@@ -37,10 +37,16 @@ opensearch_endpoint: "https://{{ hostvars[(groups['opensearch'][0])].ansible_def
 sortinghat_host: "{{ hostvars[(groups['sortinghat'][0])].ansible_default_ipv4.address }}:9314"
 
 # Certificates configuration
+## Let's Encrypt configuration
+nginx_letsencrypt_workdir: "{{ nginx_workdir }}/letsencrypt"
+nginx_letsencrypt_logsdir: "{{ nginx_letsencrypt_workdir }}/logs"
+nginx_letsencrypt_configdir: "{{ nginx_letsencrypt_workdir }}/config"
+nginx_letsencrypt_webroot_path: "{{ nginx_letsencrypt_workdir }}/webroot"
 
-certs_dir: "{{ nginx_workdir }}/certs"
+## Custom certifications
+nginx_certs_dir: "{{ nginx_workdir }}/certs"
 
-## Uncomment to define custom certificates. Otherwise self-signed
+## Uncomment to define custom certificates. Otherwise Let's Encrypt
 ## certificates will be used.
 # custom_cert:
 #   cert: foo/cert.crt

@@ -1,10 +1,23 @@
 ---
 
-- name: Configure virtualhost(s)
-  include_tasks: virtualhost.yml
-  loop: "{{ instances }}"
-  loop_control:
-    loop_var: instance
+- name: Remove old NGINX container
+  docker_container:
+    name: "{{ nginx_docker_container }}"
+    state: absent
+
+- name: Create NGINX directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    recurse: true
+  with_items:
+    - "{{ nginx_certs_dir }}"
+    - "{{ nginx_letsencrypt_configdir }}"
+    - "{{ nginx_letsencrypt_logsdir }}"
+    - "{{ nginx_letsencrypt_webroot_path }}"
+    - "{{ nginx_log_dir }}"
+    - "{{ nginx_virtualhosts_workdir }}"
 
 - name: Configure NGINX status page
   template:
@@ -20,32 +33,63 @@
     dest: "{{ nginx_virtualhosts_workdir }}/proxy_buffer.conf"
     backup: true
 
-- name: Remove old NGINX container
-  docker_container:
-    name: "{{ nginx_docker_container }}"
-    state: absent
-
 - name: Create docker volumes for certs and config
   set_fact:
     nginx_volumes: |-
       [
-      {% for instance in instances %}
-        "{{ certs_dir }}/{{ instance.nginx.fqdn }}.crt:/etc/ssl/certs/{{ instance.nginx.fqdn }}.crt",
-        "{{ certs_dir }}/{{ instance.nginx.fqdn }}.key:/etc/ssl/private/{{ instance.nginx.fqdn }}.key",
-      {% endfor %}
-        "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/",
+        "{{ nginx_certs_dir }}:/etc/ssl/certs/",
+        "{{ nginx_letsencrypt_configdir }}:/etc/ssl/certbot_certs/",
+        "{{ nginx_letsencrypt_webroot_path }}:/var/www/certbot/:ro",
         "{{ nginx_gcs_workdir }}:/opt/gcs",
-        "{{ nginx_log_dir }}:/var/log/nginx"
+        "{{ nginx_log_dir }}:/var/log/nginx",
+        "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
       ]
 
 - name: Check the list of volumes
   debug:
     msg: "{{ nginx_volumes }}"
 
-- name: Start NGINX container
+- name: "Create SortingHat uWSGI params configuration file"
+  template:
+    src: uwsgi_params.j2
+    dest: "{{ nginx_virtualhosts_workdir }}/uwsgi_params"
+    backup: true
+
+- name: "Configure virtualhost (certbot with acme-challenge) for all instances"
+  template:
+    src: vhost_port_80.j2
+    dest: "{{ nginx_virtualhosts_workdir }}/{{ instance.nginx.fqdn }}.conf"
+    backup: true
+  loop: "{{ instances }}"
+  loop_control:
+    loop_var: instance
+  when: custom_cert is undefined
+
+# Start Nginx container to allow certbot to create certificates.
+- name: Start NGINX container with acme-challenge to create certificates using certbot
   docker_container:
     name: "{{ nginx_docker_container }}"
     image: "{{ nginx_docker_image }}:{{ nginx_version }}"
+    volumes: "{{ nginx_volumes }}"
+    ports:
+      - "80:80"
+      - "443:443"
+    exposed_ports:
+      - "80"
+      - "443"
+  when: custom_cert is undefined
+
+- name: Configure virtualhost(s) for all instances
+  include_tasks: virtualhost.yml
+  loop: "{{ instances }}"
+  loop_control:
+    loop_var: instance
+
+- name: Start NGINX container with virtualhost(s)
+  docker_container:
+    name: "{{ nginx_docker_container }}"
+    image: "{{ nginx_docker_image }}:{{ nginx_version }}"
+    restart: yes
     volumes: "{{ nginx_volumes }}"
     ports:
       - "80:80"

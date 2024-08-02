@@ -1,0 +1,28 @@
+- name: Install certbot
+  pip:
+    name:
+      - certbot
+      - certbot-nginx
+    executable: pip3
+
+- name: Register certbot
+  shell: |
+    certbot -n register --agree-tos --email {{ letsencrypt_register_email }} --work-dir {{ nginx_letsencrypt_workdir }} --logs-dir {{ nginx_letsencrypt_logsdir }} --config-dir {{ nginx_letsencrypt_configdir }}
+    touch {{ nginx_letsencrypt_workdir }}/.registered
+  args:
+    creates: "{{ nginx_letsencrypt_workdir }}/.registered"
+
+- name: Get certificate
+  command: "certbot -n certonly --webroot -w {{ nginx_letsencrypt_webroot_path }} -d {{ hostname }} --work-dir {{ nginx_letsencrypt_workdir }} --logs-dir {{ nginx_letsencrypt_logsdir }} --config-dir {{ nginx_letsencrypt_configdir }}"
+  args:
+    creates: "{{ nginx_letsencrypt_workdir }}/live/{{ hostname }}"
+  ignore_errors: true
+
+- name: Setup cronjob for renewal (At 00:00 on day-of-month 1 in every 2nd month, Let's Encrypt certificates expire in 90 days)
+  cron:
+    name: certbot-renewal (At 00:00 on day-of-month 1 in every 2nd month)
+    job: "certbot -q renew --work-dir {{ nginx_letsencrypt_workdir }} --logs-dir {{ nginx_letsencrypt_logsdir }} --config-dir {{ nginx_letsencrypt_configdir }}"
+    month: "*/2"
+    day: "1"
+    hour: "0"
+    minute: "0"

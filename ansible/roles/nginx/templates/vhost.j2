@@ -1,25 +1,23 @@
-server {
-    listen 80;
-    server_name {{ instance.nginx.fqdn }};
-
-    return 301 https://{{ instance.nginx.fqdn }};
-}
+{% include 'vhost_port_80.j2' %}
 
 server {
     include    mime.types;
     sendfile   on;
 
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name {{ instance.nginx.fqdn }};
 
     # Needed by OpenSearch Dashboards queries
     client_max_body_size 2000M;
 
-    # ssl    on;
-
-    ssl_certificate /etc/ssl/certs/{{ instance.nginx.fqdn }}.crt;
-    ssl_certificate_key /etc/ssl/private/{{ instance.nginx.fqdn }}.key;
-
+{% if custom_cert is defined %}
+    ssl_certificate /etc/ssl/certs/custom.crt;
+    ssl_certificate_key /etc/ssl/certs/custom.key;
+{% else %}
+    ssl_certificate /etc/ssl/certbot_certs/live/{{ instance.nginx.fqdn }}/fullchain.pem;
+    ssl_certificate_key /etc/ssl/certbot_certs/live/{{ instance.nginx.fqdn }}/privkey.pem;
+{% endif %}
     ssl_protocols TLSv1.3 TLSv1.2;
     ssl_ciphers AES256+EECDH:AES256+EDH:!aNULL;
     ssl_prefer_server_ciphers on;
