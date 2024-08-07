@@ -133,23 +133,47 @@
     name: "{{ sortinghat_docker_container }}"
     state: absent
 
+- name: "Create allowed hosts"
+  set_fact:
+    allowed_hosts: |-
+      [
+      {% for item in instances %}
+        {{ "" if loop.first else "," }}
+        "{{ item.nginx.fqdn | regex_findall('[a-zA-Z0-9-]*(?P<domain>\..*)', '\\g<domain>') | first }}"
+      {% endfor %}
+      ]
+
+- name: Remove duplicate entries in allowed hosts
+  set_fact:
+    allowed_hosts: "{{ allowed_hosts | unique }}"
+
 - name: Add sortinghat_allowed_hosts
   set_fact:
-    sortinghat_allowed_hosts: "{{ sortinghat_allowed_hosts + ',' + item.nginx.fqdn }}"
-  loop: "{{ instances }}"
+    sortinghat_allowed_hosts: "{{ sortinghat_allowed_hosts + ',' + item }}"
+  loop: "{{ allowed_hosts }}"
 
 - name: Check sortinghat_allowed_hosts list
   debug:
     msg: "{{ sortinghat_allowed_hosts }}"
 
-- name: Add sortinghat_cors_allowed_origins
+- name:  Create sortinghat_cors_allowed_origins_regexes
   set_fact:
-    sortinghat_cors_allowed_origins: "{{ sortinghat_cors_allowed_origins + ',' + 'https://'+item.nginx.fqdn }}"
-  loop: "{{ instances }}"
+    cors_regexes: |-
+      [
+      {% for item in allowed_hosts %}
+        {{ "" if loop.first else "," }}
+        "{{ item | regex_replace('^\.(.*)\.(.*)', '^https?://([a-zA-Z0–9-]+\.)+\1\.\2$') }}"
+      {% endfor %}
+      ]
 
-- name: Check sortinghat_cors_allowed_origins list
+- name: Add sortinghat_cors_allowed_origins_regexes
+  set_fact:
+    sortinghat_cors_allowed_origins_regexes: "{{ sortinghat_cors_allowed_origins_regexes + ',' + item }}"
+  loop: "{{ cors_regexes }}"
+
+- name: Check sortinghat_cors_allowed_origins_regexes list
   debug:
-    msg: "{{ sortinghat_cors_allowed_origins }}"
+    msg: "{{ sortinghat_cors_allowed_origins_regexes }}"
 
 - name: Start SortingHat container
   docker_container:
@@ -171,7 +195,7 @@
       SORTINGHAT_SUPERUSER_USERNAME: "{{ sortinghat_superuser_name }}"
       SORTINGHAT_SUPERUSER_PASSWORD: "{{ sortinghat_superuser_password }}"
       SORTINGHAT_ALLOWED_HOST: "{{ sortinghat_allowed_hosts }}"
-      SORTINGHAT_CORS_ALLOWED_ORIGINS: "{{ sortinghat_cors_allowed_origins }}"
+      SORTINGHAT_CORS_ALLOWED_ORIGIN_REGEXES: "{{ sortinghat_cors_allowed_origins_regexes }}"
       SORTINGHAT_STATICFILES_STORAGE: "{{ sortinghat_bucket_provider }}"
       SORTINGHAT_BUCKET_NAME: "{{ sortinghat_assets_bucket }}"
       SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
