@@ -159,7 +159,7 @@
     command: --upgrade
     env:
       SORTINGHAT_DEBUG: "{{ sortinghat_debug }}"
-      SORTINGHAT_CONFIG: sortinghat.config.settings
+      SORTINGHAT_CONFIG: sortinghat.config.settings_bap
       SORTINGHAT_SECRET_KEY: "{{ sortinghat_secret_key }}"
       SORTINGHAT_DB_HOST: "{{ mariadb_hosts }}"
       SORTINGHAT_DB_USER: "{{ mariadb_service_account }}"
