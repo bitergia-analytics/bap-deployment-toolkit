@@ -31,7 +31,7 @@ variable "vm_instance_high_cpu_threshold" {
 variable "vm_instance_high_disk_threshold" {
   type        = string
   description = "Percent usage of disk to fire the alert"
-  default     = "95"
+  default     = "80"
 }
 
 variable "vm_instance_high_memory_threshold" {

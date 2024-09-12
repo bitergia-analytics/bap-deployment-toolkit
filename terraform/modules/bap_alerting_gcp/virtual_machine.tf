@@ -3,7 +3,7 @@
 resource "google_monitoring_alert_policy" "vm_instance_high_cpu" {
   project       = var.project
 
-  display_name  = "VM Instance - High CPU Utilization"
+  display_name  = "VM Instance - High CPU Utilization (10min)"
   count         = var.alerts ? 1 : 0
 
   documentation {
@@ -13,14 +13,50 @@ resource "google_monitoring_alert_policy" "vm_instance_high_cpu" {
 
   combiner = "OR"
   conditions {
-    display_name = "VM Instance - High CPU utilization"
+    display_name = "VM Instance - High CPU utilization (10min)"
     condition_threshold {
       filter          = "resource.type = \"gce_instance\" AND metric.type = \"compute.googleapis.com/instance/cpu/utilization\""
       duration        = "0s"
       comparison      = "COMPARISON_GT"
       threshold_value = var.vm_instance_high_cpu_threshold
       aggregations {
-        alignment_period     = "300s"
+        alignment_period     = "600s"
+        per_series_aligner   = "ALIGN_MEAN"
+        cross_series_reducer = "REDUCE_MEAN"
+        group_by_fields      = [
+          "metric.label.instance_name"
+        ]
+      }
+      trigger {
+        count = 1
+      }
+    }
+  }
+
+  notification_channels = var.notification_channels
+}
+
+resource "google_monitoring_alert_policy" "vm_instance_high_cpu_1h" {
+  project       = var.project
+
+  display_name  = "VM Instance - High CPU Utilization (1h)"
+  count         = var.alerts ? 1 : 0
+
+  documentation {
+    content   = "CPU utilization on any VM instance is above 75.0% for the last 1h."
+    mime_type = "text/markdown"
+  }
+
+  combiner = "OR"
+  conditions {
+    display_name = "VM Instance - High CPU utilization (1h)"
+    condition_threshold {
+      filter          = "resource.type = \"gce_instance\" AND metric.type = \"compute.googleapis.com/instance/cpu/utilization\""
+      duration        = "0s"
+      comparison      = "COMPARISON_GT"
+      threshold_value = "0.75"
+      aggregations {
+        alignment_period     = "3600s"
         per_series_aligner   = "ALIGN_MEAN"
         cross_series_reducer = "REDUCE_MEAN"
         group_by_fields      = [
@@ -43,7 +79,7 @@ resource "google_monitoring_alert_policy" "vm_instance_high_disk" {
   count         = var.alerts ? 1 : 0
 
   documentation {
-    content   = "Disk utilization on any VM instance device is above 95.0% for the last 5m."
+    content   = "Disk utilization on any VM instance device is above 80.0% for the last 5m."
     mime_type = "text/markdown"
   }
 
