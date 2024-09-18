@@ -7,7 +7,7 @@ resource "google_monitoring_alert_policy" "vm_instance_high_cpu" {
   count         = var.alerts ? 1 : 0
 
   documentation {
-    content   = "CPU utilization on any VM instance is above 80.0% for the last 5m."
+    content   = "CPU utilization on any VM instance is above 80.0% for the last 10m."
     mime_type = "text/markdown"
   }
 
