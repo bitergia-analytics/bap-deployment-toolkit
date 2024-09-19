@@ -16,19 +16,27 @@
 - name: Configure Mordred
   import_tasks: configure.yml
 
+- name: "Create a docker network: {{ docker_network_name }}"
+  docker_network:
+    name: "{{ docker_network_name }}"
+
 - name: Remove old Mordred container(s)
   docker_container:
     name: "mordred_{{ item.project }}"
     state: absent
   with_items:
     - "{{ instances }}"
-  delegate_to: "{{ groups['mordred'][item.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][item.mordred.host]) }}"
   run_once: true
 
 - name: docker
   docker_container:
     name: "mordred_{{ item.project }}"
     image: "{{ bap_docker_image }}:{{ bap_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "mordred-{{ item.project }}"
     volumes:
     - "{{ mordred_ssh_dir }}:/home/grimoire/.ssh/"
     - "{{ mordred_setups_dir }}/{{ item.project }}/setup.cfg:/home/grimoire/conf/setup.cfg"
@@ -38,5 +46,5 @@
     - "{{ mordred_instances_dir }}/{{ item.project }}/perceval-cache/:/home/grimoire/.perceval/"
   with_items:
     - "{{ instances }}"
-  delegate_to: "{{ groups['mordred'][item.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][item.mordred.host]) }}"
   run_once: true

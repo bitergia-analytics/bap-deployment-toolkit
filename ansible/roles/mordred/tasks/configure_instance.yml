@@ -3,7 +3,7 @@
 - name: "Set {{ instance.project }} instance variables"
   set_fact:
     instance_dir: "{{ mordred_instances_dir }}/{{ instance.project }}"
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: "Ensure {{ instance.project }} instance directories are created"
@@ -18,7 +18,7 @@
     - "{{ instance_dir }}/logs"
     - "{{ instance_dir }}/sources"
     - "{{ instance_dir }}/perceval-cache"
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: "Add {{ instance.tenant }} tenant to aliases.json file"
@@ -37,7 +37,7 @@
     owner: grimoire
     group: grimoire
     mode: '0640'
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: "Checkout {{ instance.project }} sources repo"
@@ -48,7 +48,7 @@
     dest: "{{ instance_dir }}/sources"
     force: true
   when: instance.mordred.sources_repository is defined
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: "Change {{ instance.project }} sources permissions"
@@ -58,7 +58,7 @@
     owner: grimoire
     group: grimoire
     mode: '0774'
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: "Create cron job to pull changes from {{ instance.project }} sources repo"
@@ -66,13 +66,13 @@
     name: "Pull {{ instance.project }} sources"
     user: "{{ ansible_user_id }}"
     job: "cd {{ instance_dir }}/sources && git pull"
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: "Create MariaDB service account for {{ instance.project }}"
   mysql_user:
     name: "{{ mariadb_service_account }}"
-    host: "{{ ansible_default_ipv4.address }}"
+    host: "{{ '172.%' if 'all_in_one' in groups else ansible_default_ipv4.address }}"
     password: "{{ mariadb_service_account_password }}"
     priv: '*.*:ALL,GRANT'
     login_user: root
@@ -85,33 +85,33 @@
   until: result is success
   with_items:
     - "{{ mariadb_hosts }}"
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: Set anonymous role if opensearch_dashboards_anonymous is defined and the instance is public
   set_fact:
     anonymous: "{% if 'opensearch_dashboards_anonymous' in groups and groups['opensearch_dashboards_anonymous'] and instance.public %} -a {% else %} {% endif %}"
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: Add --force option (create_roles_tenat.py) if overwrite_roles is defined and the value is true
   set_fact:
     overwrite_roles: "{% if instance.overwrite_roles is defined and instance.overwrite_roles %} --force {% else %} {% endif %}"
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true
 
 - name: "Create roles and tenant for {{ instance.project }}"
   become: false
   command: >-
     python3 {{ role_path }}/files/create_roles_tenant.py
-    https://{{ opensearch_admin_user }}:{{ opensearch_admin_password }}@{{ groups['opensearch'][0] }}:9200 {{ instance.tenant }} {{ anonymous }}
+    https://{{ opensearch_admin_user }}:{{ opensearch_admin_password }}@{{ opensearch_host }}:9200 {{ instance.tenant }} {{ anonymous }}
     {{ overwrite_roles }}
   delegate_to: localhost
   run_once: true
 
 - name: "Create mordred user for {{ instance.project }}"
   uri:
-    url: "https://{{ groups['opensearch'][0] }}:9200/_plugins/_security/api/internalusers/{{ instance.tenant }}_mordred"
+    url: "https://{{ opensearch_host }}:9200/_plugins/_security/api/internalusers/{{ instance.tenant }}_mordred"
     url_username: "{{ opensearch_admin_user }}"
     url_password: "{{ opensearch_admin_password }}"
     force_basic_auth: yes
@@ -127,5 +127,5 @@
   retries: 10
   delay: 2
   become: false
-  delegate_to: "{{ groups['mordred'][instance.mordred.host] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
   run_once: true

@@ -2,7 +2,7 @@
 - name: Create a test service account
   mysql_user:
     name: "test_user"
-    host: localhost
+    host: "{{ ansible_default_ipv4.address }}"
     password: "test_password"
     priv: '*.*:ALL,GRANT'
     login_user: root
@@ -16,7 +16,7 @@
 - name: Drop a test service account
   mysql_user:
     name: "test_user"
-    host: localhost
+    host: "{{ ansible_default_ipv4.address }}"
     password: "test_password"
     priv: '*.*:ALL,GRANT'
     login_user: root

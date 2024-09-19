@@ -49,9 +49,10 @@ sortinghat_multi_tenant_list_path: "{{ sortinghat_workdir }}/sortinghat_multi_te
 
 # Database
 sortinghat_database: sortinghat_db
-mariadb_hosts: "{{ groups['mariadb'] | first }}"
+
+mariadb_hosts: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
 redis_database: "0"
-redis_hosts: "{{ groups['redis'] | first }}"
+redis_hosts: "{{ groups['all_in_one'][0] | default(groups['redis'][0]) }}"
 
 
 # Debug mode (on: 'true', '1'; off: 'false', '0')
@@ -72,7 +73,7 @@ nginx_version: stable
 nginx_docker_container: nginx
 
 ## Node configuration
-nginx_workdir: "/docker/nginx"
+nginx_workdir: /docker/nginx
 nginx_virtualhosts_workdir: "{{ nginx_workdir }}/conf"
 
 ## Enable SSL
@@ -86,3 +87,5 @@ certs_dir: "{{ nginx_workdir }}/certs"
 # custom_cert:
 #   cert: foo/cert.crt
 #   key: foo/cert.key
+
+docker_network_name: bap_network

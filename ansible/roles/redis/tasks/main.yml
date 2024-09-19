@@ -19,6 +19,10 @@
     dest: "{{ redis_workdir }}/overrides.conf"
     mode: 0664
 
+- name: "Create a docker network: {{ docker_network_name }}"
+  docker_network:
+    name: "{{ docker_network_name }}"
+
 - name: Remove old redis container
   docker_container:
     name: "{{ redis_docker_container }}"
@@ -28,6 +32,10 @@
   docker_container:
     name: "{{ redis_docker_container }}"
     image: "{{ redis_docker_image }}:{{ redis_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "{{ redis_docker_container | replace('_','-') }}"
     env:
       REDIS_PASSWORD: "{{ redis_password }}"
       REDIS_DISABLE_COMMANDS: FLUSHDB,FLUSHALL,CONFIG

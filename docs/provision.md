@@ -100,7 +100,10 @@ Replace the entries in `<>` with your values:
    of the bucket defined in the [prerequisites section](./prerequisites.md).
 - `prefix`: name of the folder where the state will be stored.
 
-### GCP Module Settings (`environment.tf`)
+#### GCP Module Settings (`environment.tf`)
+
+To deploy all BAP services in a single VM click [here](/docs/provision.md#deploy-all-bap-services-in-a-single-vm-opcional) and the [ansible playbook](/docs/deployment_and_config.md#deploy-all-bap-services-in-a-single-vm-optional)
+is also different.
 
 Below, you can find the different variables you can configure for this module.
 You can set the number of nodes and virtual machine type for each component
@@ -197,6 +200,44 @@ output "bap_env_gcp" {
   value = module.bap_env_gcp
 }
 ```
+
+##### Deploy all BAP services in a single VM (Opcional)
+
+Set `all_in_one_node_count = 1` and set to 0 the rest of `*_node_count = 0`.
+
+```tf
+module "bap_env_gcp" {
+  source = "../../modules/bap_env_gcp"
+
+  prefix = "test"
+  zone = var.zone
+
+  custom_tags = ["devel", "research"]
+
+  persistent_disks = true
+
+  all_in_one_node_count = 1
+  all_in_one_machine_type = "e2-standard-4"
+
+  # Set to 0 the rest of the services
+  mariadb_node_count = 0
+  mariadb_disk_count = 0
+  redis_node_count = 0
+  opensearch_node_count = 0
+  opensearch_dashboards_node_count = 0
+  opensearch_dashboards_anonymous_node_count = 0
+  nginx_node_count = 0
+  mordred_node_count = 0
+  sortinghat_node_count = 0
+  sortinghat_worker_node_count = 0
+}
+
+output "bap_env_gcp" {
+  value = module.bap_env_gcp
+}
+```
+
+##### Alerts
 
 If you want to include the basic alerts this toolkit offers, then, add the
 following code at the end of the `environment.tf` file:

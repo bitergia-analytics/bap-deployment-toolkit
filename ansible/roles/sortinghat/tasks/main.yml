@@ -1,5 +1,11 @@
 ---
 
+- name: All in one host (sortinghat hosts and origins)
+  set_fact:
+    sortinghat_allowed_hosts: "localhost,nginx,{{ groups['all_in_one'][0] }}"
+    sortinghat_cors_allowed_origins_regexes: "https://localhost,https://nginx,https://{{ groups['all_in_one'][0] }}"
+  when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"
+
 - name: "Create SortingHat tenants info"
   set_fact:
     tenants_info: |-
@@ -77,14 +83,14 @@
     state: present
     login_user: root
     login_password: "{{ mariadb_root_password }}"
-  delegate_to: "{{ groups['mariadb'][0] }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
   loop: "{{ databases }}"
   when: sortinghat_multi_tenant is defined and sortinghat_multi_tenant == "true"
 
 - name: Create MariaDB service account for SortingHat
   mysql_user:
     name: "{{ mariadb_service_account }}"
-    host: "{{ ansible_default_ipv4.address }}"
+    host: "{{ '172.%' if 'all_in_one' in groups else ansible_default_ipv4.address }}"
     password: "{{ mariadb_service_account_password }}"
     priv: "{{ privileges }}"
     login_user: root
@@ -127,6 +133,10 @@
           {% endfor %}
         ]
       }
+
+- name: "Create a docker network: {{ docker_network_name }}"
+  docker_network:
+    name: "{{ docker_network_name }}"
 
 - name: Remove old SortingHat container
   docker_container:
@@ -179,6 +189,10 @@
   docker_container:
     name: "{{ sortinghat_docker_container }}"
     image: "{{ sortinghat_docker_image }}:{{ sortinghat_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "{{ sortinghat_docker_container | replace('_','-') }}"
     pull: yes
     command: --upgrade
     env:
@@ -212,6 +226,10 @@
 - name: "Add {{ sortinghat_superuser_name }} user to all tenants for {{ ansible_hostname }}"
   command: >
     docker exec {{ sortinghat_docker_container }} /opt/venv/bin/sortinghat-admin set-user-tenant {{ sortinghat_superuser_name }} {{ item }} {{ item }}
+  register: result
+  retries: 10
+  delay: 10
+  until: result is success
   loop: "{{ databases }}"
   when: sortinghat_multi_tenant is defined and sortinghat_multi_tenant == "true"
 
@@ -230,3 +248,4 @@
 
 - name: Configure Nginx
   include_tasks: nginx.yml
+  when: "'all_in_one' not in groups"
