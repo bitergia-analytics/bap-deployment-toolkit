@@ -29,7 +29,10 @@ server {
 
     rewrite ^/$ $scheme://$http_host/app/dashboards#/view/Overview permanent;
     location / {
-{% if instance.public is defined and instance.public == true %}
+{% if 'all_in_one' in groups and inventory_hostname in groups['all_in_one'] %}
+        proxy_pass https://{{ ansible_default_ipv4.address }}:5601/;
+        proxy_redirect https://{{ ansible_default_ipv4.address }}:5601/ /;
+{% elif instance.public is defined and instance.public == true %}
         proxy_pass https://{{ hostvars[(groups['opensearch_dashboards_anonymous'][0])].ansible_default_ipv4.address }}:5601/;
         proxy_redirect https://{{ hostvars[(groups['opensearch_dashboards_anonymous'][0])].ansible_default_ipv4.address }}:5601/ /;
 {% else %}

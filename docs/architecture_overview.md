@@ -12,7 +12,9 @@ components to fetch and analyze data. Data visualizations and storage are provid
 by [OpenSearch](https://opensearch.org/).
 
 The platform is deployed as a set of components. The diagram below shows how they
-interact with each other. These components are:
+interact with each other. By default, each component is deployed in different VMs
+but there is an option to deploy all components **on a single VM**. See these sections
+of [terraform](/docs/provision.md#deploy-all-bap-services-in-a-single-vm-opcional) and [ansible](/docs/deployment_and_config.md#deploy-all-bap-services-in-a-single-vm-optional). These components are:
 
 * **Control node**: its aim is to create the infrastructure and to provision the
   machines. It creates the other nodes using Google Cloud Platform APIs via

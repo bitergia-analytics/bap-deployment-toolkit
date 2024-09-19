@@ -46,3 +46,5 @@ redis_hosts: "{{ groups['redis'] | first }}"
 # Multi tenant
 sortinghat_multi_tenant: "true"
 sortinghat_multi_tenant_list_path: "{{ sortinghat_worker_workdir }}/sortinghat_multi_tenant_list_path.json"
+
+docker_network_name: bap_network

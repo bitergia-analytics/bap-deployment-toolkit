@@ -2,7 +2,7 @@
 
 USER={{ mariadb_backup_service_account }}
 PASSWORD="{{ mariadb_backup_service_account_password }}"
-HOST={{ groups['mariadb'][0] }}
+HOST={{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}
 
 DUMP_FOLDER="/tmp"
 DATE=$(date "+%Y%m%d")

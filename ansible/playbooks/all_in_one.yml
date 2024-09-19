@@ -1,0 +1,13 @@
+---
+- hosts: all_in_one
+  roles:
+    - mariadb
+    - redis
+    - opensearch
+    - opensearch_dashboards
+    - sortinghat
+    - sortinghat_worker
+    - nginx
+    - mordred
+    - monitoring
+  become: true

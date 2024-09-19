@@ -11,3 +11,5 @@ redis_log_dir: "{{ redis_workdir }}/log"
 network:
   bind_host: 0.0.0.0
   publish_host: "{{ ansible_default_ipv4.address }}"
+
+docker_network_name: bap_network

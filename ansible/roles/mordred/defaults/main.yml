@@ -34,5 +34,7 @@ mordred_aliases_url: https://raw.githubusercontent.com/chaoss/grimoirelab-sirmor
 ##     overwrite_roles: true
 ##     sources_repository: "<PROJECT2_SOURCE_REPO_URL>"
 ##     host: 1
+mariadb_hosts: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
+opensearch_host: "{{ groups['all_in_one'][0] | default(groups['opensearch'][0]) }}"
 
-mariadb_hosts: "{{ groups['mariadb'] }}"
+docker_network_name: bap_network
