@@ -302,6 +302,8 @@ the `all.vars` section.
       client_secret: "<client_secret>"
       base_redirect_url: "https://<fnqd>"
       logout_url: "https://<fnqd>/auth/openid/login"
+
+    opensearch_dashboards_multiple_auth: <true|false>
 ```
 
 Replace the entries in `<>` with your values:
@@ -317,6 +319,8 @@ Replace the entries in `<>` with your values:
   platform will be served.
 - `openid.logout_url`: Replace `fnqd` by the full domain where the platform
   will be served.
+- `opensearch_dashboards_multiple_auth`: Enable multiple authorization to use
+  Basic authorization and OpenID. If the value is `false` only OpenID is activated.
 
 #### Custom SSL Certificates (Optional)
 

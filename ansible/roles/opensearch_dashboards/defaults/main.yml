@@ -63,3 +63,5 @@ opensearch_dashboards_cert_fqdn: opensearch.example.org
 #   base_redirect_url: {{ openid_redirect_url }}
 #   logout_url: "{{ openid_logout_url }}"
 #
+## Activate multiple authorization method
+# opensearch_dashboards_multiple_auth: true
