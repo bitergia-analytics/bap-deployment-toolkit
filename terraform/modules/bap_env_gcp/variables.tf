@@ -434,3 +434,57 @@ variable "network_iap_tunnel" {
   description = "Activate IAP tunnel"
   default     = false
 }
+
+# All services in one VM
+
+variable "all_in_one_node_count" {
+  type    = number
+  default = 0
+}
+
+variable "all_in_one_machine_type" {
+  type    = string
+  default = "e2-standard-2"
+}
+
+variable "all_in_one_machine_image" {
+  type    = string
+  default = "debian-cloud/debian-11"
+}
+
+variable "all_in_one_boot_disk_size" {
+  type    = number
+  default = 10
+}
+
+variable "all_in_one_disk_count" {
+  type    = number
+  default = 0
+}
+
+variable "all_in_one_disk_size" {
+  type    = number
+  default = 300
+}
+
+variable "all_in_one_disk_type" {
+  type    = string
+  default = "pd-standard"
+}
+
+variable "all_in_one_disk_attach" {
+  type        = string
+  description = "Instance ID to attach MariaDB disk"
+  default     = ""
+}
+
+variable "all_in_one_disk_snapshot" {
+  type = string
+  description = "The source snapshot used to create this disk"
+  default = null
+}
+
+variable "all_in_one_ansible_use_external_ip" {
+  type    = bool
+  default = false
+}

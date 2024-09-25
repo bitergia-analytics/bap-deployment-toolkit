@@ -1,5 +1,12 @@
 ---
 
+- name: All in one host
+  set_fact:
+    discovery_seed_hosts: "{{ ansible_default_ipv4.address }}"
+    cluster_initial_master_nodes: "{{ groups['all_in_one'] }}"
+    number_of_shards: 1
+  when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"
+
 - name: Create OpenSearch configuration directory
   file:
     path: "{{ opensearch_workdir }}"
@@ -50,10 +57,18 @@
     name: "{{ opensearch_docker_container }}"
     state: absent
 
+- name: "Create a docker network: {{ docker_network_name }}"
+  docker_network:
+    name: "{{ docker_network_name }}"
+
 - name: Start OpenSearch container
   docker_container:
     name: "{{ opensearch_docker_container }}"
     image: "{{ opensearch_docker_image }}:{{ opensearch_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "{{ opensearch_docker_container | replace('_','-') }}"
     env:
       DISABLE_INSTALL_DEMO_CONFIG=true
       bootstrap.memory_lock=true

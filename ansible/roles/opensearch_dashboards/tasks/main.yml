@@ -15,6 +15,10 @@
     group: '1000'
     mode: 0644
 
+- name: "Create a docker network: {{ docker_network_name }}"
+  docker_network:
+    name: "{{ docker_network_name }}"
+
 - name: Remove old private OpenSearch Dashboards container
   docker_container:
     name: "{{ opensearch_dashboards_docker_container }}"
@@ -29,10 +33,20 @@
   delegate_to: "{{ groups['opensearch_dashboards_anonymous'][0] }}"
   when: "'opensearch_dashboards_anonymous' in groups and inventory_hostname in groups['opensearch_dashboards_anonymous']"
 
+- name: Remove old local OpenSearch Dashboards container
+  docker_container:
+    name: "{{ opensearch_dashboards_docker_container }}"
+    state: absent
+  when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"
+
 - name: Start private OpenSearch Dashboards container(s)
   docker_container:
     name: "{{ opensearch_dashboards_docker_container }}"
     image: "{{ opensearch_dashboards_docker_image }}:{{ opensearch_dashboards_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "{{ opensearch_dashboards_docker_container | replace('_','-') }}"
     env:
       NODE_OPTIONS=--max-old-space-size=1000
     volumes:
@@ -46,6 +60,10 @@
   docker_container:
     name: "{{ opensearch_dashboards_docker_container }}_anonymous"
     image: "{{ opensearch_dashboards_docker_image }}:{{ opensearch_dashboards_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "{{ opensearch_dashboards_docker_container | replace('_','-') }}-anonymous"
     env:
       NODE_OPTIONS=--max-old-space-size=1000
     volumes:
@@ -54,3 +72,19 @@
       - "{{ network.bind_host }}:5601:5601"
   delegate_to: "{{ groups['opensearch_dashboards_anonymous'][0] }}"
   when: "'opensearch_dashboards_anonymous' in groups and inventory_hostname in groups['opensearch_dashboards_anonymous']"
+
+- name: Start local OpenSearch Dashboards container(s)
+  docker_container:
+    name: "{{ opensearch_dashboards_docker_container }}"
+    image: "{{ opensearch_dashboards_docker_image }}:{{ opensearch_dashboards_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "{{ opensearch_dashboards_docker_container | replace('_','-') }}"
+    env:
+      NODE_OPTIONS=--max-old-space-size=1000
+    volumes:
+      - "{{ opensearch_dashboards_workdir }}/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
+    ports:
+      - "{{ network.bind_host }}:5601:5601"
+  when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"

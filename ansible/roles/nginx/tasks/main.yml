@@ -65,6 +65,10 @@
     loop_var: instance
   when: custom_cert is undefined
 
+- name: "Create a docker network: {{ docker_network_name }}"
+  docker_network:
+    name: "{{ docker_network_name }}"
+
 # Start Nginx container to allow certbot to create certificates.
 - name: Start NGINX container with acme-challenge to create certificates using certbot
   docker_container:
@@ -91,6 +95,10 @@
     image: "{{ nginx_docker_image }}:{{ nginx_version }}"
     restart: yes
     volumes: "{{ nginx_volumes }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "{{ nginx_docker_container | replace('_','-') }}"
     ports:
       - "80:80"
       - "443:443"

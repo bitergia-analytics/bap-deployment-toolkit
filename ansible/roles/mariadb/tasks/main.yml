@@ -17,6 +17,10 @@
     mode: 0777
     recurse: true
 
+- name: "Create a docker network: {{ docker_network_name }}"
+  docker_network:
+    name: "{{ docker_network_name }}"
+
 - name: Remove old MariaDB container
   docker_container:
     name: mariadb
@@ -29,6 +33,10 @@
   docker_container:
     name: mariadb
     image: "{{ mariadb_docker_image }}:{{ mariadb_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - mariadb
     command: "--wait_timeout={{ mariadb_wait_timeout }} --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb_buffer_pool_size={{ mariadb_innodb_buffer_pool_size }} --long_query_time={{ mariadb_long_query_time }} --log-error=/var/log/mysql/error.log --slow-query-log=1 --slow-query-log-file=/var/log/mysql/slow.log"
     pull: true
     restart_policy: always
