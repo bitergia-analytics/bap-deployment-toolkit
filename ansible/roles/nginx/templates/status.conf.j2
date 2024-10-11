@@ -1,10 +1,10 @@
 server {
    listen 80;
-   server_name {{ hostvars[groups['nginx'][0]]['ansible_default_ipv4']['address'] }};
+   server_name {{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[groups['nginx'][0]]['ansible_default_ipv4']['address'] }};
    location /nginx_status {
        stub_status on;
        access_log off;
-       allow {{ hostvars[groups['nginx'][0]]['ansible_default_ipv4']['address'] }};
+       allow {{ ansible_default_ipv4.address if 'all_in_one' in groups else hostvars[groups['nginx'][0]]['ansible_default_ipv4']['address'] }};
        deny all;
    }
    location / {

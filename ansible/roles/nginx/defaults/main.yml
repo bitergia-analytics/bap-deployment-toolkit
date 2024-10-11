@@ -33,8 +33,8 @@ nginx_log_dir: "{{ nginx_workdir }}/log"
 ##     http_rest_api: false
 
 # Service hosts
-opensearch_endpoint: "https://{{ hostvars[(groups['opensearch'][0])].ansible_default_ipv4.address }}:9200"
-sortinghat_host: "{{ hostvars[(groups['sortinghat'][0])].ansible_default_ipv4.address }}:9314"
+opensearch_endpoint: "https://{{ ansible_default_ipv4.address | list if 'all_in_one' in groups else  hostvars[(groups['opensearch'][0])].ansible_default_ipv4.address }}:9200"
+sortinghat_host: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['sortinghat'][0])].ansible_default_ipv4.address }}:9314"
 
 # Certificates configuration
 ## Let's Encrypt configuration
@@ -67,3 +67,5 @@ nginx_keys_workdir: /docker/nginx/keys
 gcloud_apt_deb_ubuntu_repository: >-
   deb [signed-by=/usr/share/keyrings/cloud.google.gpg]
   https://packages.cloud.google.com/apt cloud-sdk main
+
+docker_network_name: bap_network

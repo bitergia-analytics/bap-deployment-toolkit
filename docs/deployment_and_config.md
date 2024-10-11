@@ -3,6 +3,8 @@
 Once the infrastructure has been created, it's time to deploy and configure
 BAP with Ansible. The toolkit provides a set of playbooks and roles that
 will do this job.
+If you want to deploy all BAP services in one VM, in the section **4. Deploy the platform**,
+you will have to run [all_in_one.yml](/docs/deployment_and_config.md#deploy-all-bap-services-in-a-single-vm-optional) playbook.
 
 ## 1. Install Ansible and Dependencies
 
@@ -389,6 +391,14 @@ directory, run the following command to deploy and configure it:
 
 ```terminal
 ansible-playbook -i environments/<environment>/inventory/ playbooks/all.yml
+```
+
+### Deploy all BAP services in a single VM (Optional)
+
+Run `all_in_one.yml` instead of running `all.yml` playbook.
+
+```terminal
+ansible-playbook -i environments/<environment>/inventory/ playbooks/all_in_one.yml
 ```
 
 After some minutes, the platform will be accessible in the domain you configured

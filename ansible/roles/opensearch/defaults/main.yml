@@ -86,3 +86,5 @@ opensearch_snapshots_json_file: "{{ opensearch_workdir }}/snapshot.json"
 opensearch_keys_dir:  "{{ opensearch_workdir }}/keys"
 gcp_service_account_file: "{{ opensearch_keys_dir }}/gcs_credentials.json"
 gcs_cred_file_container: "/usr/share/opensearch/config/gcs_credentials.json"
+
+docker_network_name: bap_network

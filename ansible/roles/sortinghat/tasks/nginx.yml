@@ -3,6 +3,11 @@
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
 
+- name: Create a network
+  docker_network:
+    name: "{{ docker_network_name }}"
+  when: "'all_in_one' in groups"
+
 - name: Remove old NGINX container
   docker_container:
     name: "{{ nginx_docker_container }}"

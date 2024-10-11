@@ -1,5 +1,9 @@
 upstream opensearch_nodes {
+{% if 'all_in_one' in groups and inventory_hostname in groups['all_in_one'] %}
+    server {{ ansible_default_ipv4.address }}:9200;
+{% else %}
 {% for node in groups['opensearch'] %}
     server {{ hostvars[node].ansible_default_ipv4.address }}:9200;
 {% endfor %}
+{% endif %}
 }
