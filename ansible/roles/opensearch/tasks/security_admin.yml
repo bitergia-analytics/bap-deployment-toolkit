@@ -49,3 +49,54 @@
     dest: "{{ opensearch_workdir }}/security_initialized"
     mode: 0400
     force: false
+
+- name: Create Audit Log ingore users
+  set_fact:
+    opensearch_auditlog_ingore_users: |-
+      [
+      {% for item in instances %}
+        "{{ item.project }}_mordred",
+      {% endfor %}
+        "kibanaserver"
+      ]
+  when: opensearch_auditlog_enabled
+
+- name: Check Audit Log ingore users
+  debug:
+    msg: "{{ opensearch_auditlog_ingore_users }}"
+  when: opensearch_auditlog_enabled
+
+- name: Configure security Audit Log
+  uri:
+    url: "{{ opensearch_endpoint }}/_opendistro/_security/api/audit/config"
+    method: PUT
+    body_format: json
+    body:
+      enabled: "{{ opensearch_auditlog_enabled }}"
+      audit:
+        ignore_users: "{{ opensearch_auditlog_ingore_users }}"
+        ignore_requests: "{{ opensearch_auditlog_ignore_requests }}"
+        disabled_rest_categories: "{{ opensearch_auditlog_disabled_rest_categories }}"
+        disabled_transport_categories: "{{ opensearch_auditlog_disabled_transport_categories }}"
+        log_request_body: "{{ opensearch_auditlog_log_request_body }}"
+        resolve_indices: "{{ opensearch_auditlog_resolve_indices }}"
+        resolve_bulk_requests: "{{ opensearch_auditlog_resolve_bulk_requests }}"
+        exclude_sensitive_headers: "{{ opensearch_auditlog_exclude_sensitive_headers }}"
+        enable_transport: "{{ opensearch_auditlog_enable_transport }}"
+        enable_rest: "{{ opensearch_auditlog_enable_rest }}"
+      compliance:
+        enabled: "{{ opensearch_auditlog_compliance_enabled }}"
+        write_log_diffs: "{{ opensearch_auditlog_compliance_write_log_diffs }}"
+        read_watched_fields: "{{ opensearch_auditlog_compliance_read_watched_fields }}"
+        read_ignore_users: "{{ opensearch_auditlog_ingore_users }}"
+        write_watched_indices: "{{ opensearch_auditlog_compliance_write_watched_indices }}"
+        write_ignore_users: "{{ opensearch_auditlog_ingore_users }}"
+        read_metadata_only: "{{ opensearch_auditlog_compliance_read_metadata_only }}"
+        write_metadata_only: "{{ opensearch_auditlog_compliance_opensearch_auditlog_write_metadata_only }}"
+        external_config: "{{ opensearch_auditlog_compliance_external_config }}"
+        internal_config: "{{ opensearch_auditlog_compliance_internal_config }}"
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
+  run_once: true
+  when: opensearch_auditlog_enabled
