@@ -82,6 +82,27 @@ opensearch_snapshots_cronjob_time:
 opensearch_snapshots_script: /usr/local/bin/make_snapshot.sh
 opensearch_snapshots_json_file: "{{ opensearch_workdir }}/snapshot.json"
 
+# Audit Log
+opensearch_auditlog_enabled: true
+opensearch_auditlog_ingore_users: ["kibanaserver"]
+opensearch_auditlog_ignore_requests: ["/_mget*", "/_plugins*", "/_template", "/_search", "/_mapping*", "/_cat*", "/_alias*", "/_cluster*", "/.kibana/_search", "/.kibana/_doc/config*", "/_resolve*"]
+opensearch_auditlog_disabled_rest_categories: ["GRANTED_PRIVILEGES", "BAD_HEADERS", "FAILED_LOGIN", "MISSING_PRIVILEGES", "SSL_EXCEPTION"]
+opensearch_auditlog_disabled_transport_categories: ["GRANTED_PRIVILEGES", "BAD_HEADERS", "FAILED_LOGIN", "MISSING_PRIVILEGES", "SSL_EXCEPTION", "INDEX_EVENT", "OPENDISTRO_SECURITY_INDEX_ATTEMPT"]
+opensearch_auditlog_log_request_body: false
+opensearch_auditlog_resolve_indices: false
+opensearch_auditlog_resolve_bulk_requests: false
+opensearch_auditlog_exclude_sensitive_headers: false
+opensearch_auditlog_enable_transport: false
+opensearch_auditlog_enable_rest: true
+opensearch_auditlog_compliance_enabled: true
+opensearch_auditlog_compliance_write_log_diffs: false
+opensearch_auditlog_compliance_read_watched_fields: {}
+opensearch_auditlog_compliance_write_watched_indices: []
+opensearch_auditlog_compliance_read_metadata_only: false
+opensearch_auditlog_compliance_opensearch_auditlog_write_metadata_only: true
+opensearch_auditlog_compliance_external_config: false
+opensearch_auditlog_compliance_internal_config: true
+
 ## Google Cloud Credendials
 opensearch_keys_dir:  "{{ opensearch_workdir }}/keys"
 gcp_service_account_file: "{{ opensearch_keys_dir }}/gcs_credentials.json"
