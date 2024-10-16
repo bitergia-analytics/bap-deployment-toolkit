@@ -1,0 +1,25 @@
+---
+
+- name: Copy OpenSearch Security backup script and gsutil credentials (~/.boto)
+  template:
+    src: "{{ item.src }}"
+    dest: "{{item.dest }}"
+    mode: 0500
+    owner: "{{ ansible_user_id }}"
+  with_items:
+    - src: opensearch-security/backup.sh.j2
+      dest: "{{ opensearch_security_backup_script }}"
+    - src: boto.j2
+      dest: ~/.boto
+
+- name: Create cron job for OpenSearch Security backup
+  cron:
+    name: "Make OpenSearch Security backup"
+    user: "{{ ansible_user_id }}"
+    special_time: "{{ opensearch_security_backup_cronjob_time }}"
+    job: "{{ opensearch_security_backup_script }}"
+
+- name: Restore OpenSearch Security backup
+  import_tasks: restore_security_backup.yml
+  when: opensearch_security_backup_restore
+
