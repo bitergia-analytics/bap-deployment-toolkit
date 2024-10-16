@@ -51,13 +51,6 @@
   ignore_errors: true
   changed_when: false
 
-- name: Delete credentials file
-  file:
-    path: "{{ gcp_service_account_file }}"
-    state: absent
-  ignore_errors: true
-  changed_when: false
-
 - name: "Create snapshot repository '{{ opensearch_snapshots_repository }}'"
   uri:
     url: "{{ opensearch_snapshots_url }}/_snapshot/{{ opensearch_snapshots_repository }}"
@@ -118,12 +111,26 @@
     mode: 0500
     owner: "{{ ansible_user_id }}"
 
-- name: Create cron job
+- name: Create cron job for OpenSearch snapshot
   cron:
-    name: "Make ES snapshot"
+    name: "Make OpenSearch snapshot"
     user: "{{ ansible_user_id }}"
     hour: "{{ opensearch_snapshots_cronjob_time.hour }}"
     minute: "{{ opensearch_snapshots_cronjob_time.minute }}"
     weekday: "{{ opensearch_snapshots_cronjob_time.weekday }}"
     job: "{{ opensearch_snapshots_script }}"
     backup: true
+
+- name: Empty OpenSearch Security backup directory
+  shell: rm -rf {{ opensearch_security_backup_dir }}/*
+  when: not opensearch_security_backup_restore
+
+- name: Create OpenSearch Security backup
+  command: >
+    docker exec {{ opensearch_docker_container }}
+    bash plugins/opensearch-security/tools/securityadmin.sh
+    -cacert config/{{ certs_files.ca_cert }}
+    -cert config/{{ certs_files.admin_cert }}
+    -key config/{{ certs_files.admin_key }}
+    -icl -nhnv -cd /tmp/backup -r
+  when: not opensearch_security_backup_restore

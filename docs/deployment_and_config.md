@@ -109,6 +109,9 @@ all:
     opensearch_cluster_prefix: <opensearch_cluster_prefix>
     opensearch_cluster_name: <opensearch_cluster_name>
     opensearch_cluster_heap_size: <opensearch_cluster_heap_size>
+    ## Uncomment to restore OpenSearch Security files from a backup
+    # opensearch_security_backup_restore: true
+    # opensearch_security_backup_restore_name: backup_2024-Oct-18_10-42-37.tgz
 
     ## OpenSearch Credentials
     opensearch_admin_user: <admin_username>
@@ -364,6 +367,19 @@ Replace the entries in `<>` with your values:
 
 - `mordred_ssh_key.private`: path to your SSH private key file
 - `mordred_ssh_key.public`: path to your SSH public key file
+
+#### Restore OpenSearch Security from a backup (optional)
+
+Toolkit will create a backup daily by default, if you want to restore the
+OpenSearch Security files from a backup add these parameters. Click [here](https://opensearch.org/docs/latest/security/configuration/security-admin/)
+for more information.
+
+- `opensearch_security_backup_restore`: Restore from a backup (by default is `false`)
+- `opensearch_security_backup_restore_name`: The name of the backup to restore
+  with the format `backup_%Y-%b-%d_%H-%M-%S.tgz` (e.g. `backup_2024-Oct-18_10-42-37.tgz`).
+- `opensearch_security_backup_cronjob_time`: The frequency of the backup, here are the
+  choices: `annually`, `daily`, `hourly`, `monthly`, `reboot`, `weekly`, and `yearly`
+  (by default is `daily`).
 
 ## 3. Setup Ansible Authentication
 

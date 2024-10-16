@@ -14,6 +14,13 @@
     mode: 0750
     recurse: true
 
+- name: Copy gsutil credentials file
+  template:
+    src: boto.j2
+    dest: ~/.boto
+    mode: 0500
+    owner: "{{ ansible_user_id }}"
+
 - name: Configure OpenSearch certificates
   import_tasks: certificates.yml
 
@@ -39,6 +46,15 @@
     owner: '1000'
     group: '1000'
     mode: 0660
+
+- name: Create OpenSearch Security files
+  file:
+    path: "{{ opensearch_workdir }}/opensearch-security/backup"
+    state: directory
+    owner: '1000'
+    group: '1000'
+    mode: 0660
+    recurse: true
 
 - name: Configure OpenSearch security
   import_tasks: security_config.yml
@@ -88,6 +104,7 @@
       - "{{ opensearch_workdir }}/opensearch-security/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml"
       - "{{ opensearch_workdir }}/opensearch-security/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml"
       - "{{ opensearch_workdir }}/opensearch-security/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml"
+      - "{{ opensearch_workdir }}/opensearch-security/backup/:/tmp/backup/"
       - "{{ opensearch_logs_dir }}:/usr/share/opensearch/logs"
     ports:
       - "{{ network.publish_host }}:9200:9200"
@@ -103,6 +120,9 @@
 
 - name: Init OpenSearch security plugin
   import_tasks: security_admin.yml
+
+- name: Configure OpenSearch Security Backup
+  import_tasks: security_backup.yml
 
 - name: Set default template for indices
   uri:

@@ -103,6 +103,14 @@ opensearch_auditlog_compliance_opensearch_auditlog_write_metadata_only: true
 opensearch_auditlog_compliance_external_config: false
 opensearch_auditlog_compliance_internal_config: true
 
+# OpenSearch Security backup
+opensearch_security_backup_dir: "{{ opensearch_workdir }}/opensearch-security/backup"
+opensearch_security_backup_script: /usr/local/bin/opensearch_security_backup.sh
+opensearch_security_backup_cronjob_time: "daily" # "annually", "daily", "hourly", "monthly", "reboot", "weekly", "yearly"
+## Restore from backup
+opensearch_security_backup_restore: false
+opensearch_security_backup_restore_name: backup_2024-Jul-01_17-18-22.tgz # backup_%Y-%b-%d_%H-%M-%S.tgz
+
 ## Google Cloud Credendials
 opensearch_keys_dir:  "{{ opensearch_workdir }}/keys"
 gcp_service_account_file: "{{ opensearch_keys_dir }}/gcs_credentials.json"
