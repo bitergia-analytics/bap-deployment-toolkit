@@ -1,0 +1,69 @@
+---
+
+- name: Copy OpenSearch Security backup script and gsutil credentials (~/.boto)
+  template:
+    src: "{{ item.src }}"
+    dest: "{{item.dest }}"
+    mode: 0500
+    owner: "{{ ansible_user_id }}"
+  with_items:
+    - src: opensearch-security/backup.sh.j2
+      dest: "{{ opensearch_security_backup_script }}"
+    - src: boto.j2
+      dest: ~/.boto
+
+- name: Create cron job for OpenSearch Security backup
+  cron:
+    name: "Make OpenSearch Security backup"
+    user: "{{ ansible_user_id }}"
+    special_time: "{{ opensearch_security_backup_cronjob_time }}"
+    job: "{{ opensearch_security_backup_script }}"
+
+- name: Empty OpenSearch Security backup directory
+  shell: rm -rf {{ opensearch_security_backup_dir }}/*
+  when: opensearch_security_backup_restore
+
+- name: Download OpenSearch Securty backup from GCP bucket
+  command: >
+    gsutil cp -P gs://{{ backups_assets_bucket }}/openserach-security-backup/{{ opensearch_security_backup_restore_name }}
+    {{ opensearch_workdir }}/opensearch-security/{{ opensearch_security_backup_restore_name }}
+  when: opensearch_security_backup_restore
+
+- name: Unarchive OpenSearch Security backup file (.tgz)
+  unarchive:
+    src: "{{ opensearch_workdir }}/opensearch-security/{{ opensearch_security_backup_restore_name }}"
+    dest: "{{ opensearch_workdir }}/opensearch-security"
+    extra_opts:
+    - --transform
+    - s/security_tenants/tenants/
+    remote_src: yes
+  when: opensearch_security_backup_restore
+
+- name: Rename OpenSearch Security files removing date
+  shell: >
+    find {{ opensearch_security_backup_dir }}/ -regextype sed
+    -regex '.*/{{ item }}_[0-9]\{4\}-[a-zA-Z]\{3\}-[0-9]\{2\}_[0-9]\{2\}-[0-9]\{2\}-[0-9]\{2\}.yml'
+    -exec mv '{}' {{ opensearch_security_backup_dir }}/{{ item }}.yml \;
+  with_items:
+  - action_groups
+  - allowlist
+  - audit
+  - config
+  - internal_users
+  - nodes_dn
+  - roles
+  - roles_mapping
+  - tenants
+  - whitelist
+  when: opensearch_security_backup_restore
+
+- name: Restore OpenSearch Security from backup
+  command: >
+    docker exec {{ opensearch_docker_container }}
+    bash plugins/opensearch-security/tools/securityadmin.sh
+    -cd /tmp/backup/
+    -cacert config/{{ certs_files.ca_cert }}
+    -cert config/{{ certs_files.admin_cert }}
+    -key config/{{ certs_files.admin_key }}
+    -icl -nhnv
+  when: opensearch_security_backup_restore

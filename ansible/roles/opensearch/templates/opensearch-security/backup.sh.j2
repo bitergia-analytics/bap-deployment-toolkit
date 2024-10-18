@@ -1,0 +1,21 @@
+#!/bin/bash
+
+DATE=$(date "+%Y-%b-%d_%H-%M-%S")
+BACKUP_NAME="{{ opensearch_workdir }}/opensearch-security/backup_${DATE}.tgz"
+
+# Empty the backup directory
+rm -rf {{ opensearch_security_backup_dir }}/*
+
+# Create a new backup files
+docker exec {{ opensearch_docker_container }} \
+    bash plugins/opensearch-security/tools/securityadmin.sh \
+    -cacert config/{{ certs_files.ca_cert }} \
+    -cert config/{{ certs_files.admin_cert }} \
+    -key config/{{ certs_files.admin_key }} \
+    -icl -nhnv -cd /tmp/backup -r
+
+# Compress backup directory
+tar -cvzf ${BACKUP_NAME} "{{ opensearch_security_backup_dir }}"
+
+# Upload the new backup to GCP bucket
+gsutil cp ${BACKUP_NAME} "gs://{{ backups_assets_bucket }}/opensearch/security-backup/${BACKUP_NAME}"
