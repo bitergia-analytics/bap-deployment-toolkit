@@ -172,7 +172,7 @@
       [
       {% for item in allowed_hosts %}
         {{ "" if loop.first else "," }}
-        "{{ item | regex_replace('^\.(.*)\.(.*)', '^https?://([a-zA-Z0–9-]+\.)+\1\.\2$') }}"
+        "{{ item | regex_replace('^\.(.*)\.(.*)', '^https?://([a-zA-Z0-9_-]+\.)+\1\.\2$') }}"
       {% endfor %}
       ]
 
