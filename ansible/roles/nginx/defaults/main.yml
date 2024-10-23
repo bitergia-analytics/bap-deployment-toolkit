@@ -42,6 +42,9 @@ nginx_letsencrypt_workdir: "{{ nginx_workdir }}/letsencrypt"
 nginx_letsencrypt_logsdir: "{{ nginx_letsencrypt_workdir }}/logs"
 nginx_letsencrypt_configdir: "{{ nginx_letsencrypt_workdir }}/config"
 nginx_letsencrypt_webroot_path: "{{ nginx_letsencrypt_workdir }}/webroot"
+nginx_letsencrypt_cert_warning_days: 30
+nginx_letsencrypt_certbot_renew_script_dest: "{{ nginx_letsencrypt_workdir }}/certbot_renew.sh"
+nginx_letsencrypt_cronjob_time: "daily" # "annually", "daily", "hourly", "monthly", "reboot", "weekly", "yearly"
 
 ## Custom certifications
 nginx_certs_dir: "{{ nginx_workdir }}/certs"

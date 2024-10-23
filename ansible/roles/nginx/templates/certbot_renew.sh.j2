@@ -1,0 +1,44 @@
+#!/bin/bash
+
+CERTBOT_CONFIG_DIR="{{ nginx_letsencrypt_configdir }}"
+CERTBOT_CERTS_DIR="{{ nginx_letsencrypt_configdir }}/live"
+CERTBOT_WORK_DIR="{{ nginx_letsencrypt_workdir }}"
+CERTBOT_LOGS_DIR="{{ nginx_letsencrypt_logsdir }}"
+CERTBOT_OUTPUT="{{ nginx_letsencrypt_logsdir }}/certbot_renew.log"
+
+WARNING_DAYS="{{ nginx_letsencrypt_cert_warning_days }}"
+
+DATE_NOW=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Function to check certs
+renew_cert() {
+    cert_path="$CERTBOT_CERTS_DIR/$1/cert.pem"
+    if [ ! -f "$cert_path" ]; then
+        echo "$DATE_NOW - $1: 'cert.pem' not found at $CERTBOT_CERTS_DIR/$1/" >> "$CERTBOT_OUTPUT"
+        return 1
+    fi
+
+    expiry_date=$(openssl x509 -in "$cert_path" -noout -dates | awk -F= '/notAfter=/ {print $2}')
+    expiry_date=$(date -d "$expiry_date" +"%b %d %H:%M:%S %Y %Z")
+    days_left=$(((`date -d "$expiry_date" +%s`-`date -d "now" +%s`)/(60*60*24)))
+
+    if [ "$days_left" -lt "$WARNING_DAYS" ]; then
+        echo "$DATE_NOW - $1: Expires in $days_left days. Renewing cert" >> $CERTBOT_OUTPUT
+        certbot -q renew --work-dir $CERTBOT_WORK_DIR --logs-dir $CERTBOT_LOGS_DIR --config-dir $CERTBOT_CONFIG_DIR
+        if [ $? -eq 0 ]; then
+            echo "$DATE_NOW - $1: Cert renewed" >> $CERTBOT_OUTPUT
+            docker restart "{{ nginx_docker_container }}"
+        else
+            echo "$DATE_NOW - $1: ERROR cert not renewed" >> $CERTBOT_OUTPUT
+        fi
+    else
+        echo "$DATE_NOW - $1: Still valid. It expires on $expiry_date" >> $CERTBOT_OUTPUT
+    fi
+}
+
+for cert_dir in "$CERTBOT_CERTS_DIR"/*; do
+    if [ -d "$cert_dir" ]; then
+        domain=$(basename "$cert_dir")
+        renew_cert "$domain"
+    fi
+done
