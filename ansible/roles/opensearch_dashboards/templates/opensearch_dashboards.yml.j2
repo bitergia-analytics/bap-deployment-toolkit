@@ -49,9 +49,14 @@ opensearch_security.cookie.secure: true
 opensearch_security.cookie.secure: false
 {% endif %}
 
-{% if openid_dashboards is defined %}
+{% if openid is defined %}
 ### OpenID configuration
+{% if opensearch_dashboards_multiple_auth is defined and opensearch_dashboards_multiple_auth | bool %}
+opensearch_security.auth.type: ["basicauth","openid"]
+opensearch_security.auth.multiple_auth_enabled: true
+{% else  %}
 opensearch_security.auth.type: "openid"
+{% endif %}
 opensearch_security.openid.connect_url: "{{ openid.connect_url }}"
 opensearch_security.openid.client_id: "{{ openid.client_id }}"
 opensearch_security.openid.client_secret: "{{ openid.client_secret }}"
