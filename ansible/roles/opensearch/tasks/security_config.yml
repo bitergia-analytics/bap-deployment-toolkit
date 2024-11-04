@@ -2,7 +2,7 @@
 
 - name: Create OpenSearch security directory
   file:
-    path: "{{ opensearch_workdir }}/opensearch-security"
+    path: "{{ opensearch_security_dir }}"
     state: directory
     mode: 0775
     recurse: true
