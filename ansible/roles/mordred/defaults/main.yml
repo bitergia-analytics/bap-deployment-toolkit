@@ -2,7 +2,7 @@
 
 # Bitergia Analytics image and container
 bap_docker_image: bitergia/bitergia-analytics
-bap_version: 0.24.0
+bap_version: 0.25.0
 
 # GrimoireLab configuration
 mordred_workdir: "/docker/mordred"
