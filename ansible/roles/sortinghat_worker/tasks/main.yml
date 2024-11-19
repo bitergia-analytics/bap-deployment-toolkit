@@ -74,7 +74,7 @@
 - name: Create MariaDB service account for SortingHat worker
   mysql_user:
     name: "{{ mariadb_service_account }}"
-    host: "{{ '172.%' if 'all_in_one' in groups else ansible_all_ipv4_addresses }}"
+    host: "{{ '172.%' if 'all_in_one' in groups else ansible_default_ipv4.address }}"
     password: "{{ mariadb_service_account_password }}"
     priv: "{{ privileges }}"
     login_user: root
