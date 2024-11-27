@@ -88,3 +88,10 @@
     ports:
       - "{{ network.bind_host }}:5601:5601"
   when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"
+
+- name: Create cron job for start OpenSearch Dashboards docker container
+  cron:
+    name: "Start OpenSearch Dashboards docker container"
+    user: "{{ ansible_user_id }}"
+    job: "docker start {{ opensearch_dashboards_docker_container }}"
+    backup: true
