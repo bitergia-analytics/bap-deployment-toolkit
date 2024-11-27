@@ -190,3 +190,24 @@
     - sortinghat_multi_tenant == "true"
     - item.dedicated_queue is defined
     - item.dedicated_queue == true
+
+- name: Create cron job for start SortingHat Workers docker container
+  cron:
+    name: "Start SortingHat Workers docker container"
+    user: "{{ ansible_user_id }}"
+    job: "docker start {{ sortinghat_worker_docker_container }}-{{ item }}"
+    backup: true
+  with_sequence: start=1 end="{{ sortinghat_workers }}"
+
+- name: Create cron job for start SortingHat docker container
+  cron:
+    name: "Start SortingHat dedicated workers docker container"
+    user: "{{ ansible_user_id }}"
+    job: "docker start {{ sortinghat_worker_docker_container }}-{{ item.tenant }}"
+    backup: true
+  loop: "{{ tenants }}"
+  when:
+    - sortinghat_multi_tenant is defined
+    - sortinghat_multi_tenant == "true"
+    - item.dedicated_queue is defined
+    - item.dedicated_queue == true

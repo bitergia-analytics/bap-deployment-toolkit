@@ -108,3 +108,10 @@
 
 - name: Launch first rsync
   shell: gsutil -m rsync -d -r "gs://{{ sortinghat_assets_bucket }}/" "{{ nginx_gcs_workdir }}"
+
+- name: Create cron job for start Nginx docker container
+  cron:
+    name: "Start Nginx docker container"
+    user: "{{ ansible_user_id }}"
+    job: "docker start {{ nginx_docker_container }}"
+    backup: true
