@@ -1,26 +1,19 @@
 logging:
   receivers:
-    elasticsearch_json:
-      type: elasticsearch_json
+    docker-logs:
+      type: files
+      include_paths: [/var/lib/docker/containers/*/*-json.log]
+      record_log_file_path: true
+    opensearch-logs:
+      type: files
       include_paths: {{ opensearch_logging_include_paths }}
-    elasticsearch_gc:
-      type: elasticsearch_gc
-      include_paths: {{ opensearch_logging_gc_include_paths }}
+  processors:
+    parse_json:
+      type: parse_json
+      time_key: time
+      time_format: "%Y-%m-%dT%H:%M:%S.%L"
   service:
     pipelines:
-      elasticsearch:
-        receivers:
-          - elasticsearch_json
-          - elasticsearch_gc
-metrics:
-  receivers:
-    elasticsearch:
-      type: elasticsearch
-      endpoint: {{ hostvars[groups['opensearch'][0]]['ansible_default_ipv4']['address'] }}
-      username: {{ opensearch_monitoring_username }}
-      password: {{ opensearch_monitoring_password }}
-  service:
-    pipelines:
-      elasticsearch:
-        receivers:
-          - elasticsearch
+      pipeline:
+        receivers: [docker-logs, opensearch-logs]
+        processors: [parse_json]

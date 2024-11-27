@@ -1,5 +1,5 @@
 ---
-- hosts: all, !ungrouped, !redis, !nginx, !mariadb
+- hosts: all, !ungrouped, !redis, !nginx, !mariadb, !opensearch
   become: true
   tasks:
     - name: All hosts except Redis, NGINX, and MariaDB
@@ -30,3 +30,11 @@
       include_role:
         name: monitoring
         tasks_from: mariadb
+
+- hosts: opensearch
+  become: true
+  tasks:
+    - name: OpenSearch monitoring
+      include_role:
+        name: monitoring
+        tasks_from: opensearch
