@@ -11,12 +11,10 @@ mariadb_root_user: root
 # OpenSearch
 opensearch_logging_include_paths: [
   "/docker/opensearch/log/*_server.json",
-  "/docker/opensearch/log/*__deprecation.json",
+  "/docker/opensearch/log/*_deprecation.json",
   "/docker/opensearch/log/*_index_search_slowlog.json",
-  "/docker/opensearch/log/*_index_indexing_slowlog.json",
-  "/docker/opensearch/log/*_audit.json"
+  "/docker/opensearch/log/*_index_indexing_slowlog.json"
 ]
-opensearch_logging_gc_include_paths: ["/docker/opensearch/log/gc.json"]
 
 # NGINX
 nginx_logging_access_include_paths: ["/docker/nginx/log/access.log"]
