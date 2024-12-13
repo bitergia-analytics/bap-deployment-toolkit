@@ -23,7 +23,7 @@
 
 - name: Remove old MariaDB container
   docker_container:
-    name: mariadb
+    name: "{{ mariadb_docker_container }}"
     state: absent
   tags:
     - reconfigure
@@ -31,7 +31,7 @@
 
 - name: Start MariaDB container
   docker_container:
-    name: mariadb
+    name: "{{ mariadb_docker_container }}"
     image: "{{ mariadb_docker_image }}:{{ mariadb_version }}"
     networks:
       - name: "{{ docker_network_name }}"
@@ -126,7 +126,7 @@
     group: '1000'
     mode: 0644
 
-- name: Create cron job
+- name: Create cron job for backup
   cron:
     name: "Make MariaDB backup"
     user: "{{ ansible_user_id }}"
@@ -134,4 +134,11 @@
     minute: "{{ mariadb_backup_cronjob_time.minute }}"
     weekday: "{{ mariadb_backup_cronjob_time.weekday }}"
     job: "{{ mariadb_backup_script }}"
+    backup: true
+
+- name: Create cron job for start MariaDB docker container
+  cron:
+    name: "Start MariaDB docker container"
+    user: "{{ ansible_user_id }}"
+    job: "docker start {{ mariadb_docker_container }}"
     backup: true

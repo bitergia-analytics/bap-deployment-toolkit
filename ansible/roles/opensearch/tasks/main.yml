@@ -159,3 +159,10 @@
 
 - name: Configure OpenSearch Snapshots
   import_tasks: snapshots.yml
+
+- name: Create cron job for start OpenSearch docker container
+  cron:
+    name: "Start OpenSearch docker container"
+    user: "{{ ansible_user_id }}"
+    job: "docker start {{ opensearch_docker_container }}"
+    backup: true

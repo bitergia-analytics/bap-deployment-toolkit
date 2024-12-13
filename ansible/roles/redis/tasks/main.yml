@@ -45,3 +45,10 @@
       - "{{ redis_log_dir }}:/opt/bitnami/redis/logs/"
     ports:
       - "{{ network.bind_host }}:6379:6379"
+
+- name: Create cron job for start Redis docker container
+  cron:
+    name: "Start Redis docker container"
+    user: "{{ ansible_user_id }}"
+    job: "docker start {{ redis_docker_container }}"
+    backup: true

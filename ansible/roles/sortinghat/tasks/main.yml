@@ -249,3 +249,10 @@
 - name: Configure Nginx
   include_tasks: nginx.yml
   when: "'all_in_one' not in groups"
+
+- name: Create cron job for start SortingHat docker container
+  cron:
+    name: "Start SortingHat docker container"
+    user: "{{ ansible_user_id }}"
+    job: "docker start {{ sortinghat_docker_container }}"
+    backup: true
