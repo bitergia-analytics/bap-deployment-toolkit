@@ -48,3 +48,4 @@ mariadb_backup_script: /usr/local/bin/mariadb_backup.sh
 mariadb_innodb_buffer_pool_size: 6871947673
 
 docker_network_name: bap_network
+docker_log_max_size: 500m

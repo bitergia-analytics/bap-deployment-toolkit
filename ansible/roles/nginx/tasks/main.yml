@@ -81,6 +81,9 @@
     exposed_ports:
       - "80"
       - "443"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   when: custom_cert is undefined
 
 - name: Configure virtualhost(s) for all instances
@@ -105,6 +108,9 @@
     exposed_ports:
       - "80"
       - "443"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
 
 - name: Launch first rsync
   shell: gsutil -m rsync -d -r "gs://{{ sortinghat_assets_bucket }}/" "{{ nginx_gcs_workdir }}"

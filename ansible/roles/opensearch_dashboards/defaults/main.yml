@@ -67,3 +67,4 @@ opensearch_dashboards_cert_fqdn: opensearch.example.org
 # opensearch_dashboards_multiple_auth: true
 
 docker_network_name: bap_network
+docker_log_max_size: 500m

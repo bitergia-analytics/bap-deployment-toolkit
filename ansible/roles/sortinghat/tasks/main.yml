@@ -222,6 +222,9 @@
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
     ports:
       - "{{ network.bind_host }}:9314:9314"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
 
 - name: "Add {{ sortinghat_superuser_name }} user to all tenants for {{ ansible_hostname }}"
   command: >

@@ -145,6 +145,9 @@
       SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
     volumes:
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   with_sequence: start=1 end="{{ sortinghat_workers }}"
 
 - name: "Remove old SortingHat dedicated workers {{ item.tenant }}"
@@ -184,6 +187,9 @@
       SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
     volumes:
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   loop: "{{ tenants }}"
   when:
     - sortinghat_multi_tenant is defined

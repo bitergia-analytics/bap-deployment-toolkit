@@ -50,6 +50,9 @@
     volumes:
       - mariadb_data:/var/lib/mysql
       - "{{ mariadb_logs_dir }}:/var/log/mysql/"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   register: result
   retries: 2
   delay: 5

@@ -23,6 +23,9 @@
       - "80:80"    
     exposed_ports:
       - "80"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   when: enable_ssl|bool == false
 
 - name: Start NGINX container enabling SSL
@@ -39,4 +42,7 @@
     exposed_ports:
       - "80"
       - "443"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   when: enable_ssl|bool == true

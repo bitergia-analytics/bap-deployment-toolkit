@@ -43,5 +43,8 @@
       - redis_data:/bitnami/redis/data
       - "{{ redis_workdir }}/overrides.conf:/opt/bitnami/redis/mounted-etc/overrides.conf"
       - "{{ redis_log_dir }}:/opt/bitnami/redis/logs/"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
     ports:
       - "{{ network.bind_host }}:6379:6379"
