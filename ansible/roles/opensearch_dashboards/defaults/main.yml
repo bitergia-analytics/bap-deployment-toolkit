@@ -30,12 +30,12 @@ login:
 opensearch_dashboards_branding:
   applicationTitle: "Bitergia Analytics"
   logo:
-    defaultUrl: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_logo.svg"
+    defaultUrl: "https://raw.githubusercontent.com/bitergia-analytics/bitergia-analytics-opensearch-dashboards/main/assets/bitergia_logo.svg"
   mark:
-    defaultUrl: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_logo.svg"
+    defaultUrl: "https://raw.githubusercontent.com/bitergia-analytics/bitergia-analytics-opensearch-dashboards/main/assets/bitergia_logo.svg"
   loadingLogo:
-    defaultUrl: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_logo.svg"
-  faviconUrl: "https://raw.githubusercontent.com/Bitergia/bitergia-analytics-opensearch-dashboards/master/assets/bitergia_logo.svg"
+    defaultUrl: "https://raw.githubusercontent.com/bitergia-analytics/bitergia-analytics-opensearch-dashboards/main/assets/bitergia_logo.svg"
+  faviconUrl: "https://raw.githubusercontent.com/bitergia-analytics/bitergia-analytics-opensearch-dashboards/main/assets/bitergia_logo.svg"
 
 bitergia_analytics_branding:
   projectName: "Bitergia Analytics"
