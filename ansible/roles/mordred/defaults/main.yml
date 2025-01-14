@@ -14,7 +14,7 @@ mordred_ssh_dir: "{{ mordred_workdir }}/ssh"
 #  public: "id_rsa.pub"
 mordred_instances_dir: "{{ mordred_workdir }}/instances"
 
-mordred_aliases_url: https://raw.githubusercontent.com/chaoss/grimoirelab-sirmordred/master/aliases.json
+mordred_aliases_url: https://raw.githubusercontent.com/chaoss/grimoirelab-sirmordred/main/aliases.json
 
 # Set in your environments vars.yml
 ## mordred_setups_repo_url: <SETUP_REPO_URL>
