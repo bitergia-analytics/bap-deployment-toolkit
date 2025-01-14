@@ -1,5 +1,22 @@
 ---
 
+- name: Install logrotate
+  package:
+    name: logrotate
+    state: present
+
+- name: Copy logrotate.conf to /etc/logrotate.conf
+  copy:
+    src: "{{ role_path }}/files/logrotate.conf"
+    dest: /etc/logrotate.conf
+    mode: "0644"
+
+- name: Generate /etc/logrotate.d/nginx
+  template:
+    src: nginx_logrotate.j2
+    dest: /etc/logrotate.d/nginx
+    mode: "0644"
+
 - name: Configure virtualhost(s)
   include_tasks: virtualhost.yml
 
@@ -31,6 +48,7 @@
     image: "{{ nginx_docker_image }}:{{ nginx_version }}"
     volumes:
       - "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
+      - "{{ nginx_log_dir }}:/var/log/nginx"
       - "{{ certs_dir }}/{{ ansible_hostname }}.crt:/etc/ssl/certs/{{ ansible_hostname }}.crt"
       - "{{ certs_dir }}/{{ ansible_hostname }}.key:/etc/ssl/private/{{ ansible_hostname }}.key"
     ports:
