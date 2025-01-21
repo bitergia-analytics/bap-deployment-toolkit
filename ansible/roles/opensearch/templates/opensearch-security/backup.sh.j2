@@ -16,7 +16,8 @@ docker exec {{ opensearch_docker_container }} \
     -icl -nhnv -cd /tmp/backup -r
 
 # Compress backup directory
-tar -cvzf ${BACKUP_DIR}/${BACKUP_NAME} -C "{{ opensearch_security_backup_dir }}" .
+cd "{{ opensearch_security_backup_dir }}"
+tar -cvzf ${BACKUP_DIR}/${BACKUP_NAME} *.yml
 
 # Upload the new backup to GCP bucket
-gsutil cp ${BACKUP_DIR}/${BACKUP_NAME} "gs://{{ backups_assets_bucket }}/opensearch-security-backup/${BACKUP_NAME}"
+gsutil -h 'Content-Type:' cp ${BACKUP_DIR}/${BACKUP_NAME} "gs://{{ backups_assets_bucket }}/opensearch-security-backup/${BACKUP_NAME}"
