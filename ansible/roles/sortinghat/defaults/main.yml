@@ -89,3 +89,4 @@ certs_dir: "{{ nginx_workdir }}/certs"
 #   key: foo/cert.key
 
 docker_network_name: bap_network
+docker_log_max_size: 500m

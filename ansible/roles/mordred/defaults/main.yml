@@ -38,3 +38,4 @@ mariadb_hosts: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
 opensearch_host: "{{ groups['all_in_one'][0] | default(groups['opensearch'][0]) }}"
 
 docker_network_name: bap_network
+docker_log_max_size: 500m

@@ -117,6 +117,9 @@
       - "9200"
       - "9300"
       - "9600"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
 
 - name: Init OpenSearch security plugin
   import_tasks: security_admin.yml

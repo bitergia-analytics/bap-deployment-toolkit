@@ -53,6 +53,9 @@
       - "{{ opensearch_dashboards_workdir }}/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
     ports:
       - "{{ network.bind_host }}:5601:5601"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   delegate_to: "{{ groups['opensearch_dashboards'][0] }}"
   when: "'opensearch_dashboards' in groups and inventory_hostname in groups['opensearch_dashboards']"
 
@@ -70,6 +73,9 @@
       - "{{ opensearch_dashboards_workdir }}/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
     ports:
       - "{{ network.bind_host }}:5601:5601"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   delegate_to: "{{ groups['opensearch_dashboards_anonymous'][0] }}"
   when: "'opensearch_dashboards_anonymous' in groups and inventory_hostname in groups['opensearch_dashboards_anonymous']"
 
@@ -87,4 +93,7 @@
       - "{{ opensearch_dashboards_workdir }}/opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml"
     ports:
       - "{{ network.bind_host }}:5601:5601"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"

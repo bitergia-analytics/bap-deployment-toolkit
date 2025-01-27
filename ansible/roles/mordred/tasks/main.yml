@@ -44,6 +44,9 @@
     - "{{ mordred_instances_dir }}/{{ item.project }}/sources/:/home/grimoire/data-sources/"
     - "{{ mordred_instances_dir }}/{{ item.project }}/logs/:/home/grimoire/logs/"
     - "{{ mordred_instances_dir }}/{{ item.project }}/perceval-cache/:/home/grimoire/.perceval/"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
   with_items:
     - "{{ instances }}"
   delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][item.mordred.host]) }}"

@@ -72,3 +72,4 @@ gcloud_apt_deb_ubuntu_repository: >-
   https://packages.cloud.google.com/apt cloud-sdk main
 
 docker_network_name: bap_network
+docker_log_max_size: 500m
