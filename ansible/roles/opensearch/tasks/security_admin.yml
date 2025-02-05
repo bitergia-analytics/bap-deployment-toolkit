@@ -68,7 +68,7 @@
 
 - name: Configure security Audit Log
   uri:
-    url: "{{ opensearch_endpoint }}/_opendistro/_security/api/audit/config"
+    url: https://localhost:9200/_opendistro/_security/api/audit/config
     method: PUT
     body_format: json
     body:
@@ -98,5 +98,9 @@
     client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
     validate_certs: false
+  register: result
+  until: result.status == 200
+  retries: 10
+  delay: 10
   run_once: true
   when: opensearch_auditlog_enabled

@@ -175,8 +175,10 @@ module "bap_env_gcp" {
   redis_machine_type = "e2-standard-2"
   redis_disk_snapshot = "<SNAPSHOT-DISK-NAME>
 
-  opensearch_node_count = 3
-  opensearch_machine_type = "e2-highmem-4"
+  opensearch_manager_node_count = 1
+  opensearch_manager_machine_type = "e2-standard-2"
+  opensearch_data_node_count = 2
+  opensearch_data_machine_type = "e2-highmem-4"
 
   opensearch_dashboards_node_count = 1
   opensearch_dashboards_anonymous_node_count = 0
@@ -204,6 +206,8 @@ output "bap_env_gcp" {
 ```
 
 ##### Deploy all BAP services in a single VM (Opcional)
+
+- NOTE: This configuration deploy a OpenSearch cluster with a single manager node.
 
 Set `all_in_one_node_count = 1` and set to 0 the rest of `*_node_count = 0`.
 

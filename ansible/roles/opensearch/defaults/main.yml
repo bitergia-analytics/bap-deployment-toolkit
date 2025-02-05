@@ -5,9 +5,11 @@ opensearch_version: 0.27.0
 opensearch_docker_container: bap_opensearch
 
 # OpenSearch node configuration
+opensearch_volume: opensearch-data
 opensearch_workdir: "/docker/opensearch"
 opensearch_logs_dir: "{{ opensearch_workdir }}/log"
-opensearch_cluster_heap_size: 512m
+opensearch_cluster_manager_heap_size: 512m
+opensearch_cluster_data_heap_size: 512m
 node_name: "{{ inventory_hostname }}"
 network:
   bind_host: 0.0.0.0
@@ -16,15 +18,15 @@ network:
 # OpenSearch cluster configuration
 opensearch_cluster_name: bap-opensearch
 cluster_name: "{{ opensearch_cluster_prefix }}-{{ opensearch_cluster_name }}"
+cluster_initial_manager_nodes: "{{ groups['opensearch_manager'] | join(',') }}"
+opensearch_data_nodes: "{{ groups['opensearch_data'] | join(',') }}"
 discovery_seed_hosts:
-  "{{ groups['opensearch'] |
-  map('extract', hostvars, ['ansible_default_ipv4','address']) | list | join(',') }}"
-cluster_initial_master_nodes: "{{ groups['opensearch'] | join(',') }}"
+  "{{ cluster_initial_manager_nodes }},{{ opensearch_data_nodes }}"
 multitenancy_enabled: true
 do_not_fail_on_forbidden: false
 anonymous_auth_enabled: false
 opensearch_endpoint: "https://{{ network.publish_host }}:9200"
-number_of_shards: "{{ groups['opensearch'] | length }}"
+number_of_shards: "{{ groups['opensearch_data'] | length }}"
 auto_expand_replicas: "0-1"
 
 # Certificates files and their DNs

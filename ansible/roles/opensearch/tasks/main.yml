@@ -3,7 +3,7 @@
 - name: All in one host
   set_fact:
     discovery_seed_hosts: "{{ ansible_default_ipv4.address }}"
-    cluster_initial_master_nodes: "{{ groups['all_in_one'] }}"
+    cluster_initial_manager_nodes: "{{ groups['all_in_one'] }}"
     number_of_shards: 1
   when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"
 
@@ -14,23 +14,8 @@
     mode: 0750
     recurse: true
 
-- name: Copy gsutil credentials file
-  template:
-    src: boto.j2
-    dest: ~/.boto
-    mode: 0500
-    owner: "{{ ansible_user_id }}"
-
 - name: Configure OpenSearch certificates
   import_tasks: certificates.yml
-
-- name: Setup OpenSearch configuration
-  template:
-    src: opensearch.yml.j2
-    dest: "{{ opensearch_workdir }}/opensearch.yml"
-    owner: '1000'
-    group: '1000'
-    mode: 0660
 
 - name: Create OpenSearch logs directory
   file:
@@ -68,64 +53,25 @@
     reload: true
   tags: sysctl
 
-- name: Remove old OpenSearch container
-  docker_container:
-    name: "{{ opensearch_docker_container }}"
-    state: absent
-
 - name: "Create a docker network: {{ docker_network_name }}"
   docker_network:
     name: "{{ docker_network_name }}"
 
-- name: Start OpenSearch container
-  docker_container:
-    name: "{{ opensearch_docker_container }}"
-    image: "{{ opensearch_docker_image }}:{{ opensearch_version }}"
-    networks:
-      - name: "{{ docker_network_name }}"
-        aliases:
-          - "{{ opensearch_docker_container | replace('_','-') }}"
-    env:
-      DISABLE_INSTALL_DEMO_CONFIG=true
-      bootstrap.memory_lock=true
-      "OPENSEARCH_JAVA_OPTS=-Xms{{ opensearch_cluster_heap_size }} -Xmx{{ opensearch_cluster_heap_size }}"
-    ulimits:
-      memlock:-1:-1
-      nofile:65536:65536
-    volumes:
-      - odfe-data:/usr/share/opensearch/data
-      - "{{ certs_dir }}/{{ certs_files.ca_cert }}:/usr/share/opensearch/config/{{ certs_files.ca_cert }}"
-      - "{{ certs_dir }}/{{ certs_files.admin_cert }}:/usr/share/opensearch/config/{{ certs_files.admin_cert }}"
-      - "{{ certs_dir }}/{{ certs_files.admin_key }}:/usr/share/opensearch/config/{{ certs_files.admin_key }}"
-      - "{{ certs_dir }}/{{ certs_files.node_cert }}:/usr/share/opensearch/config/{{ certs_files.node_cert }}"
-      - "{{ certs_dir }}/{{ certs_files.node_key }}:/usr/share/opensearch/config/{{ certs_files.node_key }}"
-      - "{{ opensearch_workdir }}/opensearch.yml:/usr/share/opensearch/config/opensearch.yml"
-      - "{{ opensearch_workdir }}/log4j2.properties:/usr/share/opensearch/config/log4j2.properties"
-      - "{{ opensearch_security_dir }}/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml"
-      - "{{ opensearch_security_dir }}/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml"
-      - "{{ opensearch_security_dir }}/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml"
-      - "{{ opensearch_security_backup_dir }}:/tmp/backup/"
-      - "{{ opensearch_logs_dir }}:/usr/share/opensearch/logs"
-    ports:
-      - "{{ network.publish_host }}:9200:9200"
-      - "{{ network.publish_host }}:9300:9300"
-      - "{{ network.publish_host }}:9600:9600"
-      - "127.0.0.1:9200:9200"
-      - "127.0.0.1:9300:9300"
-      - "127.0.0.1:9600:9600"
-    exposed_ports:
-      - "9200"
-      - "9300"
-      - "9600"
-    log_driver: json-file
-    log_options:
-      max-size: "{{ docker_log_max_size }}"
+- name: OpenSearch manager node
+  import_tasks: opensearch_manager.yml
+  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+
+- name: OpenSearch data node
+  import_tasks: opensearch_data.yml
+  when: "'opensearch-data' in inventory_hostname"
 
 - name: Init OpenSearch security plugin
   import_tasks: security_admin.yml
+  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
 
 - name: Configure OpenSearch Security Backup
   import_tasks: security_backup.yml
+  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
 
 - name: Set default template for indices
   uri:

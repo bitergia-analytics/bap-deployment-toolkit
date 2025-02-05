@@ -34,6 +34,14 @@ of [terraform](/docs/provision.md#deploy-all-bap-services-in-a-single-vm-opciona
 * **OpenSearch cluster**: A set of nodes that offers a OpenSearch service,
   offering high availability and fault tolerance. Data can be queried by
   end users.
+  * **Manager Nodes**: Responsible for cluster management, maintaining cluster state,
+  coordinating operations, and shard allocation. They should not store data or participate
+  in ingestion or search directly. An odd number of manager nodes (generally 3) is
+  recommended for fault tolerance and to prevent "split-brain".
+  * **Data Nodes**: Responsible for storing indexed data and executing search and
+  analysis operations. These nodes require significant disk, CPU, and memory resources.
+  The number of data nodes will depend on your storage and performance requirements.
+
 * **OpenSearch Dashboards**: web app to visualize metrics and data.
 * **Web Server**: serves the **OpenSearch Dashboards** and the user interface
   of the **Identities Manager**.
