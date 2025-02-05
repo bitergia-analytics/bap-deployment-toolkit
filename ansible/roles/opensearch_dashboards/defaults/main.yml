@@ -16,8 +16,9 @@ network:
 # basepath:
 
 #
+
 opensearch_hosts:
-  "{{ ansible_all_ipv4_addresses if 'all_in_one' in groups else groups['opensearch'] | map('extract', hostvars, ['ansible_default_ipv4','address']) | list }}"
+  "{{ ansible_all_ipv4_addresses if 'all_in_one' in groups else groups['opensearch_manager'] | map('extract', hostvars, ['ansible_default_ipv4','address']) | list }}"
 opensearch:
   endpoints: "{{ ['https'] | product(opensearch_hosts) | map('join','://') | list | product(['9200']) | map('join', ':') | list }}"
   username: kibanaserver
