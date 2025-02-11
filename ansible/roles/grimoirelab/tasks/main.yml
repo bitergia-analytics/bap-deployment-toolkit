@@ -1,0 +1,195 @@
+---
+
+- name: Create GrimoireLab directory
+  file:
+    path: "{{ grimoirelab_workdir }}"
+    state: directory
+    mode: 0755
+    recurse: true
+
+- name: Copy the custom ca-certificate to /usr/local/share/ca-certificates/
+  copy:
+    src: "{{ custom_ca_cert }}"
+    dest: /usr/local/share/ca-certificates/custom_ca.crt
+    mode: 0644
+  become: true
+  when: custom_ca_cert is defined
+
+- name: Run update-ca-certificates
+  shell: update-ca-certificates
+  become: true
+  when: custom_ca_cert is defined
+
+- name: "Create MariaDB service account"
+  mysql_user:
+    name: "{{ mariadb_service_account }}"
+    host: "{{ ansible_default_ipv4.address }}"
+    password: "{{ mariadb_service_account_password }}"
+    priv: '*.*:ALL,GRANT'
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
+    state: present
+  register: result
+  retries: 2
+  delay: 5
+  until: result is success
+
+- name: Create MariaDB database for GrimoireLab
+  mysql_db:
+    name: "{{ grimoirelab_database }}"
+    collation: utf8mb4_unicode_ci
+    encoding: utf8mb4
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    login_host: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
+
+- name: Install dependencies
+  import_tasks: install_dependencies.yml
+
+- name: "Checkout {{ grimoirelab_repo }}"
+  become: true
+  git:
+    repo: "{{ grimoirelab_repo }}"
+    dest: "{{ grimoirelab_repo_dir }}"
+    force: true
+    single_branch: yes
+    version: "{{ grimoirelab_version }}"
+
+- name: Poetry update
+  shell: source {{ grimoirelab_venv }}/bin/activate && poetry update
+  args:
+    chdir: "{{ grimoirelab_repo_dir }}"
+    executable: /bin/bash
+  environment:
+    PATH: "{{ ansible_env.HOME }}/.local/bin:$PATH"
+    VITE_API_ENDPOINT: "{{ grimoirelab_archivist_storage_url }}"
+
+- name: Poetry install
+  shell: source {{ grimoirelab_venv }}/bin/activate && poetry install
+  args:
+    chdir: "{{ grimoirelab_repo_dir }}"
+    executable: /bin/bash
+  environment:
+    PATH: "{{ ansible_env.HOME }}/.local/bin:$PATH"
+
+- name: Check grimoirelab_allowed_hosts list
+  debug:
+    msg: "{{ grimoirelab_allowed_hosts }}"
+
+- name: Check grimoirelab_cors_allowed_origins_regexes list
+  debug:
+    msg: "{{ grimoirelab_cors_allowed_origins_regexes }}"
+
+- name: Setup GrimoireLab
+  shell: source {{ grimoirelab_venv }}/bin/activate && grimoirelab admin setup
+  args:
+    chdir: "{{ grimoirelab_repo_dir }}"
+    executable: /bin/bash
+  environment:
+    GRIMOIRELAB_DEBUG: "{{ grimoirelab_debug | default(false) }}"
+    GRIMOIRELAB_REDIS_HOST: "{{ groups['all_in_one'][0] | default(groups['redis'][0]) }}"
+    GRIMOIRELAB_REDIS_PORT: "{{ redis_port | default(6379) }}"
+    GRIMOIRELAB_REDIS_PASSWORD: "{{ redis_password | default('') }}"
+    GRIMOIRELAB_REDIS_DB: "{{ redis_database | default(0) }}"
+    GRIMOIRELAB_DB_HOST: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
+    GRIMOIRELAB_DB_PORT: "{{ mariadb_port | default(3306) }}"
+    GRIMOIRELAB_DB_USER: "{{ mariadb_service_account }}"
+    GRIMOIRELAB_DB_PASSWORD: "{{ mariadb_service_account_password }}"
+    GRIMOIRELAB_DB_DATABASE: "{{ grimoirelab_database }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_USERNAME: "{{ opensearch_admin_user }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_PASSWORD: "{{ opensearch_admin_password }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_URL: "{{ custom_opensearch_endpoint | default(grimoirelab_archivist_storage_url) }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_INDEX: "{{ grimoirelab_archivist_storage_index | default('events') }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_VERIFY_CERT: "{{ grimoirelab_archivist_storage_verify_cert | default(false) }}"
+    GRIMOIRELAB_ARCHIVIST_WORKERS: "{{ grimoirelab_archivist_workers | default(20) }}"
+    GRIMOIRELAB_ALLOWED_HOST: "{{ grimoirelab_allowed_hosts | default('*') }}"
+    GRIMOIRELAB_CORS_ALLOWED_ORIGIN_REGEXES: "{{ grimoirelab_cors_allowed_origins_regexes | default('*') }}"
+    GRIMOIRELAB_SECRET_KEY: "{{ grimoirelab_secret_key }}"
+    GRIMOIRELAB_EVENTS_STREAM_MAX_LENGTH: "{{ grimoirelab_events_stream_max_length | default('1000000') }}"
+    PATH: "{{ ansible_env.HOME }}/.local/bin:$PATH"
+
+- name: Run GrimoireLab server
+  shell: source {{ grimoirelab_venv }}/bin/activate && grimoirelab run server &
+  args:
+    chdir: "{{ grimoirelab_repo_dir }}"
+    executable: /bin/bash
+  environment:
+    GRIMOIRELAB_DEBUG: "{{ grimoirelab_debug | default(false) }}"
+    GRIMOIRELAB_REDIS_HOST: "{{ groups['all_in_one'][0] | default(groups['redis'][0]) }}"
+    GRIMOIRELAB_REDIS_PORT: "{{ redis_port | default(6379) }}"
+    GRIMOIRELAB_REDIS_PASSWORD: "{{ redis_password | default('') }}"
+    GRIMOIRELAB_REDIS_DB: "{{ redis_database | default(0) }}"
+    GRIMOIRELAB_DB_HOST: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
+    GRIMOIRELAB_DB_PORT: "{{ mariadb_port | default(3306) }}"
+    GRIMOIRELAB_DB_USER: "{{ mariadb_service_account }}"
+    GRIMOIRELAB_DB_PASSWORD: "{{ mariadb_service_account_password }}"
+    GRIMOIRELAB_DB_DATABASE: "{{ grimoirelab_database }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_USERNAME: "{{ opensearch_admin_user }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_PASSWORD: "{{ opensearch_admin_password }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_URL: "{{ custom_opensearch_endpoint | default(grimoirelab_archivist_storage_url) }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_INDEX: "{{ grimoirelab_archivist_storage_index | default('events') }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_VERIFY_CERT: "{{ grimoirelab_archivist_storage_verify_cert | default(false) }}"
+    GRIMOIRELAB_ARCHIVIST_WORKERS: "{{ grimoirelab_archivist_workers | default(20) }}"
+    GRIMOIRELAB_ALLOWED_HOST: "{{ grimoirelab_allowed_hosts | default('*') }}"
+    GRIMOIRELAB_CORS_ALLOWED_ORIGIN_REGEXES: "{{ grimoirelab_cors_allowed_origins_regexes | default('*') }}"
+    GRIMOIRELAB_SECRET_KEY: "{{ grimoirelab_secret_key }}"
+    GRIMOIRELAB_EVENTS_STREAM_MAX_LENGTH: "{{ grimoirelab_events_stream_max_length | default('1000000') }}"
+    PATH: "{{ ansible_env.HOME }}/.local/bin:$PATH"
+
+- name: Run GrimoireLab workers to fetch and eventize data
+  shell: source {{ grimoirelab_venv }}/bin/activate && grimoirelab run eventizers --workers {{ grimoirelab_eventizers_workers | default(5) }} &
+  args:
+    chdir: "{{ grimoirelab_repo_dir }}"
+    executable: /bin/bash
+  environment:
+    GRIMOIRELAB_DEBUG: "{{ grimoirelab_debug | default(false) }}"
+    GRIMOIRELAB_REDIS_HOST: "{{ groups['all_in_one'][0] | default(groups['redis'][0]) }}"
+    GRIMOIRELAB_REDIS_PORT: "{{ redis_port | default(6379) }}"
+    GRIMOIRELAB_REDIS_PASSWORD: "{{ redis_password | default('') }}"
+    GRIMOIRELAB_REDIS_DB: "{{ redis_database | default(0) }}"
+    GRIMOIRELAB_DB_HOST: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
+    GRIMOIRELAB_DB_PORT: "{{ mariadb_port | default(3306) }}"
+    GRIMOIRELAB_DB_USER: "{{ mariadb_service_account }}"
+    GRIMOIRELAB_DB_PASSWORD: "{{ mariadb_service_account_password }}"
+    GRIMOIRELAB_DB_DATABASE: "{{ grimoirelab_database }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_USERNAME: "{{ opensearch_admin_user }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_PASSWORD: "{{ opensearch_admin_password }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_URL: "{{ custom_opensearch_endpoint | default(grimoirelab_archivist_storage_url) }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_INDEX: "{{ grimoirelab_archivist_storage_index | default('events') }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_VERIFY_CERT: "{{ grimoirelab_archivist_storage_verify_cert | default(false) }}"
+    GRIMOIRELAB_ARCHIVIST_WORKERS: "{{ grimoirelab_archivist_workers | default(20) }}"
+    GRIMOIRELAB_ALLOWED_HOST: "{{ grimoirelab_allowed_hosts | default('*') }}"
+    GRIMOIRELAB_CORS_ALLOWED_ORIGIN_REGEXES: "{{ grimoirelab_cors_allowed_origins_regexes | default('*') }}"
+    GRIMOIRELAB_SECRET_KEY: "{{ grimoirelab_secret_key }}"
+    GRIMOIRELAB_EVENTS_STREAM_MAX_LENGTH: "{{ grimoirelab_events_stream_max_length | default('1000000') }}"
+    PATH: "{{ ansible_env.HOME }}/.local/bin:$PATH"
+
+- name: Run GrimoireLab workers to store data
+  shell: source {{ grimoirelab_venv }}/bin/activate && grimoirelab run archivists --workers {{ grimoirelab_archivist_workers | default(20) }} &
+  args:
+    chdir: "{{ grimoirelab_repo_dir }}"
+    executable: /bin/bash
+  environment:
+    GRIMOIRELAB_DEBUG: "{{ grimoirelab_debug | default(false) }}"
+    GRIMOIRELAB_REDIS_HOST: "{{ groups['all_in_one'][0] | default(groups['redis'][0]) }}"
+    GRIMOIRELAB_REDIS_PORT: "{{ redis_port | default(6379) }}"
+    GRIMOIRELAB_REDIS_PASSWORD: "{{ redis_password | default('') }}"
+    GRIMOIRELAB_REDIS_DB: "{{ redis_database | default(0) }}"
+    GRIMOIRELAB_DB_HOST: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
+    GRIMOIRELAB_DB_PORT: "{{ mariadb_port | default(3306) }}"
+    GRIMOIRELAB_DB_USER: "{{ mariadb_service_account }}"
+    GRIMOIRELAB_DB_PASSWORD: "{{ mariadb_service_account_password }}"
+    GRIMOIRELAB_DB_DATABASE: "{{ grimoirelab_database }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_USERNAME: "{{ opensearch_admin_user }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_PASSWORD: "{{ opensearch_admin_password }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_URL: "{{ custom_opensearch_endpoint | default(grimoirelab_archivist_storage_url) }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_INDEX: "{{ grimoirelab_archivist_storage_index | default('events') }}"
+    GRIMOIRELAB_ARCHIVIST_STORAGE_VERIFY_CERT: "{{ grimoirelab_archivist_storage_verify_cert | default(false) }}"
+    GRIMOIRELAB_ARCHIVIST_WORKERS: "{{ grimoirelab_archivist_workers | default(20) }}"
+    GRIMOIRELAB_ALLOWED_HOST: "{{ grimoirelab_allowed_hosts | default('*') }}"
+    GRIMOIRELAB_CORS_ALLOWED_ORIGIN_REGEXES: "{{ grimoirelab_cors_allowed_origins_regexes | default('*') }}"
+    GRIMOIRELAB_SECRET_KEY: "{{ grimoirelab_secret_key }}"
+    GRIMOIRELAB_EVENTS_STREAM_MAX_LENGTH: "{{ grimoirelab_events_stream_max_length | default('1000000') }}"
+    PATH: "{{ ansible_env.HOME }}/.local/bin:$PATH"

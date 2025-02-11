@@ -19,6 +19,17 @@
     - "{{ nginx_log_dir }}"
     - "{{ nginx_virtualhosts_workdir }}"
 
+- name: "Remove {{ grimoirelab_static_workir }} content"
+  file:
+    path: "{{ grimoirelab_static_workir }}"
+    state: absent
+
+- name: Copy GrimoireLab static
+  copy:
+    src: "/docker/grimoirelab/venv/lib/python3.11/site-packages/grimoirelab/core/static/"
+    dest: "{{ grimoirelab_static_workir }}"
+    remote_src: true
+
 - name: Configure NGINX status page
   template:
     src: status.conf.j2
@@ -41,6 +52,7 @@
         "{{ nginx_letsencrypt_configdir }}:/etc/ssl/certbot_certs/",
         "{{ nginx_letsencrypt_webroot_path }}:/var/www/certbot/:ro",
         "{{ nginx_gcs_workdir }}:/opt/gcs",
+        "{{ grimoirelab_static_workir }}:/opt/grimoirelab_static",
         "{{ nginx_log_dir }}:/var/log/nginx",
         "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
       ]
@@ -58,11 +70,8 @@
 - name: "Configure virtualhost (certbot with acme-challenge) for all instances"
   template:
     src: vhost_port_80.j2
-    dest: "{{ nginx_virtualhosts_workdir }}/{{ instance.nginx.fqdn }}.conf"
+    dest: "{{ nginx_virtualhosts_workdir }}/{{ instance.fqdn }}.conf"
     backup: true
-  loop: "{{ instances }}"
-  loop_control:
-    loop_var: instance
   when: custom_cert is undefined
 
 - name: "Create a docker network: {{ docker_network_name }}"
@@ -88,9 +97,6 @@
 
 - name: Configure virtualhost(s) for all instances
   include_tasks: virtualhost.yml
-  loop: "{{ instances }}"
-  loop_control:
-    loop_var: instance
 
 - name: Start NGINX container with virtualhost(s)
   docker_container:
@@ -99,15 +105,15 @@
     restart: yes
     volumes: "{{ nginx_volumes }}"
     networks:
-      - name: "{{ docker_network_name }}"
-        aliases:
-          - "{{ nginx_docker_container | replace('_','-') }}"
+      - name: "host"
     ports:
       - "80:80"
       - "443:443"
+      - "8001:8001"
     exposed_ports:
       - "80"
       - "443"
+      - "8001"
     log_driver: json-file
     log_options:
       max-size: "{{ docker_log_max_size }}"

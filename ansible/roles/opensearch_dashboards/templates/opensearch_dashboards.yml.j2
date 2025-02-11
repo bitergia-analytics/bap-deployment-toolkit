@@ -3,7 +3,11 @@ server.host: "0.0.0.0"
 {% if basepath is defined %}
 server.basePath: {{ basepath }}
 {% endif %}
+{% if custom_opensearch_endpoint is defined %}
+opensearch.hosts: {{ custom_opensearch_endpoint }}
+{% else %}
 opensearch.hosts: {{ opensearch.endpoints }}
+{% endif %}
 opensearch.ssl.verificationMode: none
 opensearch.username: {{ opensearch.username }}
 opensearch.password: {{ opensearch.password }}

@@ -34,7 +34,7 @@ variable "custom_tags" {
 
 variable "machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "persistent_disks" {
@@ -56,7 +56,7 @@ variable "mariadb_machine_type" {
 
 variable "mariadb_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "mariadb_boot_disk_size" {
@@ -110,7 +110,7 @@ variable "redis_machine_type" {
 
 variable "redis_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "redis_boot_disk_size" {
@@ -164,7 +164,7 @@ variable "opensearch_machine_type" {
 
 variable "opensearch_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "opensearch_boot_disk_size" {
@@ -225,7 +225,7 @@ variable "opensearch_dashboards_machine_type" {
 
 variable "opensearch_dashboards_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "opensearch_dashboards_boot_disk_size" {
@@ -257,7 +257,7 @@ variable "nginx_machine_type" {
 
 variable "nginx_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "nginx_boot_disk_size" {
@@ -280,56 +280,56 @@ variable "nginx_ansible_use_external_ip" {
   default = false
 }
 
-# Mordred
+# grimoirelab
 
-variable "mordred_node_count" {
+variable "grimoirelab_node_count" {
   type    = number
   default = 1
 }
 
-variable "mordred_machine_type" {
+variable "grimoirelab_machine_type" {
   type    = string
   default = "e2-standard-2"
 }
 
-variable "mordred_machine_image" {
+variable "grimoirelab_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
-variable "mordred_boot_disk_size" {
+variable "grimoirelab_boot_disk_size" {
   type    = number
   default = 10
 }
 
-variable "mordred_disk_count" {
+variable "grimoirelab_disk_count" {
   type    = number
   default = 0
 }
 
-variable "mordred_disk_size" {
+variable "grimoirelab_disk_size" {
   type    = number
   default = 50
 }
 
-variable "mordred_disk_type" {
+variable "grimoirelab_disk_type" {
   type    = string
   default = "pd-standard"
 }
 
-variable "mordred_disk_attach" {
+variable "grimoirelab_disk_attach" {
   type        = string
   description = "Instance ID to attach MariaDB disk"
   default     = ""
 }
 
-variable "mordred_disk_snapshot" {
+variable "grimoirelab_disk_snapshot" {
   type = string
   description = "The source snapshot used to create this disk"
   default = null
 }
 
-variable "mordred_ansible_use_external_ip" {
+variable "grimoirelab_ansible_use_external_ip" {
   type    = bool
   default = false
 }
@@ -348,7 +348,7 @@ variable "sortinghat_machine_type" {
 
 variable "sortinghat_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "sortinghat_boot_disk_size" {
@@ -366,7 +366,7 @@ variable "sortinghat_ansible_use_external_ip" {
   default = false
 }
 
-# SortingHat
+# SortingHat Worker
 
 variable "sortinghat_worker_node_count" {
   type    = number
@@ -380,7 +380,7 @@ variable "sortinghat_worker_machine_type" {
 
 variable "sortinghat_worker_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "sortinghat_worker_boot_disk_size" {
@@ -449,7 +449,7 @@ variable "all_in_one_machine_type" {
 
 variable "all_in_one_machine_image" {
   type    = string
-  default = "debian-cloud/debian-11"
+  default = "debian-cloud/debian-12"
 }
 
 variable "all_in_one_boot_disk_size" {

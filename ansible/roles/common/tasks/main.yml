@@ -21,4 +21,4 @@
 - name: Install Python packages
   pip:
     name: "{{ python_packages }}"
-
+    break_system_packages: true

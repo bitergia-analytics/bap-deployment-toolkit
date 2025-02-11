@@ -1,0 +1,20 @@
+---
+
+# GrimoireLab repository and version
+grimoirelab_repo: https://github.com/chaoss/grimoirelab.git
+grimoirelab_version: 2.x
+
+# GrimoireLab configuration
+grimoirelab_workdir: "/docker/grimoirelab"
+grimoirelab_repo_dir: "{{ grimoirelab_workdir }}/repository"
+opensearch_host: "{{ groups['all_in_one'][0] | default(groups['opensearch'][0]) }}"
+grimoirelab_archivist_storage_url: "https://{{ opensearch_host }}:9200"
+grimoirelab_cors_allowed_origins_regexes: "https://localhost,https://{{ groups['all_in_one'][0] }},https://{{ instance.fqdn }}:8001"
+grimoirelab_allowed_hosts: "localhost,{{ groups['all_in_one'][0] }},{{ instance.fqdn }}"
+
+# Node.js version
+nodejs_version: node
+
+# Database
+grimoirelab_database: core_db
+grimoirelab_venv: "{{ grimoirelab_workdir }}/venv"

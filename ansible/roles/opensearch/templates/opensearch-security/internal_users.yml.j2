@@ -15,6 +15,14 @@ _meta:
   - "admin"
   description: "admin user"
 
+# TODO: Create grimoirelab backend role
+{{ opensearch_grimoirelab_user }}:
+  hash: "{{ opensearch_grimoirelab_password_hash }}"
+  reserved: true
+  backend_roles:
+  - "grimoirelab"
+  description: "grimoirelab user"
+
 kibanaserver:
   hash: "{{ opensearch_dashboards_password_hash }}"
   reserved: true

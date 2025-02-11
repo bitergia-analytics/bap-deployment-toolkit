@@ -6,3 +6,5 @@ roles:
 collections:
   - name: google.cloud
     version: 1.0.2
+
+  - name: community.google

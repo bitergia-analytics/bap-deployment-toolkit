@@ -52,13 +52,7 @@
 
 - name: Create Audit Log ingore users
   set_fact:
-    opensearch_auditlog_ingore_users: |-
-      [
-      {% for item in instances %}
-        "{{ item.project }}_mordred",
-      {% endfor %}
-        "kibanaserver"
-      ]
+    opensearch_auditlog_ingore_users: ["kibanaserver"]
   when: opensearch_auditlog_enabled
 
 - name: Check Audit Log ingore users
@@ -98,5 +92,7 @@
     client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
     validate_certs: false
+  retries: 10
+  delay: 30
   run_once: true
   when: opensearch_auditlog_enabled

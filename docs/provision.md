@@ -185,8 +185,8 @@ module "bap_env_gcp" {
   nginx_node_count = 1
   nginx_machine_type = "e2-standard-2"
 
-  mordred_node_count = 1
-  mordred_machine_type = "e2-standard-2"
+  grimoirelab_node_count = 1
+  grimoirelab_machine_type = "e2-standard-2"
 
   sortinghat_node_count = 1
   sortinghat_machine_type = "e2-standard-2"
@@ -229,7 +229,7 @@ module "bap_env_gcp" {
   opensearch_dashboards_node_count = 0
   opensearch_dashboards_anonymous_node_count = 0
   nginx_node_count = 0
-  mordred_node_count = 0
+  grimoirelab_node_count = 0
   sortinghat_node_count = 0
   sortinghat_worker_node_count = 0
 }

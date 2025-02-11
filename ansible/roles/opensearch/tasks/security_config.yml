@@ -17,6 +17,8 @@
   loop:
     - password: "{{ opensearch_admin_password }}"
       hash_name: opensearch_admin_password_hash
+    - password: "{{ opensearch_grimoirelab_password }}"
+      hash_name: opensearch_grimoirelab_password_hash
     - password: "{{ opensearch_dashboards_password }}"
       hash_name: opensearch_dashboards_password_hash
     - password: "{{ opensearch_customer_password }}"

@@ -8,33 +8,17 @@ nginx_docker_container: nginx
 nginx_workdir: "/docker/nginx"
 nginx_virtualhosts_workdir: "{{ nginx_workdir }}/conf"
 nginx_log_dir: "{{ nginx_workdir }}/log"
+grimoirelab_static_workir: "/docker/grimoirelab/static"
 
-# Create your instances configurations
-## instances:
-## - project: example
-##   tenant: example
-##   public: false
-##   sortinghat:
-##     tenant: example
-##     dedicated_queue: true
-##     openinfra_client_id: ""
-##     openinfra_client_secret: ""
-##   nginx:
-##     fqdn: example.com
-##     http_rest_api: true
-## - project: example-public
-##   tenant: example-public
-##   public: true
-##   sortinghat:
-##     tenant: example-public
-##     dedicated_queue: false
-##   nginx:
-##     fqdn: example-public.com
-##     http_rest_api: false
+# Create your instance configuration
+instance:
+  sortinghat: false
+  public: false
+  fqdn: example.com
 
 # Service hosts
 opensearch_endpoint: "https://{{ ansible_default_ipv4.address | list if 'all_in_one' in groups else  hostvars[(groups['opensearch'][0])].ansible_default_ipv4.address }}:9200"
-sortinghat_host: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['sortinghat'][0])].ansible_default_ipv4.address }}:9314"
+#sortinghat_host: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['sortinghat'][0])].ansible_default_ipv4.address }}:9314"
 
 # Certificates configuration
 ## Let's Encrypt configuration
