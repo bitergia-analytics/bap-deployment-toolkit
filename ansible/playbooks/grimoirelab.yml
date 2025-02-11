@@ -1,5 +1,5 @@
 ---
-- hosts: mordred
+- hosts: grimoirelab
   pre_tasks:
     - name: Gather facts from MariaDB nodes
       setup:
@@ -9,5 +9,5 @@
       with_items:
         - "{{ groups['mariadb'] }}"
   roles:
-    - mordred
+    - grimoirelab
   become: true

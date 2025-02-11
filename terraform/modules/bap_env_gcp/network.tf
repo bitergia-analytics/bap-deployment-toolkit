@@ -23,7 +23,7 @@ resource "google_compute_firewall" "fw-nginx" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443"]
+    ports    = ["80", "443", "8001"]
   }
 
   source_ranges = var.network_fw_nginx_source_ranges
@@ -63,7 +63,7 @@ resource "google_compute_firewall" "allow-services" {
 
   allow {
     protocol = "tcp"
-    ports    = ["3306","5601","9200","9300","9600"]
+    ports    = ["3306","5601","9200","9300","9600", "8001"]
   }
 
   source_ranges = ["10.0.0.0/8"]

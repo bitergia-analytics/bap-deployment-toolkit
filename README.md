@@ -15,8 +15,8 @@ This toolkit is released under the terms of the [GPL3 or later license](LICENSE)
 
 The current version of the toolkit requires:
 
-- Debian 11 (bullseye) or Ubuntu 20.04 (or later).
-- Python 3.8 (or later)
+- Debian 12 (bookworm) or Ubuntu 22.04 (or later).
+- Python 3.11 (or later)
 - Terraform 1.3 (or later)
 - Ansible 6.4 (or later)
 

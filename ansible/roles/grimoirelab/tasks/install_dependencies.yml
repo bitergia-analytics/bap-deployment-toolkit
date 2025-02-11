@@ -1,0 +1,92 @@
+---
+
+# Poetry
+- name: Install Poetry
+  shell: curl -sSL https://install.python-poetry.org | python3 -
+  args:
+    creates: "{{ ansible_env.HOME }}/.poetry/bin/poetry"
+    executable: /bin/bash
+
+- name: Verify Poetry installation
+  shell: poetry --version
+  args:
+    executable: /bin/bash
+  register: poetry_version
+  environment:
+    PATH: "{{ ansible_env.HOME }}/.local/bin:$PATH"
+
+- name: Check Poetry version
+  debug:
+    msg: "Poetry version: {{ poetry_version.stdout }}"
+
+# Node.js
+- name: Install nvm
+  shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
+
+- name: Install Node.js
+  shell: source {{ ansible_env.HOME }}/.nvm/nvm.sh && nvm install {{ nodejs_version }}
+  args:
+    executable: /bin/bash
+
+- name: Verify Node.js installation
+  shell: source {{ ansible_env.HOME }}/.nvm/nvm.sh && node -v
+  register: node_version
+  args:
+    executable: /bin/bash
+
+- name: Check Node.js version
+  debug:
+    msg: "Node.js version: {{ node_version.stdout }}"
+
+# Yarn
+- name: Add Yarn repository key
+  apt_key:
+    url: "https://dl.yarnpkg.com/debian/pubkey.gpg"
+    state: present
+
+- name: Add Yarn repository
+  apt_repository:
+    repo: "deb https://dl.yarnpkg.com/debian stable main"
+    state: present
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install Yarn
+  apt:
+    name: yarn
+    state: present
+
+- name: Verify Yarn installation
+  shell: yarn --version
+  register: yarn_version
+
+- debug:
+    msg: "Yarn version: {{ yarn_version.stdout }}"
+
+# GrimoireLab
+- name: Ensure dependencies are installed.
+  apt:
+    name:
+      - libmariadbclient-dev-compat
+      - default-libmysqlclient-dev
+      - mariadb-client
+      - gcc
+      - pkg-config
+      - build-essential
+      - python3-dev
+      - python3-venv
+    state: present
+    update_cache: true
+  tags: packages
+
+- name: Install mysqlclient and uwsgi
+  pip:
+    name:
+      - mysqlclient==2.0.3
+      - uwsgi==2.0.28
+    virtualenv: "{{ grimoirelab_venv }}"
+    virtualenv_command: "python3 -m venv"

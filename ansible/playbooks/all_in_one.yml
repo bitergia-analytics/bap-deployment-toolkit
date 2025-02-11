@@ -5,9 +5,9 @@
     - redis
     - opensearch
     - opensearch_dashboards
-    - sortinghat
-    - sortinghat_worker
+    #- sortinghat
+    #- sortinghat_worker
     - nginx
-    - mordred
+    - grimoirelab
     - monitoring
   become: true

@@ -3,7 +3,7 @@
     name:
       - certbot
       - certbot-nginx
-    executable: pip3
+    break_system_packages: true
 
 - name: Register certbot
   run_once: true

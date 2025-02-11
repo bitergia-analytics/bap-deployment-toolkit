@@ -1,7 +1,7 @@
 server {
     listen 80;
 
-    server_name {{ instance.nginx.fqdn }};
+    server_name {{ instance.fqdn }};
 
 {% if custom_cert is undefined %}
     location /.well-known/acme-challenge/ {

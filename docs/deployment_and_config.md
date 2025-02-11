@@ -14,7 +14,7 @@ the follow commands from a terminal on the control node:
 1. Install Ansible using `pip`:
 
    ```terminal
-   pip3 install ansible
+   pip3 install ansible --break_system_packages
    ```
 
 1. Reset the terminal if the commands are not available yet.
@@ -24,7 +24,7 @@ the follow commands from a terminal on the control node:
    ```terminal
    cd ansible
 
-   pip3 install -r requirements/requirements.txt
+   pip3 install -r requirements/requirements.txt --break_system_packages
 
    ansible-galaxy install -r requirements/ansible-galaxy-requirements.yml
    ```
@@ -98,8 +98,8 @@ all:
     mariadb_root_password: <mariadb_root_password>
     mariadb_backup_service_account: backup
     mariadb_backup_service_account_password: <mariadb_backup_password>
-    mariadb_service_account: sortinghat
-    mariadb_service_account_password: <sortinghat_password>
+    mariadb_service_account: grimoirelab
+    mariadb_service_account_password: <grimoirelab_password>
     redis_password: <redis_password>
 
     # MariaDB Settings
@@ -148,9 +148,6 @@ all:
     # SortingHat Nginx max_conns
     sortinghat_max_conns: "<sortinghat_max_conns>"
 
-    # Mordred Settings
-    mordred_setups_repo_url: <repo_mordred_config.git>
-
     # Ngninx Certbot
     letsencrypt_register_email: <letsencrypt_register_email>
 
@@ -159,38 +156,11 @@ all:
     #  cert: custom.crt
     #  key: custom.key
 
-    # Instances Settings
-    instances:
-    - project: <project_a>
-      tenant: <tenant_name_a>
-      public: false
-      mordred:
-        password: <mordred_tenant_a_password>
-        overwrite_roles: <overwrite_roles>
-        sources_repository: "<repo_teneant_a_projects.git>"
-        host: <mordred_host_a>
-      sortinghat:
-        tenant: <tenant_name_a>
-        dedicated_queue: true
-        openinfra_client_id: "<openinfra_client_id>"
-        openinfra_client_secret: "<openinfra_client_secret>"
-      nginx:
-        fqdn: <fqdn-1>
-        http_rest_api: false
-    - project: <project_b>
-      tenant: <tenant_name_b>
-      public: true
-      mordred:
-        password: <mordred_tenant_b_password>
-        overwrite_roles: <overwrite_roles>
-        sources_repository: "<repo_teneant_b_projects.git>"
-        host: <mordred_host_b>
-      sortinghat:
-        tenant: <sortinghat_tenant>
-        dedicated_queue: false
-      nginx:
-        fqdn: <fqdn-2>
-        http_rest_api: true
+    # Instance Setting
+    instance:
+      sortinghat: <True | False>
+      public: <True | False>
+      fqdn: example.com
 ```
 
 Replace the entries in `<>` with your values:
@@ -252,42 +222,15 @@ Replace the entries in `<>` with your values:
   and warnings about expired certs on Let's Encrypt.
 
 After configuring these parameters, you need to configure the instances of the
-task scheduler (Mordred) and Nginx virtual host. You need a task scheduler for each project
-you want to analyze. Check the section about configuring Mordred for more information
-about how to setup the task scheduler.
+task scheduler (GrimoireLab) and Nginx virtual host. Check the section about configuring
+GrimoireLab for more information about how to setup the task scheduler.
 
-- `mordred_setups_repo_url`: URL of the git repository where the configuration
-  for each project/mordred instance are stored.
-- `instances`: Mordred and Nginx virtual host configurations. Create as many entries of
-  project as you might need.
-- `instances.project`: name of the project to analyze.
-- `instances.tenant`: the name of the tenant for this OpenSearch Dashboards endpoint..
-- `instances.public`: OpenSearch Dashboards with anonymous access `true | false`. If
-  the variable is not defined the OpenSearch Dashboards is private.
-- `instances.mordred.overwrite_roles` (optional): overwrite roles and tenant `true | false`.
-- `instances.mordred.password`: strong password for the modred user
-   of this tenant.
-- `instances.mordred.sources_repository`: repository with the list of data
-   sources to analyze on this project.
-- `instances.mordred.host`: on which mordred VM host will deploy the container (e.g. `0`).
-- `instances.sortingaht.tenant`: the name used here will be used to store the data from
-- `instances.sortinghat.dedicated_queue` (optional): to run identities jobs on a dedicated queue.
-   This will also create a dedicated worker for these tasks. The possible values are `true`
-   or `false`. By default is set to `false`.
-- `instances.sortinghat.openinfra_client_id` (optional): OpenInfraID Oauth2 client ID for private API. When the
-  parameter is not set, it will only obtain members from the public API that doesn't contain
-  email information. (by default is ""). Only works with dedicated queues.
-- `instances.sortinghat.openinfra_client_secret` (optional): OpenInfraID Oauth2 client secret for private
-   API (by default is ""). Only works with dedicated queues.
-- `instances.nginx.fqdn`: full qualified domain name (e.g. `bap.example.com`)
+- `instance`: GrimoireLab and Nginx virtual host configurations.
+- `instance.sortinghat` (Optional): Active SortingHat endpoint `true | false` (by default is `false`).
+- `instance.public` (Optional): OpenSearch Dashboards with anonymous access `true | false`. If
+  the variable is not defined the OpenSearch Dashboards is private (by default is `false`).
+- `instance.fqdn`: full qualified domain name (e.g. `bap.example.com`)
   where BAP will be available.
-- `instances.nginx.http_rest_api`: Open OpenSearch HTTP rest API only if the variable is defined
-  with the value `true`.
-
-**IMPORTANT**: When there are multiple instances that will use the same
-SortingHat tenant, be sure the `instances.sortinghat` configuration is exactly
-the same on all those entries. Unexpected errors can appear, if the parameters
-are different.
 
 #### OpenID Configuration (Optional)
 
@@ -348,29 +291,6 @@ Replace the entries in `<>` with your values:
 
 - `custom_cert.cert`: path to your `.crt` or `.pem` certificate
 - `custom_cert.key`: path to your `.key` file
-
-#### SSH Keys for Non-Public Data Sources (Optional)
-
-Sometimes, data sources such as `git` or `gerrit` would require access using
-SSH protocol. For those cases, the platform generates a SSH key pair when it's
-deployed for the first time. However, these keys won't work for private
-repositories which require authentication. For those cases, you can provide your
-own SSH keys, setting their location on the `vars.yml` file under the
-`all.vars` section.
-
-As with other keys and certificates, we recommend to store the certificates under
-the `keys/<environment>` directory of this toolkit.
-
-```yaml
-    mordred_ssh_key:
-      private: "<path_to_private_ssh_key>"
-      public: "<path_to_public_ssh_key>"
-```
-
-Replace the entries in `<>` with your values:
-
-- `mordred_ssh_key.private`: path to your SSH private key file
-- `mordred_ssh_key.public`: path to your SSH public key file
 
 #### Restore OpenSearch Security from a backup (optional)
 

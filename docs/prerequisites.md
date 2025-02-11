@@ -154,7 +154,7 @@ The following steps will help you with the basic configuration of this node.
    ```terminal
    gcloud compute instances create control-node \
        --image-project=debian-cloud \
-       --image-family=debian-11 \
+       --image-family=debian-12 \
        --machine-type=e2-small \
        --zone=<zone> \
        --scopes=cloud-platform \

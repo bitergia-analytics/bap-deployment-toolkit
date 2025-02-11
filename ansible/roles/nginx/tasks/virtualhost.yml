@@ -3,7 +3,7 @@
 - name: Generate certificate using certbot
   include_tasks: certbot.yml
   vars:
-    hostname: "{{ instance.nginx.fqdn }}"
+    hostname: "{{ instance.fqdn }}"
   when: custom_cert is undefined
 
 - name: "Copy custom SSL certificates"
@@ -35,10 +35,9 @@
     src: "opensearch_nodes.j2"
     dest: "{{ nginx_virtualhosts_workdir }}/opensearch_nodes.conf"
     backup: true
-  when: instance.nginx.http_rest_api is defined and instance.nginx.http_rest_api
 
-- name: "Create virtualhost configuration for {{ instance.nginx.fqdn }}"
+- name: "Create virtualhost configuration for {{ instance.fqdn }}"
   template:
     src: vhost.j2
-    dest: "{{ nginx_virtualhosts_workdir }}/{{ instance.nginx.fqdn }}.conf"
+    dest: "{{ nginx_virtualhosts_workdir }}/{{ instance.fqdn }}.conf"
     backup: true

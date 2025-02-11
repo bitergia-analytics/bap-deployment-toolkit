@@ -38,7 +38,7 @@ variable "machine_type" {
 variable "machine_image" {
   type        = string
   description = "OS distribution image"
-  default     = "debian-cloud/debian-11"
+  default     = "debian-cloud/debian-12"
 }
 
 variable "boot_disk_persistent" {
