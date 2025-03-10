@@ -41,4 +41,5 @@
   cron:
     name: Certbot renewal
     job: "{{ nginx_letsencrypt_certbot_renew_script_dest }}"
+    user: root
     special_time: "{{ nginx_letsencrypt_cronjob_time }}"
