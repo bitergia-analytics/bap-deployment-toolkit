@@ -4,7 +4,7 @@
   include_tasks: certbot.yml
   vars:
     hostname: "{{ instance.nginx.fqdn }}"
-  when: custom_cert is undefined
+  when: custom_cert is undefined and instance.nginx is defined
 
 - name: "Copy custom SSL certificates"
   run_once: true
@@ -42,3 +42,4 @@
     src: vhost.j2
     dest: "{{ nginx_virtualhosts_workdir }}/{{ instance.nginx.fqdn }}.conf"
     backup: true
+  when: instance.nginx is defined

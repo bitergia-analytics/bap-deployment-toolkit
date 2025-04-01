@@ -63,7 +63,7 @@
   loop: "{{ instances }}"
   loop_control:
     loop_var: instance
-  when: custom_cert is undefined
+  when: custom_cert is undefined and instance.nginx is defined
 
 - name: "Create a docker network: {{ docker_network_name }}"
   docker_network:
