@@ -92,6 +92,15 @@
   loop_control:
     loop_var: instance
 
+- name: Copy the default host configuration files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ nginx_virtualhosts_workdir }}/{{ item }}"
+  with_items:
+    - bitergia-logo.png
+    - custom_404.html
+    - default.conf
+
 - name: Start NGINX container with virtualhost(s)
   docker_container:
     name: "{{ nginx_docker_container }}"
