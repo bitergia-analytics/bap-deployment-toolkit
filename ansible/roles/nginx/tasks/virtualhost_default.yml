@@ -1,0 +1,48 @@
+---
+
+- name: "Get {{ nginx_default_host }} certificate info"
+  shell: openssl x509 -in "{{ nginx_letsencrypt_configdir }}/live/{{ nginx_default_host }}/cert.pem" -noout -dates | awk -F= '/notAfter=/ {print $2}'
+  register: cert_info
+  when: custom_cert is undefined
+
+- name: "Show {{ nginx_default_host }} certificate info"
+  debug:
+    msg: "{{ cert_info }}"
+  when: custom_cert is undefined
+
+- name: "Create certificate for {{ nginx_default_host }}"
+  command: "certbot -n certonly --webroot -w {{ nginx_letsencrypt_webroot_path }} -d {{ nginx_default_host }} --work-dir {{ nginx_letsencrypt_workdir }} --logs-dir {{ nginx_letsencrypt_logsdir }} --config-dir {{ nginx_letsencrypt_configdir }}"
+  args:
+    creates: "{{ nginx_letsencrypt_workdir }}/live/{{ nginx_default_host }}"
+  ignore_errors: true
+  when: custom_cert is undefined and cert_info.stderr
+
+- name: "Copy custom SSL certificates"
+  run_once: true
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - src: "{{ custom_cert.cert if custom_cert is defined else 'cert.crt' }}"
+      dest: "{{ nginx_certs_dir }}/custom.crt"
+      owner: '1000'
+      group: '1000'
+      mode: '0644'
+    - src: "{{ custom_cert.key if custom_cert is defined else 'cert.key' }}"
+      dest: "{{ nginx_certs_dir }}/custom.key"
+      owner: '1000'
+      group: '1000'
+      mode: '0600'
+  loop_control:
+    label: "{{ item.dest }}"
+  when: custom_cert is defined
+
+- name: "Create virtualhost configuration for default.conf"
+  template:
+    src: default.conf.j2
+    dest: "{{ nginx_virtualhosts_workdir }}/default.conf"
+    backup: true
+  when: nginx_default_host is defined
