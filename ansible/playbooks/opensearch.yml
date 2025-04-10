@@ -1,5 +1,5 @@
 ---
-- hosts: opensearch
+- hosts: opensearch_manager, opensearch_data
   roles:
     - opensearch
   become: true

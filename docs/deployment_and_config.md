@@ -108,7 +108,8 @@ all:
     # OpenSearch Settings
     opensearch_cluster_prefix: <opensearch_cluster_prefix>
     opensearch_cluster_name: <opensearch_cluster_name>
-    opensearch_cluster_heap_size: <opensearch_cluster_heap_size>
+    opensearch_cluster_manager_heap_size: <opensearch_cluster_manager_heap_size>
+    opensearch_cluster_data_heap_size: <opensearch_cluster_data_heap_size>
     ## Uncomment to restore OpenSearch Security files from a backup
     # opensearch_security_backup_restore: true
     # opensearch_security_backup_restore_name: opensearch-security-backup_20241018.tgz
@@ -130,6 +131,9 @@ all:
     sortinghat_secret_key: <sortinghat_secret_key>
     sortinghat_superuser_name: <sortinghat_admin_username>
     sortinghat_superuser_password: <sortinghat_admin_password>
+
+    # SortingHat Database
+    sortinghat_database: <sortinghat_database>
 
     # SortingHat Multi tenant
     sortinghat_multi_tenant: <sortinghat_multi_tenant>
@@ -215,7 +219,9 @@ Replace the entries in `<>` with your values:
 - `opensearch_cluster_name` (optional): name of the OpenSearch cluster.
   This value will be used in combination with `<opensearch_cluster_prefix>`
   to define the name of the cluster. Its default parameter is `bap-opensearch`.
-- `opensearch_cluster_heap_size` (optional): Java heap size for the OpenSearch cluster nodes (e.g. `1g`, `2g`).
+- `opensearch_cluster_manager_heap_size` (optional): Java heap size for the OpenSearch cluster manager nodes (e.g. `1g`, `2g`).
+  If you don't set a value, its default value will be `512m`.
+- `opensearch_cluster_data_heap_size` (optional): Java heap size for the OpenSearch cluster data nodes (e.g. `1g`, `2g`).
   If you don't set a value, its default value will be `512m`.
 - `opensearch_admin_user`: admin user on the OpenSearch cluster.
 - `opensearch_admin_password`: strong password for the admin user of OpenSearch.
@@ -235,6 +241,7 @@ Replace the entries in `<>` with your values:
 - `sortinghat_superuser_name`: admin user of the SortingHat service.
 - `sortinghat_superuser_password`: strong password for the admin user
   of the SortingHat server.
+- `sortinghat_database`: SortingHat database (by default is `sortinghat_db`).
 - `sortinghat_multi_tenant`: activate SortingHat multi tenant (`"true" | "false"`,
   by default is `"true"`).
 - `sortinghat_assets_bucket`: this is the name of the bucket created by

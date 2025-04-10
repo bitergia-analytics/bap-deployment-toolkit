@@ -7,7 +7,8 @@
       delegate_facts: true
       when: hostvars[item]['ansible_default_ipv4'] is not defined
       with_items:
-        - "{{ groups['opensearch'] }}"
+        - "{{ groups['opensearch_manager'] }}"
+        - "{{ groups['opensearch_data'] }}"
         - "{{ groups['sortinghat'] }}"
 
     - name: Gather facts from opensearch_dashboards service

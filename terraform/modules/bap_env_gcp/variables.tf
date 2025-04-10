@@ -150,57 +150,110 @@ variable "redis_ansible_use_external_ip" {
   default = false
 }
 
-# OpenSearch
+# OpenSearch Manager
 
-variable "opensearch_node_count" {
+variable "opensearch_manager_node_count" {
   type    = number
-  default = 2
+  default = 1
 }
 
-variable "opensearch_machine_type" {
+variable "opensearch_manager_machine_type" {
   type    = string
-  default = "e2-highmem-4" # 4vcpu, 32GB memory
+  default = "e2-standard-2" # 2vcpu, 8GB memory
 }
 
-variable "opensearch_machine_image" {
+variable "opensearch_manager_machine_image" {
   type    = string
   default = "debian-cloud/debian-11"
 }
 
-variable "opensearch_boot_disk_size" {
+variable "opensearch_manager_boot_disk_size" {
   type    = number
   default = 10
 }
 
-variable "opensearch_disk_count" {
+variable "opensearch_manager_disk_count" {
   type    = number
   default = 0
 }
 
-variable "opensearch_disk_size" {
+variable "opensearch_manager_disk_size" {
   type    = number
   default = 200
 }
 
-variable "opensearch_disk_type" {
+variable "opensearch_manager_disk_type" {
   type    = string
   default = "pd-standard"
 }
 
-variable "opensearch_disk_attach" {
+variable "opensearch_manager_disk_attach" {
   type        = string
   description = "Instance ID to attach OpenSearch disk"
   default     = ""
 }
 
-variable "opensearch_disk_snapshot" {
+variable "opensearch_manager_disk_snapshot" {
   type = string
   description = "The source snapshot used to create this disk"
   default = null
 }
 
+variable "opensearch_manager_ansible_use_external_ip" {
+  type    = bool
+  default = false
+}
 
-variable "opensearch_ansible_use_external_ip" {
+# OpenSearch Data
+
+variable "opensearch_data_node_count" {
+  type    = number
+  default = 2
+}
+
+variable "opensearch_data_machine_type" {
+  type    = string
+  default = "e2-highmem-4" # 4vcpu, 32GB memory
+}
+
+variable "opensearch_data_machine_image" {
+  type    = string
+  default = "debian-cloud/debian-11"
+}
+
+variable "opensearch_data_boot_disk_size" {
+  type    = number
+  default = 10
+}
+
+variable "opensearch_data_disk_count" {
+  type    = number
+  default = 0
+}
+
+variable "opensearch_data_disk_size" {
+  type    = number
+  default = 200
+}
+
+variable "opensearch_data_disk_type" {
+  type    = string
+  default = "pd-standard"
+}
+
+variable "opensearch_data_disk_attach" {
+  type        = string
+  description = "Instance ID to attach OpenSearch disk"
+  default     = ""
+}
+
+variable "opensearch_data_disk_snapshot" {
+  type = string
+  description = "The source snapshot used to create this disk"
+  default = null
+}
+
+variable "opensearch_data_ansible_use_external_ip" {
   type    = bool
   default = false
 }

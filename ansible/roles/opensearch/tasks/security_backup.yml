@@ -22,4 +22,3 @@
 - name: Restore OpenSearch Security backup
   import_tasks: restore_security_backup.yml
   when: opensearch_security_backup_restore
-

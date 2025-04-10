@@ -1,0 +1,61 @@
+- name: Set manager node configuration
+  set_fact:
+    opensearch_node_roles: ["cluster_manager"]
+    opensearch_docker_container: bap_opensearch_manager
+
+- name: Setup OpenSearch manager configuration
+  template:
+    src: opensearch.yml.j2
+    dest: "{{ opensearch_workdir }}/opensearch.yml"
+    owner: '1000'
+    group: '1000'
+    mode: 0660
+
+- name: Remove old OpenSearch manager container
+  docker_container:
+    name: "{{ opensearch_docker_container }}"
+    state: absent
+
+- name: Start OpenSearch manager container
+  docker_container:
+    name: "{{ opensearch_docker_container }}"
+    image: "{{ opensearch_docker_image }}:{{ opensearch_version }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+        aliases:
+          - "{{ opensearch_docker_container | replace('_','-') }}"
+    env:
+      DISABLE_INSTALL_DEMO_CONFIG=true
+      bootstrap.memory_lock=true
+      "OPENSEARCH_JAVA_OPTS=-Xms{{ opensearch_cluster_manager_heap_size }} -Xmx{{ opensearch_cluster_manager_heap_size }}"
+    ulimits:
+      memlock:-1:-1
+      nofile:65536:65536
+    volumes:
+      - "{{ certs_dir }}/{{ certs_files.ca_cert }}:/usr/share/opensearch/config/{{ certs_files.ca_cert }}"
+      - "{{ certs_dir }}/{{ certs_files.admin_cert }}:/usr/share/opensearch/config/{{ certs_files.admin_cert }}"
+      - "{{ certs_dir }}/{{ certs_files.admin_key }}:/usr/share/opensearch/config/{{ certs_files.admin_key }}"
+      - "{{ certs_dir }}/{{ certs_files.node_cert }}:/usr/share/opensearch/config/{{ certs_files.node_cert }}"
+      - "{{ certs_dir }}/{{ certs_files.node_key }}:/usr/share/opensearch/config/{{ certs_files.node_key }}"
+      - "{{ opensearch_volume }}:/usr/share/opensearch/data"
+      - "{{ opensearch_workdir }}/opensearch.yml:/usr/share/opensearch/config/opensearch.yml"
+      - "{{ opensearch_workdir }}/log4j2.properties:/usr/share/opensearch/config/log4j2.properties"
+      - "{{ opensearch_security_dir }}/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml"
+      - "{{ opensearch_security_dir }}/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml"
+      - "{{ opensearch_security_dir }}/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml"
+      - "{{ opensearch_security_backup_dir }}:/tmp/backup/"
+      - "{{ opensearch_logs_dir }}:/usr/share/opensearch/logs"
+    ports:
+      - "{{ network.publish_host }}:9200:9200"
+      - "{{ network.publish_host }}:9300:9300"
+      - "{{ network.publish_host }}:9600:9600"
+      - "127.0.0.1:9200:9200"
+      - "127.0.0.1:9300:9300"
+      - "127.0.0.1:9600:9600"
+    exposed_ports:
+      - "9200"
+      - "9300"
+      - "9600"
+    log_driver: json-file
+    log_options:
+      max-size: "{{ docker_log_max_size }}"
