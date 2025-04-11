@@ -65,6 +65,13 @@
     loop_var: instance
   when: custom_cert is undefined and instance.nginx is defined
 
+- name: "Configure virtualhost (certbot with acme-challenge) for default host"
+  template:
+    src: vhost_port_80.j2
+    dest: "{{ nginx_virtualhosts_workdir }}/default.conf"
+    backup: true
+  when: custom_cert is undefined and nginx_default_host is defined
+
 - name: "Create a docker network: {{ docker_network_name }}"
   docker_network:
     name: "{{ docker_network_name }}"
@@ -99,7 +106,11 @@
   with_items:
     - bitergia-logo.png
     - custom_404.html
-    - default.conf
+  when: nginx_default_host is defined
+
+- name: Confgure virtualhost for default host
+  include_tasks: virtualhost_default.yml
+  when: nginx_default_host is defined
 
 - name: Start NGINX container with virtualhost(s)
   docker_container:
