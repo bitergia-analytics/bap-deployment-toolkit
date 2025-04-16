@@ -155,8 +155,11 @@ all:
     # Mordred Settings
     mordred_setups_repo_url: <repo_mordred_config.git>
 
-    # Ngninx Certbot
+    # Nginx Certbot
     letsencrypt_register_email: <letsencrypt_register_email>
+
+    ## Uncomment to define an Nginx Default host
+    #nginx_default_host: <nginx_defualt_fqdn>
 
     ## Uncomment to define custom certificates. Otherwise it will create Let's Encrypt certificates.
     #custom_cert:
@@ -257,6 +260,7 @@ Replace the entries in `<>` with your values:
   to the proxied server (by default is `75`).
 - `letsencrypt_register_email`: email used for registration, recovery contact,
   and warnings about expired certs on Let's Encrypt.
+- `nginx_defualt_fqdn` (optional): enable a default host (404 page not found).
 
 After configuring these parameters, you need to configure the instances of the
 task scheduler (Mordred) and Nginx virtual host. You need a task scheduler for each project

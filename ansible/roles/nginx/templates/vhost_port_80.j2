@@ -1,7 +1,11 @@
 server {
+{% if instance is undefined and nginx_default_host is defined %}
+    listen 80 default_server;
+    server_name {{ nginx_default_host}};
+{% else %}
     listen 80;
-
     server_name {{ instance.nginx.fqdn }};
+{% endif %}
 
 {% if custom_cert is undefined %}
     location /.well-known/acme-challenge/ {
@@ -12,4 +16,13 @@ server {
     location / {
         return 301 https://$server_name$request_uri;
     }
+
+{% if instance is undefined and nginx_default_host is defined %}
+    error_page 404 /custom_404.html;
+
+    location = /custom_404.html {
+        root /etc/nginx/conf.d;
+        internal;
+    }
+{% endif %}
 }
