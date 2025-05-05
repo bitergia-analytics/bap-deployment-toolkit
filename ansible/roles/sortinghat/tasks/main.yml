@@ -148,8 +148,10 @@
     allowed_hosts: |-
       [
       {% for item in instances %}
-        {{ "" if loop.first else "," }}
-        "{{ item.nginx.fqdn | regex_findall('[a-zA-Z0-9-]*(?P<domain>\..*)', '\\g<domain>') | first }}"
+        {% if item.nginx is defined %}
+          {{ "" if loop.first else "," }}
+          "{{ item.nginx.fqdn | regex_findall('[a-zA-Z0-9-]*(?P<domain>\..*)', '\\g<domain>') | first }}"
+        {% endif %}
       {% endfor %}
       ]
 
