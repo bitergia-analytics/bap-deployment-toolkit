@@ -4,6 +4,9 @@ server {
     include    mime.types;
     sendfile   on;
 
+    # Disable nginx version
+    server_tokens off;
+
     listen 443 ssl;
     http2 on;
     server_name {{ instance.nginx.fqdn }};
