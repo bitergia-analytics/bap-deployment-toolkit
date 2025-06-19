@@ -219,6 +219,7 @@
       GOOGLE_APPLICATION_CREDENTIALS: /home/sortinghat/gcp_credentials.json
       SORTINGHAT_UWSGI_WORKERS: "{{ sortinghat_uwsgi_workers }}"
       SORTINGHAT_UWSGI_THREADS: "{{ sortinghat_uwsgi_threads }}"
+      SORTINGHAT_MATCH_TRUSTED_SOURCES: "{{ sortinghat_match_trusted_sources | default('github,gitlab,slack,openinfra') }}"
     volumes:
       - "{{ gcp_service_account_file }}:/home/sortinghat/gcp_credentials.json:ro"
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"

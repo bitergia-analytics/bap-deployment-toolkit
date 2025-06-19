@@ -143,6 +143,7 @@
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
       SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
       SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
+      SORTINGHAT_MATCH_TRUSTED_SOURCES: "{{ sortinghat_match_trusted_sources | default('github,gitlab,slack,openinfra') }}"
     volumes:
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
     log_driver: json-file
