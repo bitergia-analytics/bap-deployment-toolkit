@@ -97,7 +97,7 @@
     login_password: "{{ mariadb_root_password }}"
     state: present
   register: result
-  retries: 2
+  retries: 10
   delay: 5
   until: result is success
 

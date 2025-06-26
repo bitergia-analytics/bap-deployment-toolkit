@@ -18,17 +18,15 @@
     - "{{ nginx_letsencrypt_webroot_path }}"
     - "{{ nginx_log_dir }}"
     - "{{ nginx_virtualhosts_workdir }}"
+    - "{{ grimoirelab_core_static }}"
 
-- name: "Remove {{ grimoirelab_static_workir }} content"
+- name: "Remove {{ grimoirelab_core }} content"
   file:
-    path: "{{ grimoirelab_static_workir }}"
+    path: "{{ grimoirelab_core_static }}"
     state: absent
 
-- name: Copy GrimoireLab static
-  copy:
-    src: "/docker/grimoirelab/venv/lib/python3.11/site-packages/grimoirelab/core/static/"
-    dest: "{{ grimoirelab_static_workir }}"
-    remote_src: true
+- name: Download GrimoireLab static files from GCP Storage
+  shell: gsutil cp -r "gs://{{ sortinghat_assets_bucket }}/grimoirelab_core/static" "{{ grimoirelab_core }}"
 
 - name: Configure NGINX status page
   template:
@@ -52,7 +50,7 @@
         "{{ nginx_letsencrypt_configdir }}:/etc/ssl/certbot_certs/",
         "{{ nginx_letsencrypt_webroot_path }}:/var/www/certbot/:ro",
         "{{ nginx_gcs_workdir }}:/opt/gcs",
-        "{{ grimoirelab_static_workir }}:/opt/grimoirelab_static",
+        "{{ grimoirelab_core_static }}:/opt/grimoirelab_static",
         "{{ nginx_log_dir }}:/var/log/nginx",
         "{{ nginx_virtualhosts_workdir}}:/etc/nginx/conf.d/"
       ]

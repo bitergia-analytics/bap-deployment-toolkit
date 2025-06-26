@@ -4,8 +4,8 @@
 - import_playbook: redis.yml
 - import_playbook: opensearch.yml
 - import_playbook: opensearch_dashboards.yml
-- import_playbook: sortinghat.yml
-- import_playbook: sortinghat_worker.yml
+#- import_playbook: sortinghat.yml
+#- import_playbook: sortinghat_worker.yml
+- import_playbook: grimoirelab.yml
 - import_playbook: nginx.yml
-- import_playbook: mordred.yml
 - import_playbook: monitoring.yml

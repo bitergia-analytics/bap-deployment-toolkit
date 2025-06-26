@@ -126,6 +126,8 @@ all:
     opensearch_readall_password: <default_readall_password>
     opensearch_backups_user: <backup_username>
     opensearch_backups_password: <backup_password>
+    opensearch_grimoirelab_user: <grimoirelab_user>
+    opensearch_grimoirelab_password: <grimoirelab_user_password>
 
     ## Backups Storage
     backups_assets_bucket: <backups_bucket_name>

@@ -24,16 +24,19 @@
     mode: 0755
     recurse: true
   with_items:
-    - "{{ nginx_gcs_workdir }}"
-    - "{{ nginx_keys_workdir }}"
+    - "{{ grimoirelab_gcs_workdir }}"
+    - "{{ keys_dir }}"
 
 - name: Copy GCP service account file
   copy:
     src: "{{ gcp_service_account_host_file }}"
-    dest: "{{ nginx_keys_workdir }}/key.json"
-    owner: '1000'
-    group: '1000'
+    dest: "{{ gcp_service_account_file }}"
     mode: 0644
 
 - name: Activate service account
-  shell: gcloud auth activate-service-account --key-file "{{ nginx_keys_workdir }}/key.json"
+  shell: gcloud auth activate-service-account --key-file "{{ gcp_service_account_file }}"
+
+- name: Upload GrimoireLab static files to GCP Storage
+  shell: gsutil cp -r "{{ grimoirelab_static_workdir }}" "gs://{{ sortinghat_assets_bucket }}/grimoirelab_core/"
+  args:
+    executable: /bin/bash

@@ -7,6 +7,11 @@
     creates: "{{ ansible_env.HOME }}/.poetry/bin/poetry"
     executable: /bin/bash
 
+- name: Add Poetry to PATH
+  shell: echo 'export PATH="$HOME/.local/bin:$PATH"' >> {{ ansible_env.HOME }}/.bashrc
+  args:
+    executable: /bin/bash
+
 - name: Verify Poetry installation
   shell: poetry --version
   args:
@@ -87,6 +92,6 @@
   pip:
     name:
       - mysqlclient==2.0.3
-      - uwsgi==2.0.28
+      - uwsgi==2.0.30
     virtualenv: "{{ grimoirelab_venv }}"
     virtualenv_command: "python3 -m venv"

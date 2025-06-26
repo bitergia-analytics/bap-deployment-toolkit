@@ -108,7 +108,11 @@ server {
 
     location / {
         include /etc/nginx/conf.d/uwsgi_params;
-        uwsgi_pass 127.0.0.1:9314;
+{% if 'all_in_one' in groups and inventory_hostname in groups['all_in_one'] %}
+        uwsgi_pass {{ ansible_default_ipv4.address }}:9314;
+{% else %}
+        uwsgi_pass {{ hostvars[(groups['grimoirelab'][0])].ansible_default_ipv4.address }}:9314;
+{% endif %}
         uwsgi_param Host $host;
         uwsgi_param X-Real-IP $remote_addr;
         uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;

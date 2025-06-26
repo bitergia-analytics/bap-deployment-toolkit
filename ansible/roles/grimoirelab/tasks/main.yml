@@ -193,3 +193,6 @@
     GRIMOIRELAB_SECRET_KEY: "{{ grimoirelab_secret_key }}"
     GRIMOIRELAB_EVENTS_STREAM_MAX_LENGTH: "{{ grimoirelab_events_stream_max_length | default('1000000') }}"
     PATH: "{{ ansible_env.HOME }}/.local/bin:$PATH"
+
+- name: Configure Google Cloud Storage (GCS)
+  include_tasks: gcs.yml

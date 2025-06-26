@@ -57,3 +57,6 @@ gcloud_apt_deb_ubuntu_repository: >-
 
 docker_network_name: bap_network
 docker_log_max_size: 500m
+
+grimoirelab_core: "/docker/grimoirelab/core"
+grimoirelab_core_static: "{{ grimoirelab_core }}/static"

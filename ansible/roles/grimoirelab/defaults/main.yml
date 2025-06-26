@@ -9,8 +9,8 @@ grimoirelab_workdir: "/docker/grimoirelab"
 grimoirelab_repo_dir: "{{ grimoirelab_workdir }}/repository"
 opensearch_host: "{{ groups['all_in_one'][0] | default(groups['opensearch'][0]) }}"
 grimoirelab_archivist_storage_url: "https://{{ opensearch_host }}:9200"
-grimoirelab_cors_allowed_origins_regexes: "https://localhost,https://{{ groups['all_in_one'][0] }},https://{{ instance.fqdn }}:8001"
-grimoirelab_allowed_hosts: "localhost,{{ groups['all_in_one'][0] }},{{ instance.fqdn }}"
+grimoirelab_cors_allowed_origins_regexes: "https://localhost,https://{{ opensearch_host }},https://{{ instance.fqdn }}:8001"
+grimoirelab_allowed_hosts: "localhost,{{ opensearch_host }},{{ instance.fqdn }}"
 
 # Node.js version
 nodejs_version: node
@@ -18,3 +18,14 @@ nodejs_version: node
 # Database
 grimoirelab_database: core_db
 grimoirelab_venv: "{{ grimoirelab_workdir }}/venv"
+grimoirelab_static_workdir: "{{ grimoirelab_venv }}/lib/python3.11/site-packages/grimoirelab/core/static/"
+
+# GCS bucket access
+## Gcloud repository
+gcloud_apt_deb_ubuntu_repository: >-
+  deb [signed-by=/usr/share/keyrings/cloud.google.gpg]
+  https://packages.cloud.google.com/apt cloud-sdk main
+## GCS directories
+grimoirelab_gcs_workdir: /docker/grimoirelab/gcs
+keys_dir: "{{ grimoirelab_workdir }}/keys"
+gcp_service_account_file: "{{ keys_dir }}/credentials.json"
