@@ -124,33 +124,118 @@
   run_once: true
   when: restore_snapshot is defined
 
-- name: Copy snapshot index list JSON file
-  template:
-    src: snapshot.json.j2
-    dest: "{{ opensearch_snapshots_json_file }}"
-    mode: 0400
-    owner: "{{ ansible_user_id }}"
-  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+- name: Configure OpenSearch notification channels for Slack
+  include_tasks: slack_channel.yml
+  loop: "{{ opensearch_notification_channels }}"
+  when:
+    - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+    - opensearch_notification_channels is defined and opensearch_notification_channels | length > 0
 
-- name: Copy snapshot script
-  template:
-    src: make_snapshot.sh.j2
-    dest: "{{ opensearch_snapshots_script }}"
-    mode: 0500
-    owner: "{{ ansible_user_id }}"
-  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+- name: "Check if snapshot policy {{ opensearch_snapshot_policy.policy_id }} exists"
+  uri:
+    url: "{{ opensearch_snapshots_url }}/_plugins/_sm/policies/{{ opensearch_snapshot_policy.policy_id }}"
+    method: GET
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
+    status_code: 200, 404
+  register: opensearch_snapshot_policy_check
+  when:
+    - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+    - opensearch_snapshot_policy is defined
 
-- name: Create cron job for OpenSearch snapshot
-  cron:
-    name: "Make OpenSearch snapshot"
-    user: "{{ ansible_user_id }}"
-    hour: "{{ opensearch_snapshots_cronjob_time.hour }}"
-    minute: "{{ opensearch_snapshots_cronjob_time.minute }}"
-    weekday: "{{ opensearch_snapshots_cronjob_time.weekday }}"
-    job: "{{ opensearch_snapshots_script }}"
-    backup: true
-  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+- name: "Create Snapshot policy {{ opensearch_snapshot_policy.policy_id }}"
+  uri:
+    url: "{{ opensearch_snapshots_url }}/_plugins/_sm/policies/{{ opensearch_snapshot_policy.policy_id }}"
+    method: POST
+    body_format: json
+    body:
+      description: "{{ opensearch_snapshot_policy.description }}"
+      creation:
+        schedule:
+          cron:
+            expression: "{{ opensearch_snapshot_policy.creation_cron_expression }}"
+            timezone: "{{ opensearch_snapshot_policy.timezone }}"
+        time_limit: "{{ opensearch_snapshot_policy.time_limit }}"
+      deletion:
+        schedule:
+          cron:
+            expression: "{{ opensearch_snapshot_policy.deletion_cron_expression }}"
+            timezone: "{{ opensearch_snapshot_policy.timezone }}"
+        condition:
+          max_age: "{{ opensearch_snapshot_policy.retention.max_age }}"
+          max_count: "{{ opensearch_snapshot_policy.retention.max_count }}"
+          min_count: "{{ opensearch_snapshot_policy.retention.min_count }}"
+        time_limit: "{{ opensearch_snapshot_policy.time_limit }}"
+      snapshot_config:
+        date_format: "{{ opensearch_snapshot_policy.date_format }}"
+        timezone: "{{ opensearch_snapshot_policy.timezone }}"
+        indices: "{{ opensearch_snapshot_policy.indices }}"
+        repository: "{{ opensearch_snapshots_repository }}"
+        ignore_unavailable: true
+        include_global_state: false
+        partial: false
+      notification:
+        channel:
+          id: "{{ opensearch_snapshot_policy.notification_channel_id }}"
+        conditions:
+          creation: "{{ opensearch_snapshot_policy.notification_conditions.creation }}"
+          deletion: "{{ opensearch_snapshot_policy.notification_conditions.deletion }}"
+          failure: "{{ opensearch_snapshot_policy.notification_conditions.failure }}"
+          time_limit_exceeded: false
+    status_code: 200, 201
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
+  when:
+    - opensearch_snapshot_policy_check is not defined or opensearch_snapshot_policy_check.status != 200
+    - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+    - opensearch_snapshot_policy is defined
 
-- name: Empty OpenSearch Security backup directory
-  shell: rm -rf {{ opensearch_security_backup_dir }}/*
-  when: not opensearch_security_backup_restore
+- name: "Update Snapshot policy {{ opensearch_snapshot_policy.policy_id }}"
+  uri:
+    url: "{{ opensearch_snapshots_url }}/_plugins/_sm/policies/{{ opensearch_snapshot_policy.policy_id }}?if_seq_no={{ opensearch_snapshot_policy_check.json._seq_no }}&if_primary_term={{ opensearch_snapshot_policy_check.json._primary_term }}"
+    method: PUT
+    body_format: json
+    body:
+      description: "{{ opensearch_snapshot_policy.description }}"
+      creation:
+        schedule:
+          cron:
+            expression: "{{ opensearch_snapshot_policy.creation_cron_expression }}"
+            timezone: "{{ opensearch_snapshot_policy.timezone }}"
+        time_limit: "{{ opensearch_snapshot_policy.time_limit }}"
+      deletion:
+        schedule:
+          cron:
+            expression: "{{ opensearch_snapshot_policy.deletion_cron_expression }}"
+            timezone: "{{ opensearch_snapshot_policy.timezone }}"
+        condition:
+          max_age: "{{ opensearch_snapshot_policy.retention.max_age }}"
+          max_count: "{{ opensearch_snapshot_policy.retention.max_count }}"
+          min_count: "{{ opensearch_snapshot_policy.retention.min_count }}"
+        time_limit: "{{ opensearch_snapshot_policy.time_limit }}"
+      snapshot_config:
+        date_format: "{{ opensearch_snapshot_policy.date_format }}"
+        timezone: "{{ opensearch_snapshot_policy.timezone }}"
+        indices: "{{ opensearch_snapshot_policy.indices }}"
+        repository: "{{ opensearch_snapshots_repository }}"
+        ignore_unavailable: true
+        include_global_state: false
+        partial: false
+      notification:
+        channel:
+          id: "{{ opensearch_snapshot_policy.notification_channel_id }}"
+        conditions:
+          creation: "{{ opensearch_snapshot_policy.notification_conditions.creation }}"
+          deletion: "{{ opensearch_snapshot_policy.notification_conditions.deletion }}"
+          failure: "{{ opensearch_snapshot_policy.notification_conditions.failure }}"
+          time_limit_exceeded: false
+    status_code: 200, 201
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
+  when:
+    - opensearch_snapshot_policy_check is defined and opensearch_snapshot_policy_check.status == 200
+    - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+    - opensearch_snapshot_policy is defined

@@ -110,6 +110,40 @@ all:
     opensearch_cluster_name: <opensearch_cluster_name>
     opensearch_cluster_manager_heap_size: <opensearch_cluster_manager_heap_size>
     opensearch_cluster_data_heap_size: <opensearch_cluster_data_heap_size>
+    ## Uncomment this section to configure OpenSearch notification channels for Slack.
+    #opensearch_notification_channels:
+    #- config_id: "slack_channel_1"
+    #  name: "Slack Channel 1"
+    #  description: "Slack channel 1 for OpenSearch notifications"
+    #  config_type: "slack"
+    #  slack_url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+    #- config_id: "slack_channel_2"
+    #  name: "Slack Channel 2"
+    #  description: "Slack channel 2 for OpenSearch notifications"
+    #  config_type: "slack"
+    #  slack_url: "https://hooks.slack.com/services/T00000000/B00000000/YYYYYYYYYYYYYYYYYYYYYYYY"
+
+    ## Uncomment this section to configure a OpenSearch snapshot policy.
+    #opensearch_snapshot_policy:
+    #  policy_id: "daily_snapshot"
+    #  description: "Daily snapshot policy for OpenSearch"
+    #  time_limit: "1h"
+    #  enabled: true
+    #  retention:
+    #    max_age: "30d"
+    #    max_count: 31
+    #    min_count: 1
+    #  indices: "*"
+    #  notification_channel_id: "slack_channel_1"
+    #  notification_conditions:
+    #    creation: true
+    #    deletion: false
+    #    failure: true
+    #  creation_cron_expression: "0 0 * * *"  # Daily at midnight
+    #  deletion_cron_expression: "0 3 * * *"  # Daily at 3 AM
+    #  timezone: "UTC"
+    #  date_format: "yyyy-MM-dd"
+
     ## Uncomment to restore OpenSearch Security files from a backup
     # opensearch_security_backup_restore: true
     # opensearch_security_backup_restore_name: opensearch-security-backup_20241018.tgz
@@ -382,6 +416,65 @@ Replace the entries in `<>` with your values:
 
 - `mordred_ssh_key.private`: path to your SSH private key file
 - `mordred_ssh_key.public`: path to your SSH public key file
+
+#### Create OpenSearch notification channels for Slack (optional)
+
+This toolkit allows to receive notifications about the activity on OpenSearch. Rigth now, the only
+channel supported is Slack. To configure it add the following parameters to your config. You can
+find more information in [the official documentation](https://docs.opensearch.org/docs/latest/observing-your-data/notifications/api/).
+
+- `opensearch_notification_channels`: Channel configurations, only available for Slack.
+  Create as many entries as you might need.
+- `opensearch_notification_channels.config_id`: Specifies the channel identifier.
+- `opensearch_notification_channels.name`: The name of the channel.
+- `opensearch_notification_channels.description`: The description of the channel.
+- `opensearch_notification_channels.slack_url`: The URL of the Slack channel.
+
+Here are some examples of the notifications:
+
+```text
+Snapshot Management - Snapshot Creation Notification
+Snapshot daily_snapshot-2025-07-04-566z0ew1 creation has finished successfully.
+
+Snapshot Management - Snapshot Deletion Notification
+Snapshot(s) [daily_snapshot-2025-07-04-ajuaw79l] deletion has finished.
+```
+
+#### Create OpenSearch Snapshot Policy (optional)
+
+You can use the toolkit to set OpenSearch policies that will create data snapshots.
+These snapshots will serve as a backup in the case you need to recover data. By default,
+the will be created every day but you can set how often you want to generate them.
+At the same time, you can set a retention policy to delete old snapshots. By default,
+snapshots will be kept for 30 days.
+You can find more info about how snapshots work on OpenSearch in
+[their official documentation](https://docs.opensearch.org/docs/latest/tuning-your-cluster/availability-and-recovery/snapshots/sm-api/).
+Set the following parameters to configure the snapshot policies.
+
+**Important**: You must create and configure a OpenSearch notification channel
+before setting up `opensearch_snapshot_policy.notification_channel_id`.
+
+- `opensearch_snapshot_policy`: Snapshot management policy
+- `opensearch_snapshot_policy.policy_id`: Policy ID
+- `opensearch_snapshot_policy.description`: The description of the SM policy
+- `opensearch_snapshot_policy.enabled`: Should this SM policy be enabled at creation?
+- `opensearch_snapshot_policy.date_format`: Specifies the format for the date in the snapshot name.
+  Supports all date formats supported by OpenSearch (e.g. "yyyy-MM-dd"). Snapshot names
+  have the format `<policy_name>-<date_format>-<random number>`.
+- `opensearch_snapshot_policy.indices`: The names of the indexes in the snapshot. Multiple index
+  names are separated by `,`. Supports wildcards (`*`).
+- `opensearch_snapshot_policy.creation_cron_expression`: The cron schedule used to create snapshots.
+- `opensearch_snapshot_policy.deletion_cron_expression`: The cron schedule used to delete snapshots.
+- `opensearch_snapshot_policy.time_limit`: Sets the maximum time to wait for snapshot creation and
+  deletion to finish.
+- `opensearch_snapshot_policy.retention.max_age`: The maximum time a snapshot is retained.
+- `opensearch_snapshot_policy.retention.max_count`: The maximum number of snapshots to be retained.
+- `opensearch_snapshot_policy.retention.min_count`: The minimum number of snapshots to be retained.
+- `opensearch_snapshot_policy.notification_channel_id`: The channel ID of the channel used for notifications.
+- `opensearch_snapshot_policy.notification_conditions.creation`: Do you want notifications about snapshot creation? (`true` | `false`).
+- `opensearch_snapshot_policy.notification_conditions.deletion`: Do you want notifications about snapshot deletion? (`true` | `false`).
+- `opensearch_snapshot_policy.notification_conditions.failure`: Do you want notifications about creation or deletion failure? (`true` | `false`).
+- `opensearch_snapshot_policy.timezone`: Policy timezone (e.g. `UTC`). You can find the entire list at [TZ Identifier column](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
 #### Restore OpenSearch Security from a backup (optional)
 
