@@ -121,3 +121,37 @@ gcs_cred_file_container: "/usr/share/opensearch/config/gcs_credentials.json"
 
 docker_network_name: bap_network
 docker_log_max_size: 500m
+
+## Slack notification channels
+# Uncomment this section to configure Slack channels for OpenSearch notifications.
+#opensearch_notification_channels:
+#- config_id: "slack_channel_1"
+#  name: "Slack Channel 1"
+#  description: "Slack channel 1 for OpenSearch notifications"
+#  slack_url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+#- config_id: "slack_channel_2"
+#  name: "Slack Channel 2"
+#  description: "Slack channel 2 for OpenSearch notifications"
+#  slack_url: "https://hooks.slack.com/services/T00000000/B00000000/YYYYYYYYYYYYYYYYYYYYYYYY"
+
+## OpenSearch Snapshot Policy
+# Uncomment this section to configure a snapshot policy for OpenSearch.
+#opensearch_snapshot_policy:
+#  policy_id: "daily_snapshot"
+#  description: "Daily snapshot policy for OpenSearch"
+#  time_limit: "1h"
+#  enabled: true
+#  retention:
+#    max_age: "30d"
+#    max_count: 31
+#    min_count: 1
+#  indices: "*"
+#  notification_channel_id: "slack_channel_1"
+#  notification_conditions:
+#    creation: true
+#    deletion: false
+#    failure: true
+#  creation_cron_expression: "0 0 * * *"  # Daily at midnight
+#  deletion_cron_expression: "0 3 * * *"  # Daily at 3 AM
+#  timezone: "UTC"
+#  date_format: "yyyy-MM-dd"
