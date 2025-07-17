@@ -188,9 +188,9 @@
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
     validate_certs: false
   when:
-    - opensearch_snapshot_policy_check is not defined or opensearch_snapshot_policy_check.status != 200
     - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
     - opensearch_snapshot_policy is defined
+    - opensearch_snapshot_policy_check is not defined or opensearch_snapshot_policy_check.status != 200
 
 - name: "Update Snapshot policy {{ opensearch_snapshot_policy.policy_id }}"
   uri:
@@ -236,6 +236,6 @@
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
     validate_certs: false
   when:
-    - opensearch_snapshot_policy_check is defined and opensearch_snapshot_policy_check.status == 200
     - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
     - opensearch_snapshot_policy is defined
+    - opensearch_snapshot_policy_check is defined and opensearch_snapshot_policy_check.status == 200
