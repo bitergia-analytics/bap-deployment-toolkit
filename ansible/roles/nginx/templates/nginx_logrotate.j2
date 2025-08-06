@@ -1,0 +1,13 @@
+{{ nginx_log_dir }}/*.log
+{{ nginx_letsencrypt_logsdir }}/*.log
+{
+    su root root
+    rotate 14
+    size 5M
+    missingok
+    notifempty
+    delaycompress
+    compress
+    create 0640
+    copytruncate
+}
