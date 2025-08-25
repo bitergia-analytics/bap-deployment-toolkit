@@ -16,7 +16,9 @@
           "tenant": "{{ item.sortinghat.tenant | replace('-','_') }}",
           "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }},
           "openinfra_client_id": "{{ item.sortinghat.openinfra_client_id | default("") }}",
-          "openinfra_client_secret": "{{ item.sortinghat.openinfra_client_secret | default("") }}"
+          "openinfra_client_secret": "{{ item.sortinghat.openinfra_client_secret | default("") }}",
+          "eclipse_foundation_user_id": "{{ item.sortinghat.eclipse_foundation_user_id | default("") }}",
+          "eclipse_foundation_password": "{{ item.sortinghat.eclipse_foundation_password | default("") }}"
         }
       {% endfor %}
       ]
@@ -30,7 +32,9 @@
           "tenant": tenant,
           "dedicated_queue": dedicated_queue,
           "openinfra_client_id": openinfra_client_id,
-          "openinfra_client_secret": openinfra_client_secret
+          "openinfra_client_secret": openinfra_client_secret,
+          "eclipse_foundation_user_id": eclipse_foundation_user_id,
+          "eclipse_foundation_password": eclipse_foundation_password
           }')
        | unique
       }}

@@ -19,6 +19,8 @@ nginx_log_dir: "{{ nginx_workdir }}/log"
 ##     dedicated_queue: true
 ##     openinfra_client_id: ""
 ##     openinfra_client_secret: ""
+##     eclipse_foundation_user_id: ""
+##     eclipse_foundation_password: ""
 ##   nginx:
 ##     fqdn: example.com
 ##     http_rest_api: true
