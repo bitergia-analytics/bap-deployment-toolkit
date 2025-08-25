@@ -16,7 +16,9 @@
           "tenant": "{{ item.sortinghat.tenant | replace('-','_') }}",
           "dedicated_queue": {{ item.sortinghat.dedicated_queue | default(false) }},
           "openinfra_client_id": "{{ item.sortinghat.openinfra_client_id | default("") }}",
-          "openinfra_client_secret": "{{ item.sortinghat.openinfra_client_secret | default("") }}"
+          "openinfra_client_secret": "{{ item.sortinghat.openinfra_client_secret | default("") }}",
+          "eclipse_foundation_user_id": "{{ item.sortinghat.eclipse_foundation_user_id | default("") }}",
+          "eclipse_foundation_password": "{{ item.sortinghat.eclipse_foundation_password | default("") }}"
         }
       {% endfor %}
       ]
@@ -30,7 +32,9 @@
           "tenant": tenant,
           "dedicated_queue": dedicated_queue,
           "openinfra_client_id": openinfra_client_id,
-          "openinfra_client_secret": openinfra_client_secret
+          "openinfra_client_secret": openinfra_client_secret,
+          "eclipse_foundation_user_id": eclipse_foundation_user_id,
+          "eclipse_foundation_password": eclipse_foundation_password
           }')
        | unique
       }}
@@ -184,6 +188,8 @@
       SORTINGHAT_REDIS_DB: "{{ redis_database }}"
       SORTINGHAT_OPENINFRA_CLIENT_ID: "{{ item.openinfra_client_id }}"
       SORTINGHAT_OPENINFRA_CLIENT_SECRET: "{{ item.openinfra_client_secret }}"
+      SORTINGHAT_ECLIPSE_FOUNDATION_USER_ID: "{{ item.eclipse_foundation_user_id }}"
+      SORTINGHAT_ECLIPSE_FOUNDATION_PASSWORD: "{{ item.eclipse_foundation_password }}"
       SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
       SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
     volumes:

@@ -215,6 +215,8 @@ all:
         dedicated_queue: true
         openinfra_client_id: "<openinfra_client_id>"
         openinfra_client_secret: "<openinfra_client_secret>"
+        eclipse_foundation_user_id: "<eclipse_foundation_user_id>"
+        eclipse_foundation_password: "<eclipse_foundation_password>"
       nginx:
         fqdn: <fqdn-1>
         http_rest_api: false
@@ -324,6 +326,8 @@ about how to setup the task scheduler.
   email information. (by default is ""). Only works with dedicated queues.
 - `instances.sortinghat.openinfra_client_secret` (optional): OpenInfraID Oauth2 client secret for private
    API (by default is ""). Only works with dedicated queues.
+- `instances.sortinghat.eclipse_foundation_user_id` (optional): Eclipse Foundation API user ID.
+- `instances.sortinghat.eclipse_foundation_password` (optional): Eclipse Foundation API user's password.
 - `instances.nginx.fqdn`: full qualified domain name (e.g. `bap.example.com`)
   where BAP will be available.
 - `instances.nginx.http_rest_api`: Open OpenSearch HTTP rest API only if the variable is defined
