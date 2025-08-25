@@ -6,12 +6,24 @@ logging:
     nginx_error:
       type: nginx_error
       include_paths: {{ nginx_logging_error_include_paths }}
+    certbot_renew:
+      type: files
+      include_paths: {{ nginx_logging_certbot_renew_include_paths }}
+  processors:
+    certbot_parser:
+      type: parse_regex
+      regex: "^(?<time>[\d-]* [\d:]*) - (?<level>[^ ]*) - (?<message>[^ :].*)$"
   service:
     pipelines:
       nginx:
         receivers:
           - nginx_access
           - nginx_error
+      certbot:
+        receivers:
+          - certbot_renew
+        processors:
+          - certbot_parser
 metrics:
   receivers:
     nginx:

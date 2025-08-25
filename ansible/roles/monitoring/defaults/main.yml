@@ -20,6 +20,7 @@ opensearch_logging_include_paths: [
 nginx_logging_access_include_paths: ["/docker/nginx/log/access.log"]
 nginx_logging_error_include_paths: ["/docker/nginx/log/error.log"]
 nginx_metric_stub_status_url: "http://{{ hostvars[groups['nginx'][0]]['ansible_default_ipv4']['address'] }}:80/nginx_status"
+nginx_logging_certbot_renew_include_paths: ["/docker/nginx/letsencrypt/logs/certbot_renew.log"]
 
 # Redis
 redis_logging_include_paths: ["/docker/redis/log/redis.log"]

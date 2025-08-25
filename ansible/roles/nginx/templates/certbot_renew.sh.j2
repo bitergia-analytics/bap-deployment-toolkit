@@ -9,12 +9,13 @@ CERTBOT_OUTPUT="{{ nginx_letsencrypt_logsdir }}/certbot_renew.log"
 WARNING_DAYS="{{ nginx_letsencrypt_cert_warning_days }}"
 
 DATE_NOW=$(date +"%Y-%m-%d %H:%M:%S")
+RESTART=FALSE
 
 # Function to check certs
 renew_cert() {
     cert_path="$CERTBOT_CERTS_DIR/$1/cert.pem"
     if [ ! -f "$cert_path" ]; then
-        echo "$DATE_NOW - $1: 'cert.pem' not found at $CERTBOT_CERTS_DIR/$1/" >> "$CERTBOT_OUTPUT"
+        echo "$DATE_NOW - ERROR - $1: 'cert.pem' not found at $CERTBOT_CERTS_DIR/$1/" >> "$CERTBOT_OUTPUT"
         return 1
     fi
 
@@ -23,16 +24,16 @@ renew_cert() {
     days_left=$(((`date -d "$expiry_date" +%s`-`date -d "now" +%s`)/(60*60*24)))
 
     if [ "$days_left" -lt "$WARNING_DAYS" ]; then
-        echo "$DATE_NOW - $1: Expires in $days_left days. Renewing cert" >> $CERTBOT_OUTPUT
+        echo "$DATE_NOW - WARNING - $1: Expires in $days_left days. Renewing cert" >> $CERTBOT_OUTPUT
         certbot -q renew --work-dir $CERTBOT_WORK_DIR --logs-dir $CERTBOT_LOGS_DIR --config-dir $CERTBOT_CONFIG_DIR
         if [ $? -eq 0 ]; then
-            echo "$DATE_NOW - $1: Cert renewed" >> $CERTBOT_OUTPUT
-            docker restart "{{ nginx_docker_container }}"
+            echo "$DATE_NOW - INFO - $1: Cert renewed" >> $CERTBOT_OUTPUT
         else
-            echo "$DATE_NOW - $1: ERROR cert not renewed" >> $CERTBOT_OUTPUT
+            echo "$DATE_NOW - ERROR - $1: Cert not renewed" >> $CERTBOT_OUTPUT
         fi
+        RESTART=TRUE
     else
-        echo "$DATE_NOW - $1: Still valid. It expires on $expiry_date" >> $CERTBOT_OUTPUT
+        echo "$DATE_NOW - INFO - $1: Still valid. It expires on $expiry_date" >> $CERTBOT_OUTPUT
     fi
 }
 
@@ -42,3 +43,8 @@ for cert_dir in "$CERTBOT_CERTS_DIR"/*; do
         renew_cert "$domain"
     fi
 done
+
+if [ "$RESTART" == TRUE ]; then
+    echo "$DATE_NOW - INFO - Docker: Restarting NGINX container" >> $CERTBOT_OUTPUT
+    docker restart "{{ nginx_docker_container }}"
+fi

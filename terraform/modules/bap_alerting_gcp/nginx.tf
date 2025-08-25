@@ -96,3 +96,67 @@ resource "google_monitoring_alert_policy" "nginx_absent_metrics" {
   notification_channels = var.notification_channels
 
 }
+
+# Alert for Certbot
+
+resource "google_logging_metric" "log_error_metric" {
+  project     = var.project
+
+  name        = "error_logs_count"
+  description = "Count the number of logs with severity ERROR"
+
+  # Filter to find logs with severity ERROR.
+  filter      = "logName =~ \"certbot_renew$\" AND jsonPayload.level: \"ERROR\""
+
+  metric_descriptor {
+    metric_kind = "DELTA"
+    value_type  = "INT64"
+    display_name = "NGINX - Certbot ERROR Logs Count"
+    labels {
+      key         = "service"
+      value_type  = "STRING"
+      description = "Name of the service that emitted the log."
+    }
+  }
+
+  # Configuration to extract the 'service' label value from the log
+  label_extractors = {
+    "service" = "EXTRACT(jsonPayload.service)"
+  }
+}
+
+resource "google_monitoring_alert_policy" "log_error_alert" {
+  project      = var.project
+
+  display_name = "NGINX - Certbot fails to renew certificates"
+  count        = var.alerts ? 1 : 0
+
+  documentation {
+    content   = "ERROR found in the Certbot renew script."
+    mime_type = "text/markdown"
+  }
+
+  combiner = "OR"
+  severity = "ERROR"
+  conditions {
+    display_name = "NGINX - Certbot ERROR found in logs"
+
+    condition_threshold {
+      filter = "resource.type = \"gce_instance\" AND metric.type = \"logging.googleapis.com/user/${google_logging_metric.log_error_metric.name}\""
+      duration           = "0s"
+      comparison         = "COMPARISON_GT"
+      threshold_value    = 0
+      aggregations {
+        alignment_period     = "60s"
+        per_series_aligner   = "ALIGN_DELTA"
+        cross_series_reducer = "REDUCE_NONE"
+      }
+
+      trigger {
+        count = 1
+      }
+    }
+  }
+
+  notification_channels = var.notification_channels
+}
