@@ -128,6 +128,7 @@
     owner: '1000'
     group: '1000'
     mode: 0644
+  no_log: true
 
 - name: Create cron job
   cron:

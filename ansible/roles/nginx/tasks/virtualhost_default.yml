@@ -39,6 +39,7 @@
   loop_control:
     label: "{{ item.dest }}"
   when: custom_cert is defined
+  no_log: true
 
 - name: "Create virtualhost configuration for default.conf"
   template:

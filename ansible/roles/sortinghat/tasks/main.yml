@@ -120,6 +120,7 @@
     src: "{{ gcp_service_account_host_file }}"
     dest: "{{ gcp_service_account_file }}"
     mode: 0644
+  no_log: true
 
 - name: "Create SortingHat multi tenant file"
   copy:

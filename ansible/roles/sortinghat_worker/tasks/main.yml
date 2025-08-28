@@ -165,6 +165,7 @@
     - sortinghat_multi_tenant == "true"
     - item.dedicated_queue is defined
     - item.dedicated_queue == true
+  no_log: true
 
 - name: "Start SortingHat dedicated worker {{ item.tenant }}"
   docker_container:
@@ -203,3 +204,4 @@
     - sortinghat_multi_tenant == "true"
     - item.dedicated_queue is defined
     - item.dedicated_queue == true
+  no_log: true

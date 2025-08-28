@@ -28,6 +28,7 @@
     - "{{ instances }}"
   delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][item.mordred.host]) }}"
   run_once: true
+  no_log: true
 
 - name: docker
   docker_container:
@@ -51,3 +52,4 @@
     - "{{ instances }}"
   delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][item.mordred.host]) }}"
   run_once: true
+  no_log: true
