@@ -28,6 +28,7 @@
   loop_control:
     label: "{{ item.dest }}"
   when: custom_cert is defined
+  no_log: true
 
 - name: "Create load balancer configuration for OpenSearch nodes"
   run_once: true

@@ -24,3 +24,4 @@
     group: '1000'
     mode: 0600
   loop: "{{ certs_files.values() | list }}"
+  no_log: true

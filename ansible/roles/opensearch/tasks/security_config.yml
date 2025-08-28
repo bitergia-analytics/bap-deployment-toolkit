@@ -28,6 +28,7 @@
   loop_control:
     label: "{{ item.hash_name }}"
   when: not security_initialized_mark.stat.exists
+  no_log: true
 
 - name: Copy security configuration, internal users and roles mappings
   template:
@@ -43,3 +44,4 @@
     - path: opensearch-security/roles_mapping.yml
   when: item.always_update is defined or
         not security_initialized_mark.stat.exists
+  no_log: true

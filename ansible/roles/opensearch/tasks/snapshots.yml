@@ -22,6 +22,7 @@
     owner: '1000'
     group: '1000'
     mode: 0644
+  no_log: true
 
 - name: Copy credentials file to OpenSearch manager container
   command: docker cp {{ gcp_service_account_file }} {{ opensearch_docker_container }}:{{ gcs_cred_file_container }}

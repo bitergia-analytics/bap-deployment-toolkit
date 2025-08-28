@@ -34,6 +34,7 @@
     owner: '1000'
     group: '1000'
     mode: 0644
+  no_log: true
 
 - name: Activate service account
   shell: gcloud auth activate-service-account --key-file "{{ nginx_keys_workdir }}/key.json"

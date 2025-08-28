@@ -64,6 +64,7 @@
   loop_control:
     loop_var: instance
   when: custom_cert is undefined and instance.nginx is defined
+  no_log: true
 
 - name: "Configure virtualhost (certbot with acme-challenge) for default host"
   template:
@@ -71,6 +72,7 @@
     dest: "{{ nginx_virtualhosts_workdir }}/default.conf"
     backup: true
   when: custom_cert is undefined and nginx_default_host is defined
+  no_log: true
 
 - name: "Create a docker network: {{ docker_network_name }}"
   docker_network:
@@ -98,6 +100,7 @@
   loop: "{{ instances }}"
   loop_control:
     loop_var: instance
+  no_log: true
 
 - name: Copy the default host configuration files
   copy:
