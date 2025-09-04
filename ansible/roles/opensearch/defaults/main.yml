@@ -61,7 +61,7 @@ certs_dn:
 
 # Snapshots
 opensearch_base_path: opensearch
-# Set in your environments vars.yml copying the name of the bucket created by terraform
+# Set in your environments vars.yml copying the name of the bucket created by opentofu
 #backups_assets_bucket: bap-opensearch-snapshots-<XXXXXXXX>
 opensearch_snapshots_repo_type: gcs
 opensearch_snapshots_repository: os_backups

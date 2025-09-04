@@ -14,11 +14,11 @@ by [OpenSearch](https://opensearch.org/).
 The platform is deployed as a set of components. The diagram below shows how they
 interact with each other. By default, each component is deployed in different VMs
 but there is an option to deploy all components **on a single VM**. See these sections
-of [terraform](/docs/provision.md#deploy-all-bap-services-in-a-single-vm-opcional) and [ansible](/docs/deployment_and_config.md#deploy-all-bap-services-in-a-single-vm-optional). These components are:
+of [opentofu](/docs/provision.md#deploy-all-bap-services-in-a-single-vm-opcional) and [ansible](/docs/deployment_and_config.md#deploy-all-bap-services-in-a-single-vm-optional). These components are:
 
 * **Control node**: its aim is to create the infrastructure and to provision the
   machines. It creates the other nodes using Google Cloud Platform APIs via
-  Terraform. Then, it runs Ansible to provision and launch the services,
+  OpenTofu. Then, it runs Ansible to provision and launch the services,
   via SSH.
 * **Task Scheduler cluster**: it collects data from different `Data Sources`
   and schedules the work to feed all the databases with the enriched
