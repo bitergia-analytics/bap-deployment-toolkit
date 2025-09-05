@@ -270,6 +270,10 @@ Replace the entries in `<>` with your values:
 - `opensearch_customer_password`: strong password for the default user.
 - `opensearch_readall_password`: strong password for the internal OpenSearch user.
 - `opensearch_backups_password`: strong password for the backups user.
+- `auditlog_policy`: auditlog policy.
+- `auditlog_policy.name`: name of the auditlog policy (by default is `auditlog_policy`).
+- `auditlog_policy.description`: description of the auditlog policy (by default is `3 month retention policy for auditlog indexes.`).
+- `auditlog_policy.min_index_age`: minimum age of the index to be eligible for rollover (by default is `90d`).
 - `backups_assets_bucket`: this is the name of the bucket created by Terraform
   for storing the OpenSearch snapshots and MariaDB backups.
   Check your cloud provider to obtain the name of the bucket. If you didn't

@@ -27,7 +27,11 @@ do_not_fail_on_forbidden: false
 anonymous_auth_enabled: false
 opensearch_endpoint: "https://{{ network.publish_host }}:9200"
 number_of_shards: "{{ groups['opensearch_data'] | length }}"
-auto_expand_replicas: "0-1"
+number_of_replicas: 1
+auditlog_policy:
+  name: "auditlog_policy"
+  description: "3 month retention policy for auditlog indexes."
+  min_index_age: "90d"
 
 # Certificates files and their DNs
 certs_dir: "{{ opensearch_workdir }}/certs"
