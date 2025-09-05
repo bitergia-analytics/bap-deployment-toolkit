@@ -7,7 +7,7 @@ opensearch.hosts: {{ opensearch.endpoints }}
 opensearch.ssl.verificationMode: none
 opensearch.username: {{ opensearch.username }}
 opensearch.password: {{ opensearch.password }}
-opensearch.requestHeadersWhitelist: ["securitytenant","Authorization"]
+opensearch.requestHeadersAllowlist: ["securitytenant","Authorization"]
 
 opensearch_security.multitenancy.enabled: true
 opensearch_security.multitenancy.tenants.enable_private: false
@@ -24,9 +24,9 @@ opensearch_security.auth.anonymous_auth_enabled: true
 opensearch_security.auth.anonymous_auth_enabled: false
 {% endif %}
 
-opensearch_security.basicauth.login.brandimage: "https://raw.githubusercontent.com/bitergia-analytics/bitergia-analytics-opensearch-dashboards/main/assets/bitergia_login_logo.png"
-opensearch_security.basicauth.login.title: {{ login.title }}
-opensearch_security.basicauth.login.subtitle: {{ login.subtitle }}
+opensearch_security.ui.basicauth.login.brandimage: "https://raw.githubusercontent.com/bitergia-analytics/bitergia-analytics-opensearch-dashboards/main/assets/bitergia_login_logo.png"
+opensearch_security.ui.basicauth.login.title: {{ login.title }}
+opensearch_security.ui.basicauth.login.subtitle: {{ login.subtitle }}
 
 # Bitergia Branding
 opensearchDashboards.branding:
