@@ -1,7 +1,7 @@
 ---
 # redis
 
-redis_docker_image: bitnami/redis
+redis_docker_image: bitnamisecure/valkey
 redis_version: latest
 redis_docker_container: redis
 

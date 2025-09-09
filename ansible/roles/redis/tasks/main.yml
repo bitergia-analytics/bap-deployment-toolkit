@@ -37,12 +37,12 @@
         aliases:
           - "{{ redis_docker_container | replace('_','-') }}"
     env:
-      REDIS_PASSWORD: "{{ redis_password }}"
-      REDIS_DISABLE_COMMANDS: FLUSHDB,FLUSHALL,CONFIG
+      VALKEY_PASSWORD: "{{ redis_password }}"
+      VALKEY_DISABLE_COMMANDS: FLUSHDB,FLUSHALL,CONFIG
     volumes:
-      - redis_data:/bitnami/redis/data
-      - "{{ redis_workdir }}/overrides.conf:/opt/bitnami/redis/mounted-etc/overrides.conf"
-      - "{{ redis_log_dir }}:/opt/bitnami/redis/logs/"
+      - redis_data:/bitnami/valkey/data
+      - "{{ redis_workdir }}/overrides.conf:/opt/bitnami/valkey/mounted-etc/overrides.conf"
+      - "{{ redis_log_dir }}:/opt/bitnami/valkey/logs/"
     log_driver: json-file
     log_options:
       max-size: "{{ docker_log_max_size }}"
