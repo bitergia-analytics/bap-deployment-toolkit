@@ -4,6 +4,7 @@ terraform {
   required_providers {
       google = {
         source = "hashicorp/google"
+        version = "~> 7.0"
       }
       ansible = {
         source  = "nbering/ansible"
