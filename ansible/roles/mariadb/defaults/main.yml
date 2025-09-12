@@ -20,7 +20,7 @@ mariadb_workdir: "/docker/mariadb"
 mariadb_logs_dir: "{{ mariadb_workdir }}/log"
 gcp_service_account_file: "{{ mariadb_workdir }}/gcs_credentials.json"
 
-# Set in your environments vars.yml copying the name of the bucket created by terraform
+# Set in your environments vars.yml copying the name of the bucket created by opentofu
 #backups_assets_bucket: bap-mariadb-backups-<XXXXXXXX>.
 #To create gs_access_key and gs_secret_key.
 #1. https://console.cloud.google.com/storage

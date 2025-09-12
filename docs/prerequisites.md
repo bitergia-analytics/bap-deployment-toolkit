@@ -48,7 +48,7 @@ The services should now been activated.
 
 #### Setup Provider Authentication and Authorization - Service Account
 
-Terraform and Ansible will use a Service Account to provision the platform
+OpenTofu and Ansible will use a Service Account to provision the platform
 on your project. This account will have the minimum permissions necessary
 for these tasks. To create one, follow these steps:
 
@@ -71,12 +71,12 @@ Once the account has been created, you will need to create a key file:
 1. Rename the file to a more descriptive name such as
    `bap-sa-keys-<project-name>.json` (e.g. bap-sa-keys-myproject.json).
 
-Keep this file safe for now. You will need it when you run Terraform and Ansible
+Keep this file safe for now. You will need it when you run OpenTofu and Ansible
 later.
 
 #### Setup SSH Authentication - OS Login
 
-Terraform and Ansible will use SSH to create virtual machines and to provision
+OpenTofu and Ansible will use SSH to create virtual machines and to provision
 other resources. In the case of GCP, you will need to enable
 [OS Login](https://cloud.google.com/compute/docs/oslogin) to activate
 SSH access.
@@ -122,23 +122,23 @@ After it, follow the next steps on the Cloud Shell.
 SSH access should now be enabled on the Service Account and this will be used
 by Ansible to SSH login to each VM.
 
-#### Setup Terraform State Storage Bucket - GCP Cloud Storage
+#### Setup OpenTofu State Storage Bucket - GCP Cloud Storage
 
-Terraform state will be stored on a GCP bucket. For the bucket you will
-need a unique name such as `<project-name>-terraform-state`
-(e.g. `myproject-terraform-state`) and a
+OpenTofu state will be stored on a GCP bucket. For the bucket you will
+need a unique name such as `<project-name>-opentofu-state`
+(e.g. `myproject-opentofu-state`) and a
 [bucket storage location](https://cloud.google.com/storage/docs/locations).
 
 Then, run this command from the Cloud Shell machine terminal:
 
 ```terminal
-gsutil mb -l <bucket_location> gs://<project-name>-get-terraform-state
+gsutil mb -l <bucket_location> gs://<project-name>-opentofu-state
 ```
 
 For example:
 
 ```terminal
-gsutil mb -l EUROPE-SOUTHWEST1 gs://bap-terraform-state
+gsutil mb -l EUROPE-SOUTHWEST1 gs://bap-opentofu-state
 ```
 
 #### Create a Control Node
@@ -383,4 +383,4 @@ the basic steps to do it:
 1. Follow the instructions on the screen.
 1. Once it is set up, click on clip icon next to the channel to copy the link
    to it. You will need this link on the next section to add the channel
-   to your Terraform configuration.
+   to your OpenTofu configuration.

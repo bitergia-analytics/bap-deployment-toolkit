@@ -31,7 +31,7 @@ the follow commands from a terminal on the control node:
 
 ## 2. Setup the Inventory and Configuration
 
-As it happens with Terraform, Ansible needs some configuration parameters
+As it happens with OpenTofu, Ansible needs some configuration parameters
 in oder to run. You will need to define specific parameters that depend on
 the cloud provider you are using and some parameters to deploy and configure
 BAP.
@@ -274,11 +274,11 @@ Replace the entries in `<>` with your values:
 - `auditlog_policy.name`: name of the auditlog policy (by default is `auditlog_policy`).
 - `auditlog_policy.description`: description of the auditlog policy (by default is `3 month retention policy for auditlog indexes.`).
 - `auditlog_policy.min_index_age`: minimum age of the index to be eligible for rollover (by default is `90d`).
-- `backups_assets_bucket`: this is the name of the bucket created by Terraform
+- `backups_assets_bucket`: this is the name of the bucket created by OpenTofu
   for storing the OpenSearch snapshots and MariaDB backups.
   Check your cloud provider to obtain the name of the bucket. If you didn't
   change the configuration, it should be `<prefix>-bap-backups-<id>`, where
-  `<prefix>` is the [terraform prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf)
+  `<prefix>` is the [opentofu prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf)
   and `<id>` is a random number.
 - `sortinghat_secret_key`: strong password/key for the SortingHat service.
 - `sortinghat_superuser_name`: admin user of the SortingHat service.
@@ -288,10 +288,10 @@ Replace the entries in `<>` with your values:
 - `sortinghat_multi_tenant`: activate SortingHat multi tenant (`"true" | "false"`,
   by default is `"true"`).
 - `sortinghat_assets_bucket`: this is the name of the bucket created by
-  Terraform for storing the static files of the SortingHat's UI. Check your
+  OpenTofu for storing the static files of the SortingHat's UI. Check your
   cloud provider to obtain the name of the bucket. It should start with
   the prefix `<prefix>-bap-sortinghat-`, where `<prefix>` is the
-  [terraform prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf).
+  [opentofu prefix](https://github.com/bitergia-analytics/bap-deployment-toolkit/blob/main/docs/provision.md#gcp-module-settings-environmenttf).
 - `sortinghat_bucket_provider`: cloud provider type; valid values are: `gcp`.
 - `sortinghat_workers`: number of SortingHat Workers (by default is `1`).
 - `sortinghat_uwsgi_workers`: number of SortingHat uWSGI workers (by default is `1`).

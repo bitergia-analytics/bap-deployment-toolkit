@@ -1,26 +1,29 @@
-# Provisioning with Terraform
+# Provisioning with OpenTofu
 
-The toolkit uses Terraform to manage, on your cloud provider, the lifecycle of
+The toolkit uses OpenTofu to manage, on your cloud provider, the lifecycle of
 the resources needed by BAP. It will be responsible of creating and updating
 virtual machines, storage buckets, and firewall rules.
 
-## 1. Install Terraform
+**IMPORTANT**: If you are migrating from Terraform to OpenTofu, please check
+[this section](#migrating-from-terraform-to-opentofu-optional).
 
-You will have to install Terraform on the control node. There are many methods
+## 1. Install OpenTofu
+
+You will have to install OpenTofu on the control node. There are many methods
 to do it but we recommend the one described on the
-[official documentation](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli).
+[official documentation](https://opentofu.org/docs/intro/install/deb/).
 
-:information_source:&nbsp; You might need to install `wget` to install
-Terraform. You can do it with the following command:
+:information_source:&nbsp; You might need to install `curl` to install
+OpenTofu. You can do it with the following command:
 
 ```terminal
-sudo apt install wget
+sudo apt install curl
 ```
 
-## 2. Configure Terraform
+## 2. Configure OpenTofu
 
 Due to cloud providers offer different types of solutions and resources, you're
-required to define some configuration parameters before running Terraform. These
+required to define some configuration parameters before running OpenTofu. These
 parameters are stored in the files:
 
 - `variables.tf` - sets the common variables
@@ -28,8 +31,8 @@ parameters are stored in the files:
 - `environment.tf` - stores the types of the virtual machines
 
 We recommend to store the files in a specific directory for your project under
-the `terraform/environments` directory of the toolkit repository (e.g.
-`terraform/environments/myproject/`). This documentation assumes you're storing
+the `opentofu/environments` directory of the toolkit repository (e.g.
+`opentofu/environments/myproject/`). This documentation assumes you're storing
 the files there.
 
 The next sections describe how to set up the configuration based on your cloud
@@ -64,11 +67,11 @@ Replace the entries in `<>` with your values:
 - `project`: the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project.
 - `zone`: the GCP [zone](https://cloud.google.com/compute/docs/regions-zones)
    where the resources of the project will be created.
-- `prefix`: the prefix that is added to all resources created by Terraform
+- `prefix`: the prefix that is added to all resources created by OpenTofu
    (VM, Cloud Storage Bucket, firawall, etc).
 - `alerts`: to install (`true`) or uninstall (`false`) the alerts.
 
-#### Terraform Settings (`main.tf`)
+#### OpenTofu Settings (`main.tf`)
 
 This is the template for the `main.tf`.
 
@@ -96,7 +99,7 @@ provider "google" {
 
 Replace the entries in `<>` with your values:
 
-- `bucket`: name of the bucket to store the Terraform state. This is the value
+- `bucket`: name of the bucket to store the OpenTofu state. This is the value
    of the bucket defined in the [prerequisites section](./prerequisites.md).
 - `prefix`: name of the folder where the state will be stored.
 
@@ -283,20 +286,56 @@ page of your project.
 Once you have created all the configuration files, you will be ready to create
 the infrastructure for the platform. Run the following commands:
 
-1. Change to the Terraform environment directory:
+1. Change to the OpenTofu environment directory:
 
    ```terminal
-   cd terraform/environments/<environment>
+   cd opentofu/environments/<environment>
    ```
 
-1. Initialize Terraform downloading the requirements and configuring the modules.
+1. Initialize OpenTofu downloading the requirements and configuring the modules.
 
    ```terminal
-   terraform init
+   tofu init
    ```
 
 1. Provision the infrastructure. You will need to confirm the changes.
 
    ```terminal
-   terraform apply
+   tofu apply
    ```
+
+### Migrating from Terraform to OpenTofu (Optional)
+
+If you have been using Terraform to manage your infrastructure, you can migrate
+to OpenTofu without losing your current state. To do so, follow these steps:
+
+1. Change to the Terraform environment directory.
+
+   ```terminal
+   cd terraform/environments/<environment>
+   ```
+
+1. Ensure you have a backup of your existing Terraform state file (`terraform.tfstate`).
+   This is crucial in case anything goes wrong during the migration process.
+
+   ```terminal
+   terraform state pull > terraform.tfstate
+   ```
+
+1. Install OpenTofu on your control node if you haven't already done so. You can follow the
+   [installation instructions](#1-install-opentofu).
+1. Run the following command to initialize OpenTofu and migrate the state.
+
+   ```terminal
+   tofu init -upgrade
+   ```
+
+   This command will read the existing Terraform state file and convert it to the OpenTofu format.
+
+1. Verify that the migration was successful.
+
+   ```terminal
+   tofu plan
+   ```
+
+   This command should show no changes if the migration was successful.
