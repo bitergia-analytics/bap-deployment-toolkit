@@ -73,26 +73,9 @@
   import_tasks: security_backup.yml
   when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
 
-- name: Set default template for indices
-  uri:
-    url: "{{ opensearch_endpoint }}/_template/default"
-    method: PUT
-    status_code: 200
-    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
-    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
-    body_format: json
-    body:
-      template: "*"
-      order: -1
-      settings:
-        number_of_shards: "{{ number_of_shards }}"
-        auto_expand_replicas: "{{ auto_expand_replicas }}"
-    validate_certs: false
-  register: result
-  until: result.status == 200
-  retries: 10
-  delay: 2
-  run_once: true
+- name: Configure OpenSearch indexes templates and policy
+  import_tasks: index_templates_policy.yml
+  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
 
 - name: Wait for OpenSearch container(s) to be available
   uri:

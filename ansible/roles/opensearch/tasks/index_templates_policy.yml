@@ -1,0 +1,100 @@
+- name: Set default template for indices
+  uri:
+    url: "{{ opensearch_endpoint }}/_template/default"
+    method: PUT
+    status_code: 200
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    body_format: json
+    body:
+      template: "*"
+      order: -1
+      settings:
+        number_of_shards: "{{ number_of_shards }}"
+        number_of_replicas: "{{ number_of_replicas }}"
+    validate_certs: false
+
+- name: Check if auditlog policy exists
+  uri:
+    url: "{{ opensearch_endpoint }}/_plugins/_ism/policies/{{ auditlog_policy.name }}"
+    method: GET
+    status_code: [200, 404]
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    validate_certs: false
+  register: auditlog_policy_result
+
+- name: Set auditlog policy
+  uri:
+    url: "{{ opensearch_endpoint }}/_plugins/_ism/policies/{{ auditlog_policy.name }}"
+    method: PUT
+    status_code: 201
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    body_format: json
+    body:
+      policy:
+        description: "{{ auditlog_policy.description }}"
+        default_state: "hot"
+        states:
+          - name: "hot"
+            actions: []
+            transitions:
+              - state_name: "delete"
+                conditions:
+                  min_index_age: "{{ auditlog_policy.min_index_age }}"
+          - name: "delete"
+            actions:
+              - delete: {}
+            transitions: []
+    validate_certs: false
+  when: auditlog_policy_result.status == 404
+
+- name: Update auditlog policy
+  uri:
+    url: "{{ opensearch_endpoint }}/_plugins/_ism/policies/{{ auditlog_policy.name }}?if_seq_no={{ auditlog_policy_result.json._seq_no }}&if_primary_term={{ auditlog_policy_result.json._primary_term }}"
+    method: PUT
+    status_code: 200
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    body_format: json
+    body:
+      policy:
+        description: "{{ auditlog_policy.description }}"
+        default_state: "hot"
+        states:
+          - name: "hot"
+            actions: []
+            transitions:
+              - state_name: "delete"
+                conditions:
+                  min_index_age: "{{ auditlog_policy.min_index_age }}"
+          - name: "delete"
+            actions:
+              - delete: {}
+            transitions: []
+    validate_certs: false
+  when: auditlog_policy_result.status == 200
+
+- name: Set auditlog indexes template
+  uri:
+    url: "{{ opensearch_endpoint }}/_index_template/auditlog_template"
+    method: PUT
+    status_code: 200
+    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
+    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
+    body_format: json
+    body:
+      index_patterns:
+        - "security-auditlog-*"
+      template:
+        settings:
+          index:
+            number_of_shards: "{{ number_of_shards }}"
+            number_of_replicas: "{{ number_of_replicas }}"
+            codec: "best_compression"
+            refresh_interval: "30s"
+            plugins:
+              index_state_management:
+                policy_id: "{{ auditlog_policy.name }}"
+    validate_certs: false
