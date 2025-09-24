@@ -1,7 +1,7 @@
 ---
 # docker
 opensearch_dashboards_docker_image: bitergia/bitergia-analytics-opensearch-dashboards
-opensearch_dashboards_version: 0.32.1
+opensearch_dashboards_version: 0.33.0
 opensearch_dashboards_docker_container: bap_opensearch_dashboard
 
 opensearch_dashboards_workdir: "/docker/opensearch_dashboard"
