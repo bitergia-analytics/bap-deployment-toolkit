@@ -8,76 +8,6 @@
     state: present
     update_cache: true
 
-- name: Create OpenSearch directory credentials for GCP
-  file:
-    path: "{{ opensearch_keys_dir }}"
-    state: directory
-    mode: 0750
-    recurse: true
-
-- name: Copy GCP service account file
-  copy:
-    src: "{{ gcp_service_account_host_file }}"
-    dest: "{{ gcp_service_account_file }}"
-    owner: '1000'
-    group: '1000'
-    mode: 0644
-  no_log: true
-
-- name: Copy credentials file to OpenSearch manager container
-  command: docker cp {{ gcp_service_account_file }} {{ opensearch_docker_container }}:{{ gcs_cred_file_container }}
-  changed_when: false
-  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
-
-- name: Copy credentials file to OpenSearch data container
-  command: docker cp {{ gcp_service_account_file }} {{ opensearch_docker_container }}:{{ gcs_cred_file_container }}
-  changed_when: false
-  when: "'opensearch-data' in inventory_hostname"
-
-- name: Register secrets in the OpenSearch manager keystore
-  command: >
-    docker exec -i -e OPENSEARCH_JAVA_OPTS="-Xms4m -Xmx64m" {{ opensearch_docker_container }}
-    bin/opensearch-keystore add-file gcs.client.default.credentials_file
-    {{ gcs_cred_file_container }} --force
-  changed_when: false
-  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
-
-- name: Register secrets in the OpenSearch data keystore
-  command: >
-    docker exec -i -e OPENSEARCH_JAVA_OPTS="-Xms4m -Xmx64m" {{ opensearch_docker_container }}
-    bin/opensearch-keystore add-file gcs.client.default.credentials_file
-    {{ gcs_cred_file_container }} --force
-  changed_when: false
-  when: "'opensearch-data' in inventory_hostname"
-
-- name: Reload opensearch secure settings
-  uri:
-    url: "{{ opensearch_snapshots_url }}/_nodes/reload_secure_settings"
-    method: POST
-    client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
-    client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
-    validate_certs: false
-  run_once: true
-  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
-
-- name: Delete credentials file from the manager container
-  community.docker.docker_container_exec:
-    container: "{{ opensearch_docker_container }}"
-    user: opensearch
-    command: rm {{ gcs_cred_file_container }}
-  ignore_errors: true
-  changed_when: false
-  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
-
-- name: Delete credentials file from the data container
-  community.docker.docker_container_exec:
-    container: "{{ opensearch_docker_container }}"
-    user: opensearch
-    command: rm {{ gcs_cred_file_container }}
-  ignore_errors: true
-  changed_when: false
-  when: "'opensearch-data' in inventory_hostname"
-
 - name: "Create snapshot repository '{{ opensearch_snapshots_repository }}'"
   uri:
     url: "{{ opensearch_snapshots_url }}/_snapshot/{{ opensearch_snapshots_repository }}"
@@ -88,6 +18,7 @@
       settings:
         bucket: "{{ backups_assets_bucket }}"
         base_path: "{{ opensearch_base_path }}"
+        client: "default"
     client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
     validate_certs: false

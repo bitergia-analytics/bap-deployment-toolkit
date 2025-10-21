@@ -1,6 +1,6 @@
 ---
 
-- name: Copy OpenSearch Security backup script and gsutil credentials (~/.boto)
+- name: Copy OpenSearch Security backup script
   template:
     src: "{{ item.src }}"
     dest: "{{item.dest }}"
@@ -9,8 +9,6 @@
   with_items:
     - src: opensearch-security/backup.sh.j2
       dest: "{{ opensearch_security_backup_script }}"
-    - src: boto.j2
-      dest: ~/.boto
 
 - name: Create cron job for OpenSearch Security backup
   cron:

@@ -66,7 +66,6 @@ nginx_proxy_busy_buffers_size: "256k"
 # GCS bucket access
 ## GCS directories
 nginx_gcs_workdir: /docker/nginx/gcs
-nginx_keys_workdir: /docker/nginx/keys
 
 ## Gcloud repository
 gcloud_apt_deb_ubuntu_repository: >-

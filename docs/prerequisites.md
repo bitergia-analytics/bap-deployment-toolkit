@@ -60,87 +60,6 @@ for these tasks. To create one, follow these steps:
    - `Storage Admin` (**Note**: not `Compute Storage Admin`)
    - `Service Account User`
 
-Once the account has been created, you will need to create a key file:
-
-1. Access the service accounts details by clicking over it on the accounts
-   listing page.
-1. Go to the `Keys` tab.
-1. Click on `Add Key` > `Create new key`.
-1. Select `JSON` format.
-1. Click `Create` to download the key.
-1. Rename the file to a more descriptive name such as
-   `bap-sa-keys-<project-name>.json` (e.g. bap-sa-keys-myproject.json).
-
-Keep this file safe for now. You will need it when you run OpenTofu and Ansible
-later.
-
-#### Setup SSH Authentication - OS Login
-
-OpenTofu and Ansible will use SSH to create virtual machines and to provision
-other resources. In the case of GCP, you will need to enable
-[OS Login](https://cloud.google.com/compute/docs/oslogin) to activate
-SSH access.
-
-First of all, you will need to generate a SSH key pair. If you don't know how
-to do it, we recommend to follow the steps described on the
-[GitLab documentation](https://docs.gitlab.com/ee/user/ssh.html#generate-an-ssh-key-pair).
-
-After it, follow the next steps on the Cloud Shell.
-
-1. Copy the contents of the SSH keys and the keys created for the service account
-   on the Cloud Shell (e.g. `<SSH key>.pub` and `bap-sa-keys-<project-name>.json`).
-1. Activate OS Login for the project.
-
-   ```terminal
-   gcloud compute project-info add-metadata --metadata enable-oslogin=TRUE
-   ```
-
-1. Login as the Service Account user via its key copied in the previous step.
-
-   ```terminal
-   gcloud auth activate-service-account --key-file=bap-sa-keys-<project-name>.json
-   ```
-
-1. Add the project's public SSH key to the account
-
-   :information_source:&nbsp;  This command will output the SSH Username
-   for the Service Account, typically in the format of `sa_<ID>`.
-   Jot down this username for later. It will be used in the Ansible
-   configuration.
-
-   ```terminal
-   gcloud compute os-login ssh-keys add --key-file=<SSH key>.pub
-   ```
-
-1. Switch back your logged in account in Cloud Shell to your regular account
-   using your email address.
-
-   ```terminal
-   gcloud config set account <account-email-address>
-   ```
-
-SSH access should now be enabled on the Service Account and this will be used
-by Ansible to SSH login to each VM.
-
-#### Setup OpenTofu State Storage Bucket - GCP Cloud Storage
-
-OpenTofu state will be stored on a GCP bucket. For the bucket you will
-need a unique name such as `<project-name>-opentofu-state`
-(e.g. `myproject-opentofu-state`) and a
-[bucket storage location](https://cloud.google.com/storage/docs/locations).
-
-Then, run this command from the Cloud Shell machine terminal:
-
-```terminal
-gsutil mb -l <bucket_location> gs://<project-name>-opentofu-state
-```
-
-For example:
-
-```terminal
-gsutil mb -l EUROPE-SOUTHWEST1 gs://bap-opentofu-state
-```
-
 #### Create a Control Node
 
 This documentation assumes you're going to use a control node to add the
@@ -157,6 +76,7 @@ The following steps will help you with the basic configuration of this node.
        --image-family=debian-11 \
        --machine-type=e2-small \
        --zone=<zone> \
+       --service-account=<bap-service-account-email> \
        --scopes=cloud-platform \
        --tags=control
    ```
@@ -164,6 +84,58 @@ The following steps will help you with the basic configuration of this node.
 1. To log in, go to `Compute Engine` > `VM instances` ([link](https://console.cloud.google.com/compute/instances))
    and open a SSH terminal on the control node by clicking on the `SSH`
    button of `control-node` entry.
+
+#### Setup SSH Authentication - OS Login
+
+OpenTofu and Ansible will use SSH to create virtual machines and to provision
+other resources. In the case of GCP, you will need to enable
+[OS Login](https://cloud.google.com/compute/docs/oslogin) to activate
+SSH access.
+
+Follow the next steps on the `control-node`.
+
+1. Generate a SSH key pair. If you don't know how to do it, we recommend to
+   follow the steps described on the
+   [GitLab documentation](https://docs.gitlab.com/ee/user/ssh.html#generate-an-ssh-key-pair).
+
+1. Activate OS Login for the project.
+
+   ```terminal
+   gcloud compute project-info add-metadata --metadata enable-oslogin=TRUE
+   ```
+
+1. Add the project's public SSH key to the account
+
+   :information_source:&nbsp;  This command will output the SSH Username
+   for the Service Account, typically in the format of `sa_<ID>`.
+   Jot down this username for later. It will be used in the Ansible
+   configuration.
+
+   ```terminal
+   gcloud compute os-login ssh-keys add --key-file=<SSH key>.pub
+   ```
+
+SSH access should now be enabled on the Service Account and this will be used
+by Ansible to SSH login to each VM.
+
+#### Setup OpenTofu State Storage Bucket - GCP Cloud Storage
+
+OpenTofu state will be stored on a GCP bucket. For the bucket you will
+need a unique name such as `<project-name>-opentofu-state`
+(e.g. `myproject-opentofu-state`) and a
+[bucket storage location](https://cloud.google.com/storage/docs/locations).
+
+Then, run this command from the `control-node` machine:
+
+```terminal
+gsutil mb -l <bucket_location> gs://<project-name>-opentofu-state
+```
+
+For example:
+
+```terminal
+gsutil mb -l EU gs://bap-opentofu-state
+```
 
 #### Setup OAuth 2.0 with GCP (Optional)
 
