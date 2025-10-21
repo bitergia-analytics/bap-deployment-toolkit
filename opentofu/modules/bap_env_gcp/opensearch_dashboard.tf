@@ -1,6 +1,8 @@
 module "opensearch_dashboards" {
   source = "../bap_gcp_instance"
 
+  service_account_email   = var.service_account_email
+
   prefix                  = var.prefix
   name                    = "opensearch-dashboards"
   node_count              = var.opensearch_dashboards_node_count

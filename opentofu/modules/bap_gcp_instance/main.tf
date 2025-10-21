@@ -66,6 +66,7 @@ resource "google_compute_instance" "bap" {
   }
 
   service_account {
+    email = var.service_account_email
     scopes = flatten([
       "logging-write",
       "monitoring-write",

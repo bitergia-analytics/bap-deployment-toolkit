@@ -42,6 +42,13 @@ variable "persistent_disks" {
   description = "Whether the disks will be auto-deleted when the instance is deleted"
   default     = false
 }
+
+variable "service_account_email" {
+  type        = string
+  description = "Service Account email to apply to the instances"
+  default     = ""
+}
+
 # MariaDB
 
 variable "mariadb_node_count" {

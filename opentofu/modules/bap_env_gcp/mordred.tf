@@ -1,6 +1,8 @@
 module "mordred" {
   source = "../bap_gcp_instance"
 
+  service_account_email   = var.service_account_email
+
   prefix                  = var.prefix
   name                    = "mordred"
   node_count              = var.mordred_node_count
