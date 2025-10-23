@@ -6,10 +6,6 @@
     state: present
     update_cache: true
 
-- name: Install Python packages
-  pip:
-    name: "{{ python_packages }}"
-
 - name: Create MariaDB logs directory
   file:
     path: "{{ mariadb_logs_dir }}"
@@ -107,28 +103,12 @@
     mode: 0500
     owner: "{{ ansible_user_id }}"
 
-- name: Copy gsutil credentials file
-  template:
-    src: boto.j2
-    dest: ~/.boto
-    mode: 0500
-    owner: "{{ ansible_user_id }}"
-
 - name: Create MariaDB configuration directory
   file:
     path: "{{ mariadb_workdir }}"
     state: directory
     mode: 0750
     recurse: true
-
-- name: Copy GCP service account file
-  copy:
-    src: "{{ gcp_service_account_host_file }}"
-    dest: "{{ gcp_service_account_file }}"
-    owner: '1000'
-    group: '1000'
-    mode: 0644
-  no_log: true
 
 - name: Create cron job
   cron:

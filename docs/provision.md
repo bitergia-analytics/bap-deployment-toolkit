@@ -339,3 +339,43 @@ to OpenTofu without losing your current state. To do so, follow these steps:
    ```
 
    This command should show no changes if the migration was successful.
+
+## 4. Grant Service Account access to the buckets
+
+After provisioning the infrastructure, you need to grant the Service Account
+access to the Cloud Storage buckets created by OpenTofu (`backups` and `sortinghat`).
+To do so, follow these steps on `control-node`:
+
+1. Grant access using `gcloud` command:
+
+   ```terminal
+   gcloud storage buckets add-iam-policy-binding gs://<backups_assets_bucket> --member=serviceAccount:<service_account_email> --role=roles/storage.admin
+   gcloud storage buckets add-iam-policy-binding gs://<sortinghat_assets_bucket> --member=serviceAccount:<service_account_email> --role=roles/storage.admin
+   ```
+
+1. Verify the access using `gcloud` command:
+
+   ```terminal
+   gcloud storage buckets get-iam-policy gs://<backups_assets_bucket>
+   gcloud storage buckets get-iam-policy gs://<sortinghat_assets_bucket>
+   ```
+
+    You should see the Service Account with the `roles/storage.admin` role. The output should look like this:
+
+   ```terminal
+   bindings:
+   - members:
+     - serviceAccount:<service_account_email>
+     role: roles/storage.admin
+   ```
+
+Alternatively, you can grant access using the GCP Console:
+
+1. Go to the [Cloud Storage Buckets](https://console.cloud.google.com/storage/browser)
+   page of your GCP project.
+1. Click on the three dots on the right of the bucket you want to grant access to.
+1. Click on `Edit access`.
+1. Click on `Add principal`.
+1. In the `New principal` field, enter the email address of the Service Account.
+1. In the `Assign role` dropdown, select `Storage Admin`.
+1. Click `Save` to apply the changes.

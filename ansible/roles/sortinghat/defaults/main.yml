@@ -7,8 +7,6 @@ sortinghat_docker_container: bap_sortinghat
 
 # SortingHat node configuration
 sortinghat_workdir: "/docker/sortinghat"
-keys_dir:  "{{ sortinghat_workdir }}/keys"
-gcp_service_account_file: "{{ keys_dir }}/credentials.json"
 
 # SortingHat uWSGI workers and threads
 sortinghat_uwsgi_workers: "1"

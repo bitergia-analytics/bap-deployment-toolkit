@@ -58,8 +58,7 @@ Create a new file named `<environment>.gcp.yml` (e.g. `myproject.gcp.yml`) in th
 plugin: gcp_compute
 projects:
   - <project_name>
-scopes:
-  - https://www.googleapis.com/auth/compute
+auth_kind: application
 hostnames:
   # List host by name instead of the default public ip
   - name
@@ -88,8 +87,6 @@ all:
     # Ansible Settings
     ansible_user: "<service_account_ssh_user>"
     ansible_ssh_private_key_file: "<path_to_ssh_key>"
-
-    gcp_service_account_host_file: "<path_to_service_account_credentials_json>"
 
     # Project settings
     project_id: "<project_name>"
@@ -159,7 +156,7 @@ all:
     opensearch_backups_password: <backup_password>
 
     ## Backups Storage
-    backups_assets_bucket: <backups_bucket_name>
+    backups_assets_bucket: <backups_assets_bucket>
 
     # SortingHat Credentials
     sortinghat_secret_key: <sortinghat_secret_key>
@@ -173,7 +170,7 @@ all:
     sortinghat_multi_tenant: <sortinghat_multi_tenant>
 
     # Sortinghat Storage
-    sortinghat_assets_bucket: <sortinghat_bucket_name>
+    sortinghat_assets_bucket: <sortinghat_assets_bucket>
     sortinghat_bucket_provider: <cloud provider>
 
     # Sortinghat Workers
@@ -242,9 +239,6 @@ Replace the entries in `<>` with your values:
 - `ansible_ssh_private_key_file`: Absolute path to the SSH private key file for
   the Service Account. If you followed this documentation, you should have it
   stored under the `keys/<environment>/` directory.
-- `gcp_service_account_host_file`: Absolute path to the Service Account
-  credentials file. If you followed this documentation, you should have it
-  in a `.json` file under the `keys/<environment>/` directory.
 - `project_id`: the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project.
 - `mariadb_root_password`: strong password for the MariaDB root user.
 - `mariadb_backup_service_account_password`: strong password for the MariaDB backup service account.
@@ -505,16 +499,9 @@ vary.
 
 ### Google Cloud Platform
 
-Run the following commands:
-
-```terminal
-export GCP_SERVICE_ACCOUNT_FILE=<path_sa_credentials.json>
-export GCP_AUTH_KIND=serviceaccount
-```
-
-Where `path_sa_credentials.json` is the path to the credentials file you
-saved when you created the service account. If you followed the instructions
-of this documentation, it should be stored in `keys/<environment>` directory.
+Make sure the SSH keys you configured in the previous step are copied to
+`keys/<environment>/` with the correct permissions and add the username to
+`ansible_user` (`sa_<ID>`) in `vars.yml`.
 
 ## 4. Deploy the Platform
 

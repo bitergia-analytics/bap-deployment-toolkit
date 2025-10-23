@@ -1,6 +1,8 @@
 module "sortinghat_worker" {
   source = "../bap_gcp_instance"
 
+  service_account_email   = var.service_account_email
+
   prefix                  = var.prefix
   name                    = "sortinghat-worker"
   node_count              = var.sortinghat_worker_node_count

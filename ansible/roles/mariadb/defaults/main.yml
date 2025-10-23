@@ -1,7 +1,4 @@
 ---
-# Python packages
-python_packages:
-  - boto>=2.9
 
 # MariaDB
 
@@ -18,7 +15,6 @@ mariadb_long_query_time: 30
 
 mariadb_workdir: "/docker/mariadb"
 mariadb_logs_dir: "{{ mariadb_workdir }}/log"
-gcp_service_account_file: "{{ mariadb_workdir }}/gcs_credentials.json"
 
 # Set in your environments vars.yml copying the name of the bucket created by opentofu
 #backups_assets_bucket: bap-mariadb-backups-<XXXXXXXX>.

@@ -1,6 +1,8 @@
 module "redis" {
   source = "../bap_gcp_instance"
 
+  service_account_email   = var.service_account_email
+
   prefix                  = var.prefix
   name                    = "redis"
   node_count              = var.redis_node_count

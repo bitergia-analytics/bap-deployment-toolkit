@@ -30,6 +30,7 @@
     recurse: true
   with_items:
     - "{{ nginx_certs_dir }}"
+    - "{{ nginx_gcs_workdir }}"
     - "{{ nginx_letsencrypt_configdir }}"
     - "{{ nginx_letsencrypt_logsdir }}"
     - "{{ nginx_letsencrypt_webroot_path }}"
@@ -40,9 +41,6 @@
   template:
     src: status.conf.j2
     dest: "{{ nginx_virtualhosts_workdir }}/status.conf"
-
-- name: Configure Google Cloud Storage (GCS)
-  include_tasks: gcs.yml
 
 - name: Configure NGINX proxy buffer sizes
   template:

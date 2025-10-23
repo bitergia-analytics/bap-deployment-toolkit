@@ -118,11 +118,6 @@ opensearch_security_backup_cronjob_time: "daily" # "annually", "daily", "hourly"
 opensearch_security_backup_restore: false
 #opensearch_security_backup_restore_name: opensearch-security-backup_20240701.tgz # opensearch-security-backup_%Y%m%d.tgz
 
-## Google Cloud Credendials
-opensearch_keys_dir:  "{{ opensearch_workdir }}/keys"
-gcp_service_account_file: "{{ opensearch_keys_dir }}/gcs_credentials.json"
-gcs_cred_file_container: "/usr/share/opensearch/config/gcs_credentials.json"
-
 docker_network_name: bap_network
 docker_log_max_size: 500m
 

@@ -6,6 +6,13 @@
     sortinghat_cors_allowed_origins_regexes: "https://localhost,https://nginx,https://{{ groups['all_in_one'][0] }}"
   when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"
 
+- name: Create SortingHat directory
+  file:
+    path: "{{ sortinghat_workdir }}"
+    state: directory
+    mode: 0750
+    recurse: true
+
 - name: "Create SortingHat tenants info"
   set_fact:
     tenants_info: |-
@@ -108,20 +115,6 @@
   with_items:
     - "{{ mariadb_hosts }}"
 
-- name: Create SortingHat directory credentials for GCP
-  file:
-    path: "{{ keys_dir }}"
-    state: directory
-    mode: 0750
-    recurse: true
-
-- name: Copy GCP service account file
-  copy:
-    src: "{{ gcp_service_account_host_file }}"
-    dest: "{{ gcp_service_account_file }}"
-    mode: 0644
-  no_log: true
-
 - name: "Create SortingHat multi tenant file"
   copy:
     dest: "{{ sortinghat_multi_tenant_list_path }}"
@@ -221,12 +214,10 @@
       SORTINGHAT_BUCKET_NAME: "{{ sortinghat_assets_bucket }}"
       SORTINGHAT_MULTI_TENANT: "{{ sortinghat_multi_tenant }}"
       SORTINGHAT_MULTI_TENANT_LIST_PATH: "{{ sortinghat_multi_tenant_list_path }}"
-      GOOGLE_APPLICATION_CREDENTIALS: /home/sortinghat/gcp_credentials.json
       SORTINGHAT_UWSGI_WORKERS: "{{ sortinghat_uwsgi_workers }}"
       SORTINGHAT_UWSGI_THREADS: "{{ sortinghat_uwsgi_threads }}"
       SORTINGHAT_MATCH_TRUSTED_SOURCES: "{{ sortinghat_match_trusted_sources | default('github,gitlab,slack,openinfra') }}"
     volumes:
-      - "{{ gcp_service_account_file }}:/home/sortinghat/gcp_credentials.json:ro"
       - "{{ sortinghat_multi_tenant_list_path }}:{{ sortinghat_multi_tenant_list_path }}"
     ports:
       - "{{ network.bind_host }}:9314:9314"
