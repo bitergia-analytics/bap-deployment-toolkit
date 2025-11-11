@@ -5,7 +5,7 @@ sortinghat_worker_workdir: "/docker/sortinghat_worker"
 
 # SortingHat image and container
 sortinghat_worker_docker_image: bitergia/bitergia-analytics-sortinghat-worker
-sortinghat_worker_version: 0.34.1
+sortinghat_worker_version: 0.35.0
 sortinghat_worker_docker_container: bap_sortinghat_worker
 sortinghat_workers: 1
 
