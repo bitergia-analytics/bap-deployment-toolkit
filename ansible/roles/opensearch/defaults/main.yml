@@ -27,7 +27,7 @@ do_not_fail_on_forbidden: false
 anonymous_auth_enabled: false
 opensearch_endpoint: "https://{{ network.publish_host }}:9200"
 number_of_shards: "{{ groups['opensearch_data'] | length }}"
-number_of_replicas: 1
+number_of_replicas: "{{ ('all_in_one' in groups) | ternary(0, 1) }}"
 auditlog_policy:
   name: "auditlog_policy"
   description: "3 month retention policy for auditlog indexes."
@@ -63,7 +63,7 @@ certs_dn:
 opensearch_base_path: opensearch
 # Set in your environments vars.yml copying the name of the bucket created by opentofu
 #backups_assets_bucket: bap-opensearch-snapshots-<XXXXXXXX>
-opensearch_snapshots_repo_type: gcs
+opensearch_snapshots_repo_type: "{{ (cloud_provider == 'gcp') | ternary('gcs', 's3') }}"
 opensearch_snapshots_repository: os_backups
 opensearch_snapshots_url: https://localhost:9200
 opensearch_snapshots_index_list:
