@@ -108,12 +108,12 @@
 
 - name: "Create roles and tenant for {{ instance.project }}"
   become: false
-  command: >-
-    python3 {{ role_path }}/files/create_roles_tenant.py
+  script: >-
+    {{ role_path }}/files/create_roles_tenant.py
     https://{{ opensearch_admin_user }}:{{ opensearch_admin_password }}@{{ opensearch_host }}:9200 {{ instance.tenant }} {{ anonymous }}
     {{ overwrite_roles }}
-  delegate_to: localhost
   run_once: true
+  no_log: true
 
 - name: "Create mordred user for {{ instance.project }}"
   uri:
