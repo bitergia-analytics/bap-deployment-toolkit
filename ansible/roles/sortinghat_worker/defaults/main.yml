@@ -16,9 +16,9 @@ network:
 
 # Database
 sortinghat_database: sortinghat_db
-mariadb_hosts: "{{ groups['mariadb'] | first }}"
+mariadb_hosts: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['mariadb'][0])].ansible_default_ipv4.address }}"
 redis_database: "0"
-redis_hosts: "{{ groups['redis'] | first }}"
+redis_hosts: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['redis'][0])].ansible_default_ipv4.address }}"
 
 # Create your instances configurations
 ## instances:
