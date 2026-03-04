@@ -18,8 +18,8 @@ network:
 # OpenSearch cluster configuration
 opensearch_cluster_name: bap-opensearch
 cluster_name: "{{ opensearch_cluster_prefix }}-{{ opensearch_cluster_name }}"
-cluster_initial_manager_nodes: "{{ groups['opensearch_manager'] | join(',') }}"
-opensearch_data_nodes: "{{ groups['opensearch_data'] | join(',') }}"
+cluster_initial_manager_nodes: "{{ groups['opensearch_manager'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | join(',') }}"
+opensearch_data_nodes: "{{ groups['opensearch_data'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | join(',') }}"
 discovery_seed_hosts:
   "{{ cluster_initial_manager_nodes }},{{ opensearch_data_nodes }}"
 multitenancy_enabled: true
