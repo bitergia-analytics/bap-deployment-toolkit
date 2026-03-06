@@ -30,6 +30,14 @@
   when: custom_cert is defined
   no_log: true
 
+- name: "Create SortingHat for All In One Machine"
+  run_once: true
+  template:
+    src: vhost_sortinghat.j2
+    dest: "{{ nginx_virtualhosts_workdir }}/sortinghat.conf"
+    backup: true
+  when: "'all_in_one' in groups"
+
 - name: "Create load balancer configuration for OpenSearch nodes"
   run_once: true
   template:
