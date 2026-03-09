@@ -1,0 +1,24 @@
+upstream sortinghat {
+    server {{ ansible_default_ipv4.address }}:9314 max_conns=75;
+}
+
+server {
+    server_name localhost {{ nginx_docker_container | replace('_','-') }};
+
+    include    mime.types;
+    sendfile   on;
+
+    listen 80;
+
+    location /identities/api/ {
+        rewrite ^/identities/(.*) /$1 break;
+
+        include /etc/nginx/conf.d/uwsgi_params;
+
+        uwsgi_pass sortinghat;
+        uwsgi_param Host $host;
+        uwsgi_param X-Real-IP $remote_addr;
+        uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
+        uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
+    }
+}
