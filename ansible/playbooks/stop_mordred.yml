@@ -1,0 +1,5 @@
+---
+- hosts: all_in_one, mordred
+  roles:
+    - stop_mordred
+  become: true
