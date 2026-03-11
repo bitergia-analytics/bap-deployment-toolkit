@@ -91,7 +91,13 @@
 - name: Set anonymous role if opensearch_dashboards_anonymous is defined and the instance is public
   set_fact:
     anonymous: "{% if 'opensearch_dashboards_anonymous' in groups and groups['opensearch_dashboards_anonymous'] and instance.public %} -a {% else %} {% endif %}"
-  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mordred'][instance.mordred.host]) }}"
+  when: "'all_in_one' not in groups"
+  run_once: true
+
+- name: Set anonymous role for all-in-one machine if the instance is public
+  set_fact:
+    anonymous: "{% if instance.public %} -a {% else %} {% endif %}"
+  when: "'all_in_one' in groups"
   run_once: true
 
 - name: Add --force option (create_roles_tenat.py) if overwrite_roles is defined and the value is true
