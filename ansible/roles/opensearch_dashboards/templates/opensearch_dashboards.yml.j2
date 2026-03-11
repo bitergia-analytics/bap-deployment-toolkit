@@ -20,6 +20,8 @@ opensearch_security.readonly_mode.roles:
 # Anonymous user opendistro_security_anonymous
 {% if ('opensearch_dashboards_anonymous' in groups) and (inventory_hostname in groups['opensearch_dashboards_anonymous']) %}
 opensearch_security.auth.anonymous_auth_enabled: true
+{% elif 'all_in_one' in groups and instance[0].public %}
+opensearch_security.auth.anonymous_auth_enabled: true
 {% else %}
 opensearch_security.auth.anonymous_auth_enabled: false
 {% endif %}
