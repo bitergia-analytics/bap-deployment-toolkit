@@ -42,3 +42,24 @@
     name: "{{ ansible_user_id }}"
     groups: docker
     append: true
+
+- name: Ensure Docker configuration directory exists
+  file:
+    path: /etc/docker
+    state: directory
+    mode: '0755'
+
+- name: Apply default ulimits configuration
+  copy:
+    src: "{{ role_path }}/files/daemon.json"
+    dest: /etc/docker/daemon.json
+    mode: '0644'
+  register: docker_config
+
+- name: Restart Docker to apply changes
+  become: yes
+  systemd_service:
+    name: docker
+    state: restarted
+    daemon_reload: yes
+  when: docker_config.changed
