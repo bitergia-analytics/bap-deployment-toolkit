@@ -564,17 +564,14 @@ Ansible will need to authenticate and access the resources in order to deploy
 the platform. Depending on your cloud provider, the authentication method may
 vary.
 
-### Google Cloud Platform
-
 Make sure the SSH keys you configured in the previous step are copied to
-`keys/<environment>/` with the correct permissions and add the username to
-`ansible_user` (`sa_<ID>`) in `vars.yml`.
+`keys/<environment>/` with the correct permissions.
 
-### Amazon Web Services
+Also, add the username to `ansible_user` in `vars.yml`. Depending on your
+cloud provider, the value is different.
 
-Make sure the SSH keys you configured in the previous step are copied to
-`keys/<environment>/` with the correct permissions and add the username to
-`ansible_user` (`admin`) in `vars.yml`.
+- **Google Cloud Platform**: `sa_<ID>`
+- **Amazon Web Services**: `admin`
 
 ## 4. Deploy the Platform
 

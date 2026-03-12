@@ -16,6 +16,7 @@ to do it but we recommend the one described on the
 :information_source:&nbsp; You might need to install `curl` to install
 OpenTofu. You can do it with the following command:
 node
+
 ```terminal
 sudo apt install curl
 ```
@@ -301,7 +302,7 @@ variable "availability_zone" {
 }
 ```
 
-Replace the entries in `<>` with your values: 
+Replace the entries in `<>` with your values:
 
 - `prefix`: the prefix that is added to all resources created by OpenTofu
    (VM, Cloud Storage Bucket, firawall, etc).
@@ -334,7 +335,7 @@ provider "aws" {
 
 Replace the entries in `<>` with your values:
 
-- `bucket`: the name of the bucket [previously created](prerequisites.md#Setup-OpenTofu-State-Storage-Bucket---AWS-S3) 
+- `bucket`: the name of the bucket [previously created](prerequisites.md#Setup-OpenTofu-State-Storage-Bucket---AWS-S3)
   to store the State.
 - `key`: the file path and name to store the state in (example: path/to/my/key -
   [must not start with '/'](https://developer.hashicorp.com/terraform/language/backend/s3)).
@@ -371,7 +372,6 @@ By default, all instances will create a boot disk with the same name of the inst
 To make it persistent, you will have to set `delete_on_termination` to false.
 
 - `delete_on_termination = false`.
-
 
 You can also create an extra persistent disk that can be attached to any VMs.
 It will be attached to the same name of VM, by default. When the `<node>_disk_count`
@@ -429,7 +429,7 @@ output "bap_env_aws" {
 }
 ```
 
-##### AWS - Deploy all BAP services in a single VM (Opcional)
+##### AWS - Deploy all BAP services in a single VM (Optional)
 
 - NOTE: This configuration deploy a OpenSearch cluster with a single manager node.
 
