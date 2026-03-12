@@ -15,6 +15,7 @@ to do it but we recommend the one described on the
 
 :information_source:&nbsp; You might need to install `curl` to install
 OpenTofu. You can do it with the following command:
+node
 
 ```terminal
 sudo apt install curl
@@ -105,7 +106,7 @@ Replace the entries in `<>` with your values:
 
 #### GCP Module Settings (`environment.tf`)
 
-To provision all BAP services on a single VM, check [this section](/docs/provision.md#deploy-all-bap-services-in-a-single-vm-opcional).
+To provision all BAP services on a single VM, check [this section](/docs/provision.md#gcp---deploy-all-bap-services-in-a-single-vm-opcional).
 
 Take into account that the method to deploy and configure with ansible
 [is also different](/docs/deployment_and_config.md#deploy-all-bap-services-in-a-single-vm-optional).
@@ -208,7 +209,7 @@ output "bap_env_gcp" {
 }
 ```
 
-##### Deploy all BAP services in a single VM (Opcional)
+##### GCP - Deploy all BAP services in a single VM (Opcional)
 
 - NOTE: This configuration deploy a OpenSearch cluster with a single manager node.
 
@@ -281,6 +282,192 @@ using the variable `notification_channels`. Each channel usually has the format
 You can find the name of the channel on the [Notifications](https://console.cloud.google.com/monitoring/alerting/notifications)
 page of your project.
 
+### Amazon Web Services (AWS)
+
+#### Variables (`variables.tf`)
+
+Below you can find the variables you need to configure in `variables.tf` file.
+
+```tf
+variable "prefix" {
+  default = "<prefix>"
+}
+
+variable "region" {
+  default = "<region>"
+}
+
+variable "availability_zone" {
+  default = "<availability_zone>"
+}
+```
+
+Replace the entries in `<>` with your values:
+
+- `prefix`: the prefix that is added to all resources created by OpenTofu
+   (VM, Cloud Storage Bucket, firawall, etc).
+- `region`: the AWS [region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html).
+- `availability_zone`: the AWS [availability zone](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-availability-zones.html).
+
+#### OpenTofu Settings (`main.tf`)
+
+This is the template for the `main.tf`.
+
+```tf
+terraform {
+  backend "s3" {
+    bucket = "<state_aws_storage_bucket_name>"
+    key    = "<state_file_path_and_name>"
+    region = "<state_aws_storage_bucket_region>"
+  }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+    }
+  }
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region     = var.region
+}
+```
+
+Replace the entries in `<>` with your values:
+
+- `bucket`: the name of the bucket [previously created](prerequisites.md#Setup-OpenTofu-State-Storage-Bucket---AWS-S3)
+  to store the State.
+- `key`: the file path and name to store the state in (example: path/to/my/key -
+  [must not start with '/'](https://developer.hashicorp.com/terraform/language/backend/s3)).
+- `region`: the AWS [region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html)
+
+#### AWS Module Settings (`environment.tf`)
+
+To provision all BAP services on a single VM, check [this section](/docs/provision.md#aws---deploy-all-bap-services-in-a-single-vm-opcional).
+Take into account that the method to deploy and configure with ansible
+[is also different](/docs/deployment_and_config.md#deploy-all-bap-services-in-a-single-vm-optional).
+
+Below, you can find the different variables you can configure for this module.
+You can set the number of nodes and virtual machine type for each component
+of the architecture. Take the next example as reference for a large project
+but adapt them to your necessities.
+
+You can create different OpenSearch Dashboards machines depends on your needs.
+We have three scenarios for OpenSearch Dashboards:
+
+1. One OpenSearch Dashboards `without anonymous` access.
+    - `opensearch_dashboards_node_count = 1`
+    - `opensearch_dashboards_anonymous_node_count = 0`
+2. One OpenSearch Dashboards `with anonymous` access.
+    - `opensearch_dashboards_node_count = 0`
+    - `opensearch_dashboards_anonymous_node_count = 1`
+3. Two OpenSearch Dashboards `one with anonymous` access and the `other not`.
+    - `opensearch_dashboards_node_count = 1`
+    - `opensearch_dashboards_anonymous_node_count = 1`
+
+Ansible will provision the OpenSearch Dashboard machines depending on which
+group the hostname belongs to.
+
+By default, all instances will create a boot disk with the same name of the instance.
+To make it persistent, you will have to set `delete_on_termination` to false.
+
+- `delete_on_termination = false`.
+
+You can also create an extra persistent disk that can be attached to any VMs.
+It will be attached to the same name of VM, by default. When the `<node>_disk_count`
+is not set or the value is `0`, it will use the `<node>_count` value.
+
+- `mariadb_disk_count = 2`
+- `mariadb_disk_attach = "<VM-NAME>"`
+
+You can also create a disk from a snapshot.
+
+- `redis_disk_snapshot = "<SNAPSHOT-DISK-NAME>"`
+
+```tf
+module "bap_env_aws" {
+  source = "../../modules/bap_env_aws"
+
+  prefix                = "test"
+  region                = var.region
+  availability_zone     = var.availability_zone
+  ami_id                = "ami-0a3ad108ca9a42423"
+  key_name              = "bap-ssh"
+  delete_on_termination = false
+  custom_tags           = "research"
+
+  mariadb_node_count    = 1
+  mariadb_instance_type = "t3.large"
+
+  redis_node_count    = 1
+  redis_instance_type = "t3.small"
+
+  opensearch_manager_node_count    = 1
+  opensearch_manager_instance_type = "t3.large"
+  opensearch_data_node_count       = 2
+  opensearch_data_instance_type    = "t3.large"
+
+  opensearch_dashboards_node_count         = 1
+  opensearch_dashboards_anonymous_node_count = 0
+  opensearch_dashboards_instance_type      = "t3.medium"
+
+  nginx_node_count    = 1
+  nginx_instance_type = "t3.small"
+
+  mordred_node_count    = 1
+  mordred_instance_type = "t3.large"
+
+  sortinghat_node_count    = 1
+  sortinghat_instance_type = "t3.medium"
+
+  sortinghat_worker_node_count    = 1
+  sortinghat_worker_instance_type = "t3.medium"
+}
+
+output "bap_env_aws" {
+  value = module.bap_env_aws
+}
+```
+
+##### AWS - Deploy all BAP services in a single VM (Optional)
+
+- NOTE: This configuration deploy a OpenSearch cluster with a single manager node.
+
+Set `all_in_one_node_count = 1` and set to 0 the rest of `*_node_count = 0`.
+
+```tf
+module "bap_env_aws" {
+  source = "../../modules/bap_env_aws"
+
+  prefix                = "test"
+  region                = var.region
+  availability_zone     = "eu-north-1a"
+  ami_id                = "ami-0a3ad108ca9a42423"
+  key_name              = "bap-ssh"
+  delete_on_termination = false
+  custom_tags           = "research"
+
+  all_in_one_node_count    = 1
+  all_in_one_instance_type = "m5.xlarge"
+
+  # Set to 0 the rest of the services
+  mariadb_node_count = 0
+  redis_node_count = 0
+  opensearch_manager_node_count = 0
+  opensearch_data_node_count = 0
+  opensearch_dashboards_node_count = 0
+  opensearch_dashboards_anonymous_node_count = 0
+  nginx_node_count = 0
+  mordred_node_count = 0
+  sortinghat_node_count = 0
+  sortinghat_worker_node_count = 0
+}
+
+output "bap_env_aws" {
+  value = module.bap_env_aws
+}
+```
+
 ## 3. Provision
 
 Once you have created all the configuration files, you will be ready to create
@@ -340,7 +527,7 @@ to OpenTofu without losing your current state. To do so, follow these steps:
 
    This command should show no changes if the migration was successful.
 
-## 4. Grant Service Account access to the buckets
+## 4. Grant Service Account access to the buckets - GCP Only
 
 After provisioning the infrastructure, you need to grant the Service Account
 access to the Cloud Storage buckets created by OpenTofu (`backups` and `sortinghat`).

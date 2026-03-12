@@ -106,14 +106,12 @@
     priv: "{{ privileges }}"
     login_user: root
     login_password: "{{ mariadb_root_password }}"
-    login_host: "{{ item }}"
     state: present
   register: result
   retries: 2
   delay: 5
   until: result is success
-  with_items:
-    - "{{ mariadb_hosts }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
 
 - name: "Create SortingHat multi tenant file"
   copy:

@@ -2,3 +2,5 @@ pymysql
 jmespath
 requests
 google-auth
+boto3
+botocore

@@ -1,17 +1,38 @@
 ---
 
+- name: Get the user with UID 1000
+  command: "id -nu 1000"
+  register: current_uid_1000_user
+  failed_when: false
+  changed_when: false
+
+- name: Show the user with UID 1000
+  debug:
+    msg: "The UID 1000 is owned by user: {{ current_uid_1000_user.stdout }}"
+  when: current_uid_1000_user.rc == 0
+
+- name: Set grimoire_user and grimoire_group facts based on UID 1000 ownership
+  set_fact:
+    grimoire_user: "{{ current_uid_1000_user.stdout }}"
+    grimoire_group: 1000
+    grimoire_user_ssh_key: false
+  when: current_uid_1000_user.rc == 0
+
 - name: Create group grimoire
   group:
-    name: grimoire
+    name: "{{ grimoire_group }}"
     state: present
+  when: current_uid_1000_user.rc != 0
 
 - name: Create user grimoire
   user:
-    name: grimoire
-    groups: grimoire
+    name: "{{ grimoire_user }}"
+    groups: "{{ grimoire_group }}"
+    uid: 1000
     generate_ssh_key: yes
     ssh_key_bits: 4096
     ssh_key_file: .ssh/id_rsa
+  when: current_uid_1000_user.rc != 0
 
 - name: Configure Mordred
   import_tasks: configure.yml
