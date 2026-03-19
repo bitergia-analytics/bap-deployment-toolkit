@@ -1,0 +1,8 @@
+---
+
+- name: Stop and remove mordred containers
+  include_tasks: cleanup_mordred.yml
+  loop: "{{ instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.project }}"

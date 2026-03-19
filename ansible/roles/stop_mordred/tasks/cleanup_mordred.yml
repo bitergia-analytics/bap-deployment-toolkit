@@ -1,0 +1,43 @@
+---
+
+- name: "Get mordred_{{ instance.project }} container info"
+  docker_container_info:
+    name: "mordred_{{ instance.project }}"
+  register: result
+
+- name: "Stop container mordred_{{ instance.project }}"
+  docker_container:
+    name: "mordred_{{ instance.project }}"
+    state: stopped
+  when: result.exists and result.container.State.Running
+
+- name: "Read the last git line of the log of {{ instance.project }}"
+  shell: "grep -v 'autorefresh' {{ mordred_instances_workdir }}/{{ instance.project }}/logs/all.log | grep git] | tail -n 1"
+  register: last_git_log_line
+  changed_when: false
+  ignore_errors: yes
+
+- name: Last git log line
+  debug:
+    msg: "{{ last_git_log_line.stdout }}"
+  when:
+    - last_git_log_line is not skipped
+    - last_git_log_line.stdout is defined
+
+- name: Extract git URL from log line
+  set_fact:
+    git_url: "{{ last_git_log_line.stdout | regex_replace('^.*((https?|git)://[^\\s]+).*$', '\\1') }}"
+  when:
+    - last_git_log_line is not skipped
+    - last_git_log_line.stdout is search('collection starts|Incremental from')
+
+- name: Repository to remove
+  debug:
+    msg: "{{ mordred_instances_workdir }}/{{ instance.project }}/perceval-cache/repositories/{{ git_url }}-git"
+  when: git_url is defined
+
+- name: "Remove git repository clone from Perceval cache directory for instance {{ instance.project }}"
+  file:
+    path: "{{ mordred_instances_workdir }}/{{ instance.project }}/perceval-cache/repositories/{{ git_url }}-git"
+    state: absent
+  when: git_url is defined
