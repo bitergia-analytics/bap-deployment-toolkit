@@ -150,5 +150,10 @@
     log_options:
       max-size: "{{ docker_log_max_size }}"
 
-- name: Launch first rsync
+- name: Launch first rsync GCP
   shell: gsutil -m rsync -d -r "gs://{{ sortinghat_assets_bucket }}/" "{{ nginx_gcs_workdir }}"
+  when: cloud_provider == "gcp"
+
+- name: Launch first rsync AWS
+  shell: aws s3 sync --delete "s3://{{ sortinghat_assets_bucket }}/static/" "{{ nginx_gcs_workdir }}"
+  when: cloud_provider == "aws"

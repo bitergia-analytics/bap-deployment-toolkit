@@ -34,8 +34,11 @@ mordred_aliases_url: https://raw.githubusercontent.com/chaoss/grimoirelab-sirmor
 ##     overwrite_roles: true
 ##     sources_repository: "<PROJECT2_SOURCE_REPO_URL>"
 ##     host: 1
-mariadb_hosts: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
-opensearch_host: "{{ groups['all_in_one'][0] | default(groups['opensearch_manager'][0]) }}"
+mariadb_hosts: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['mariadb'][0])].ansible_default_ipv4.address }}"
+opensearch_host: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['opensearch_manager'][0])].ansible_default_ipv4.address }}"
+
+grimoire_user: grimoire
+grimoire_group: grimoire
 
 docker_network_name: bap_network
 docker_log_max_size: 500m
