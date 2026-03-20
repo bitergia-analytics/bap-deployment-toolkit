@@ -1,6 +1,9 @@
 module "all_in_one" {
   source = "../bap_gcp_instance"
 
+  service_account_email        = var.service_account_email
+  service_account_extra_scopes = ["cloud-platform"]
+
   prefix                  = var.prefix
   name                    = "all-in-one"
   node_count              = var.all_in_one_node_count
