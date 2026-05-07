@@ -6,3 +6,7 @@ roles:
 collections:
   - name: google.cloud
     version: 1.0.2
+  - name: amazon.aws
+    version: ">=8.0"
+  - name: community.docker
+    version: ">=5.0"
