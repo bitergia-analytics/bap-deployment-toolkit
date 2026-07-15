@@ -23,7 +23,11 @@ do
        filename="${database}_${DATE}.sql"
        output_file="${DUMP_FOLDER}/${filename}"
        mysqldump --user=$USER --password=$PASSWORD --host=$HOST $database > "$output_file"
+       {% if cloud_provider == 'gcp' %}
        gsutil cp "$output_file" "gs://{{ backups_assets_bucket }}/mariadb/${filename}"
+       {% elif cloud_provider == 'aws' %}
+       aws s3 cp "$output_file" "s3://{{ backups_assets_bucket }}/mariadb/${filename}"
+       {% endif %}
        rm "${output_file}"
     fi
 done

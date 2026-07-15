@@ -1,11 +1,5 @@
 ---
 
-- name: All in one host (MariaDB and Redis hosts)
-  set_fact:
-    mariadb_hosts: "{{ groups['all_in_one'][0] }}"
-    redis_hosts: "{{ groups['all_in_one'][0] }}"
-  when: "'all_in_one' in groups and inventory_hostname in groups['all_in_one']"
-
 - name: "Create SortingHat tenants info"
   set_fact:
     tenants_info: |-
@@ -83,14 +77,12 @@
     priv: "{{ privileges }}"
     login_user: root
     login_password: "{{ mariadb_root_password }}"
-    login_host: "{{ item }}"
     state: present
   register: result
   retries: 2
   delay: 5
   until: result is success
-  with_items:
-    - "{{ mariadb_hosts }}"
+  delegate_to: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
 
 - name: Create SortingHat Worker directory
   file:

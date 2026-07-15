@@ -3,6 +3,13 @@
   command: >
     gsutil cp -P gs://{{ backups_assets_bucket }}/opensearch-security-backup/{{ opensearch_security_backup_restore_name }}
     {{ opensearch_security_dir }}/{{ opensearch_security_backup_restore_name }}
+  when: cloud_provider == "gcp"
+
+- name: Download OpenSearch Security backup from AWS bucket
+  command: >
+    aws s3 cp s3://{{ backups_assets_bucket }}/opensearch-security-backup/{{ opensearch_security_backup_restore_name }}
+    {{ opensearch_security_dir }}/{{ opensearch_security_backup_restore_name }}
+  when: cloud_provider == "aws"
 
 - name: Empty OpenSearch Security backup directory
   shell: rm -rf {{ opensearch_security_backup_dir }}/*

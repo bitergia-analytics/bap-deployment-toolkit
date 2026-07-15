@@ -18,14 +18,15 @@
       settings:
         bucket: "{{ backups_assets_bucket }}"
         base_path: "{{ opensearch_base_path }}"
-        client: "default"
+        region: "{{ aws_region | default(omit) }}"
     client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
     validate_certs: false
   run_once: true
-  when: "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
+  when:
+    - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
 
-- name: "Create snapshot repository '{{ restore_snapshot.repository }}'"
+- name: "Create snapshot restore repository '{{ restore_snapshot.repository }}'"
   uri:
     url: "{{ opensearch_snapshots_url }}/_snapshot/{{ restore_snapshot.repository }}"
     method: PUT
@@ -35,11 +36,14 @@
       settings:
         bucket: "{{ restore_snapshot.bucket }}"
         base_path: "{{ restore_snapshot.base_path }}"
+        region: "{{ aws_region | default(omit) }}"
     client_cert: "{{ certs_dir }}/{{ certs_files.admin_cert }}"
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
     validate_certs: false
   run_once: true
-  when: restore_snapshot is defined
+  when:
+    - restore_snapshot is defined
+    - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
 
 - name: "Restore indices from {{ restore_snapshot.repository }} of {{ restore_snapshot.bucket }} bucket"
   uri:
@@ -54,7 +58,9 @@
     client_key: "{{ certs_dir }}/{{ certs_files.admin_key }}"
     validate_certs: false
   run_once: true
-  when: restore_snapshot is defined
+  when:
+    - restore_snapshot is defined
+    - "'opensearch-manager' in inventory_hostname or 'all_in_one' in groups"
 
 - name: Configure OpenSearch notification channels for Slack
   include_tasks: slack_channel.yml

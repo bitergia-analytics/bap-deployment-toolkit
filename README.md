@@ -8,6 +8,7 @@ and [Ansible](https://www.ansible.com/) for provisioning and installation.
 The latest version of the toolkit supports the following cloud providers:
 
 - [Google Cloud Platform](https://cloud.google.com/gcp)
+- [Amazon Web Services](https://aws.amazon.com)
 
 This toolkit is released under the terms of the [GPL3 or later license](LICENSE).
 

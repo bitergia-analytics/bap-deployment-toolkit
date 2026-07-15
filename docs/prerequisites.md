@@ -222,13 +222,157 @@ On the next sections, you will be able to create a IAP tunnel through TCP,
 so the front-end of the platform will only be accessible selected users
 from their local computers.
 
+### Amazon Web Services
+
+#### Setup Provider Authentication - AWS
+
+Authentication with AWS using a role for OpenTofu and Ansible.
+
+Create a role (`ControlNodeRole`) with the following policies:
+   1. IAM -> Roles -> Create role
+   1. Trusted entity type: `AWS service`
+   1. Service or use case: `EC2`
+   1. Use case: `EC2`
+   1. Click on `Next`
+   1. Permissions policies:
+      - `AmazonEC2FullAccess`
+      - `AmazonS3FullAccess`
+      - `IAMFullAccess`
+
+#### Setup SSH Authentication
+
+OpenTofu and Ansible will use SSH to create virtual machines and to provision
+other resources.
+
+Follow the next steps on the `CloudShell`.
+
+1. Generate a SSH key pair. If you don't know how to do it, we recommend to
+   follow the steps described on the [GitLab documentation](https://docs.gitlab.com/ee/user/ssh.html#generate-an-ssh-key-pair).
+
+1. Upload the public SSH key to AWS EC2 Key Pairs:
+  ```
+aws ec2 import-key-pair --key-name "bap-ssh" --public-key-material fileb://<path/to/public/key>
+  ```
+
+Alternately you can create the key pair from the AWS console:
+  1. EC2 -> Key Pairs -> Create key pair
+  1. Name the key pair: `bap-ssh`
+  1. Key pair type: `RSA`
+  1. Private key file format: `.pem`
+  1. Click on `Create key pair`
+
+#### Create a Control Node
+
+This documentation assumes you're going to use a control node to add the
+provisioning code and configuration files in order to deploy the platform.
+The following steps will help you with the basic configuration of this node.
+
+1. From the `CloudShell terminal`. You need to select the [region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html)
+   where the machine will be created (e.g. `eu-north-1`).
+
+   Search the AMI ID for your Debian image in the selected region (`Debian 11`):
+   ```terminal
+   aws ec2 describe-images \
+     --filters "Name=name,Values=debian-11-amd64-*" \
+     --query 'sort_by(Images, &CreationDate)[-1].ImageId' \
+     --output text \
+     --region eu-north-1
+   ```
+
+1. Create a security group and copy the ID:
+   ```terminal
+   aws ec2 create-security-group \
+    --group-name bap_group \
+    --description "Access to BAP" \
+    --region eu-north-1
+   ```
+
+1. Authorize SSH access:
+   ```terminal
+   aws ec2 authorize-security-group-ingress \
+    --group-name bap_group \
+    --protocol tcp \
+    --port 22 \
+    --cidr 0.0.0.0/0 \
+    --region eu-north-1
+   ```
+
+1. Create a virtual machine:
+   ```terminal
+   aws ec2 run-instances \
+     --image-id 'ami-0a3ad108ca9a42423' \
+     --instance-type 't3.micro' \
+     --key-name 'bap-ssh' \
+     --region 'eu-north-1' \
+     --security-group-ids <GROUP-ID> \
+     --tag-specifications '{"ResourceType":"instance","Tags":[{"Key":"Name","Value":"control-node"}]}' \
+     --iam-instance-profile Name="ControlNodeRole" \
+     --count '1'
+   ```
+
+Alternatively, you can create the virtual machine from the AWS console:
+  1. EC2 -> Instances -> Launch instances
+  1. Name the instance: `control-node`
+  1. AMI ID: Search for `Debian 11`
+  1. Instance type: `t3.micro`
+  1. Key pair: `bap-ssh`
+  1. Click on `Launch instance`
+
+After the instance is created, you can connect to it:
+1. Connect to the control node:
+   ```terminal
+   chmod 400 bap-ssh.pem
+   ssh -i bap-ssh.pem admin@<control-node-public-ip>
+   ```
+   If you want to know the exact command to connect to the control node, you
+   can find it in the AWS UI:
+   - EC2 -> Instances -> `control-node` -> Connect button -> SSH client.
+
+1. Copy the SSH key to the control node:
+   ```terminal
+   scp -i bap-ssh.pem bap-ssh.pem admin@<control-node-public-ip>:/home/admin/
+   ```
+
+1. Create the public key if you are using .pem file (directly in the control node):
+   ```terminal
+   ssh-keygen -y -f bap-ssh.pem > bap-ssh.pub
+   ```
+
+#### Setup OpenTofu State Storage Bucket - AWS S3
+
+OpenTofu state will be stored on a AWS S3 bucket. For the bucket you will
+need a unique name such as `<project-name>-opentofu-state`
+(e.g. `myproject-opentofu-state`) and a
+[bucket region](https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html).
+
+Then, run this command from the `control-node` machine:
+
+```terminal
+aws s3api create-bucket \
+    --bucket <project-name>-opentofu-state \
+    --region <bucket_region> \
+    --create-bucket-configuration LocationConstraint=<bucket_region>
+```
+
+For example:
+
+```terminal
+aws s3api create-bucket \
+    --bucket bap-opentofu-state \
+    --region eu-north-1 \
+    --create-bucket-configuration LocationConstraint=eu-north-1
+```
+
 ## 2. Setup the Control Node
 
 1. Install and update the required packages.
 
    ```terminal
    sudo apt update && sudo apt upgrade -y
-   sudo apt install -y git python3-pip python3-venv
+   sudo apt install -y git python3-pip python3-venv locales
+   sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+   sudo locale-gen en_US.UTF-8
+   sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
    ```
 
 1. Download the toolkit repository with `git`.

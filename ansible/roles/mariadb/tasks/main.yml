@@ -65,7 +65,15 @@
     object: "{{ restore_mariadb_backup.name }}"
     dest: "{{ restore_mariadb_backup.dest }}"
     mode: get
-  when: restore_mariadb_backup is defined
+  when: restore_mariadb_backup is defined and cloud_provider == "gcp"
+
+- name: "Download MariaDB {{ restore_mariadb_backup.name }} backup from {{ backups_assets_bucket }} bucket"
+  aws_s3:
+    bucket: "{{ backups_assets_bucket }}"
+    object: "{{ restore_mariadb_backup.name }}"
+    dest: "{{ restore_mariadb_backup.dest }}"
+    mode: get
+  when: restore_mariadb_backup is defined and cloud_provider == "aws"
 
 - name: Restore MariaDB all databases from {{ restore_mariadb_backup.dest }} backup
   mysql_db:
@@ -102,6 +110,7 @@
     dest: "{{ mariadb_backup_script }}"
     mode: 0500
     owner: "{{ ansible_user_id }}"
+  no_log: true
 
 - name: Create MariaDB configuration directory
   file:

@@ -21,8 +21,8 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: grimoire
-    group: grimoire
+    owner: "{{ grimoire_user }}"
+    group: "{{ grimoire_group }}"
     mode: 0750
     recurse: true
   with_items:
@@ -36,12 +36,26 @@
     path: "{{ mordred_ssh_dir }}/id_rsa"
   register: sshkey
 
+- name: Create SSH key pair
+  openssh_keypair:
+    path: "/home/{{ grimoire_user }}/.ssh/id_rsa"
+    type: rsa
+    size: 4096
+    owner: "{{ grimoire_user }}"
+    group: "{{ grimoire_group }}"
+    mode: '0600'
+    state: present
+  when:
+    - not sshkey.stat.exists
+    - mordred_ssh_key is not defined
+    - grimoire_user_ssh_key is defined and not grimoire_user_ssh_key
+
 - name: Copy a custom SSH key pair
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    owner: grimoire
-    group: grimoire
+    owner: "{{ grimoire_user }}"
+    group: "{{ grimoire_group }}"
     mode: "{{ item.mode }}"
   loop:
     - src: "{{ mordred_ssh_key.private }}"
@@ -58,13 +72,13 @@
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    owner: grimoire
-    group: grimoire
+    owner: "{{ grimoire_user }}"
+    group: "{{ grimoire_group }}"
     remote_src: true
   loop:
-    - src: "/home/grimoire/.ssh/id_rsa"
+    - src: "/home/{{ grimoire_user }}/.ssh/id_rsa"
       dest: "{{ mordred_ssh_dir }}/id_rsa"
-    - src: "/home/grimoire/.ssh/id_rsa.pub"
+    - src: "/home/{{ grimoire_user }}/.ssh/id_rsa.pub"
       dest: "{{ mordred_ssh_dir }}/id_rsa.pub"
   when:
     - not sshkey.stat.exists
@@ -109,7 +123,7 @@
 
 - name: Checkout mordred setups repo
   become: true
-  become_user: grimoire
+  become_user: "{{ grimoire_user }}"
   git:
     repo: "{{ mordred_setups_repo_url }}"
     dest: "{{ mordred_setups_dir }}"

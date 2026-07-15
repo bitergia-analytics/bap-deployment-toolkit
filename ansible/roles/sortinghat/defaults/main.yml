@@ -50,17 +50,17 @@ sortinghat_multi_tenant_list_path: "{{ sortinghat_workdir }}/sortinghat_multi_te
 # Database
 sortinghat_database: sortinghat_db
 
-mariadb_hosts: "{{ groups['all_in_one'][0] | default(groups['mariadb'][0]) }}"
+mariadb_hosts: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['mariadb'][0])].ansible_default_ipv4.address }}"
 redis_database: "0"
-redis_hosts: "{{ groups['all_in_one'][0] | default(groups['redis'][0]) }}"
+redis_hosts: "{{ ansible_default_ipv4.address if 'all_in_one' in groups else  hostvars[(groups['redis'][0])].ansible_default_ipv4.address }}"
 
 
 # Debug mode (on: 'true', '1'; off: 'false', '0')
 sortinghat_debug: "false"
 
 # CSRF and CORS configuration
-sortinghat_allowed_hosts: "localhost,{{ groups['sortinghat'][0] }},{{ groups['mordred'] | join(',') }}"
-sortinghat_cors_allowed_origins_regexes: "https://localhost,https://{{ groups['sortinghat'][0] }},https://{{ groups['mordred'] | join(',https://') }}"
+sortinghat_allowed_hosts: "localhost,{{ hostvars[groups['sortinghat'][0]]['ansible_default_ipv4']['address'] }},{{ hostvars[groups['mordred'][0]]['ansible_default_ipv4']['address'] | join(',') }}"
+sortinghat_cors_allowed_origins_regexes: "https://localhost,https://{{ hostvars[groups['sortinghat'][0]]['ansible_default_ipv4']['address'] }},https://{{ hostvars[groups['mordred'][0]]['ansible_default_ipv4']['address'] | join(',https://') }}"
 
 # NGINX
 

@@ -32,7 +32,7 @@ the follow commands from a terminal on the control node:
 ## 2. Setup the Inventory and Configuration
 
 As it happens with OpenTofu, Ansible needs some configuration parameters
-in oder to run. You will need to define specific parameters that depend on
+in order to run. You will need to define specific parameters that depend on
 the cloud provider you are using and some parameters to deploy and configure
 BAP.
 
@@ -75,6 +75,36 @@ Replace the entries in `<>` with your values:
 
 - `project_name`: the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project.
 
+#### Amazon Web Services
+
+Create a new file named `<environment>.aws_ec2.yml` (e.g. `myproject.aws_ec2.yml`) in the
+`inventory` directory with the following content:
+
+```yaml
+---
+plugin: aws_ec2
+regions:
+  - <region>
+filters:
+  tag:bap_node_prefix: <prefix> # Same prefix set in Terraform
+keyed_groups:
+  - key: tags.bap_node_type
+    separator: ''
+hostnames:
+  # List host by name instead of the default public ip
+  - tag:Name
+compose:
+  # Set to 'public_ip_address' to make Ansible SSH via the public IP address of the hosts.
+  # Set to 'private_ip_address' to make Ansible SSH via the private (non-internet routable) IP addresses of the hosts.
+  # Set to 'instance_id' if Ansible is configured to connect via AWS System Manager sessions (AWS SSM)
+  ansible_host: public_ip_address
+```
+
+Replace the entries in `<>` with your values:
+
+- `region`: the [region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-choosing.html) of the AWS account.
+- `prefix`: the prefix set in the Terraform configuration.
+
 ### BAP Configuration
 
 Inside the `inventory` directory, create a file named `vars.yml` with the
@@ -84,12 +114,19 @@ following contents:
 ---
 all:
   vars:
+    # Cloud provider
+    cloud_provider: "<cloud_provider>"
+
     # Ansible Settings
+    # **GCP** - SSH username for the Service Account, in the format `sa_<ID>`; **AWS** - `admin`.
     ansible_user: "<service_account_ssh_user>"
     ansible_ssh_private_key_file: "<path_to_ssh_key>"
 
-    # Project settings
+    # GCP only settings
     project_id: "<project_name>"
+
+    # AWS only settings
+    aws_region: "<aws_region>"
 
     # Passwords and credentials
     mariadb_root_password: <mariadb_root_password>
@@ -140,6 +177,15 @@ all:
     #  deletion_cron_expression: "0 3 * * *"  # Daily at 3 AM
     #  timezone: "UTC"
     #  date_format: "yyyy-MM-dd"
+
+    ## Restore snapshot
+    # Uncomment this section to restore indices from a snapshot.
+    #restore_snapshot:
+    #  bucket: <BUCKET-NAME>
+    #  base_path: <BUCKET-BASE-PATH>
+    #  repository: <SNAPSHOT-REPOSITORY>
+    #  name: <SNAPSHOT-NAME>
+    #  index_list: "-.opendistro_security,-security-auditlog*,-.kibana_1"
 
     ## Uncomment to restore OpenSearch Security files from a backup
     # opensearch_security_backup_restore: true
@@ -235,11 +281,13 @@ all:
 
 Replace the entries in `<>` with your values:
 
-- `ansible_user`: SSH username for the Service Account, in the format of `sa_<ID>`.
+- `cloud_provider`: the cloud provider, either `gcp` or `aws`.
+- `project_id`: **Only GCP**, the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the project.
+- `aws_region`: **Only AWS**, the AWS region.
+- `ansible_user`: **GCP** - SSH username for the Service Account, in the format `sa_<ID>`; **AWS** - `admin`.
 - `ansible_ssh_private_key_file`: Absolute path to the SSH private key file for
   the Service Account. If you followed this documentation, you should have it
   stored under the `keys/<environment>/` directory.
-- `project_id`: the [id](https://support.google.com/googleapi/answer/7014113?hl=en) of the GCP project.
 - `mariadb_root_password`: strong password for the MariaDB root user.
 - `mariadb_backup_service_account_password`: strong password for the MariaDB backup service account.
 - `mariadb_service_account_password`: strong password for the MariaDB
@@ -491,6 +539,25 @@ for more information.
   choices: `annually`, `daily`, `hourly`, `monthly`, `reboot`, `weekly`, and `yearly`
   (by default is `daily`).
 
+#### Restore OpenSearch indices from a backup (optional)
+
+Toolkit will create a backup daily by default, if you want to restore the
+OpenSearch indices from a backup add these parameters.
+
+- `restore_snapshot`: Restore from a backup (by default is `false`)
+- `restore_snapshot.bucket`: The name of the bucket where the snapshots are stored (e.g. `test-bap-backups-XXXXXXXX`).
+- `restore_snapshot.base_path`: The base path of the snapshot in the bucket (e.g. `opensearch`).
+- `restore_snapshot.repository`: The name of the snapshot repository (e.g. `os_backups`).
+- `restore_snapshot.name`: The name of the snapshot to restore (e.g. `daily_snapshot-2025-07-04-566z0ew1`).
+- `restore_snapshot.index_list`: The list of indices to restore (e.g. `*,-.opendistro_security,-security-auditlog*,-.kibana_*`).
+
+NOTE: If you want to restore the indices from the same bucket used for snapshots,
+you must set these values:
+
+- `restore_snapshot.bucket`: the same as `<backups_assets_bucket>`
+- `restore_snapshot.base_path`: `opensearch`
+- `restore_snapshot.repository`: `os_backups`
+
 ## 3. Setup Ansible Authentication
 
 Ansible will need to authenticate and access the resources in order to deploy
@@ -502,6 +569,12 @@ vary.
 Make sure the SSH keys you configured in the previous step are copied to
 `keys/<environment>/` with the correct permissions and add the username to
 `ansible_user` (`sa_<ID>`) in `vars.yml`.
+
+### Amazon Web Services
+
+Make sure the SSH keys you configured in the previous step are copied to
+`keys/<environment>/` with the correct permissions and add the username to
+`ansible_user` (`admin`) in `vars.yml`.
 
 ## 4. Deploy the Platform
 
@@ -566,3 +639,97 @@ gcloud compute start-iap-tunnel test-nginx-0 443 --local-host-port=localhost:844
 Then, open your browser with the URL `https://localhost:8443`.
 
 You can also find more info about TCP tunnels on [this doc](https://cloud.google.com/iap/docs/using-tcp-forwarding).
+
+## 5. Add Snapshot repository from another cloud provider (Optional)
+
+OpenSearch official doc: https://docs.opensearch.org/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/
+
+### Google Cloud Platform - GCS
+
+Create a Key JSON file from your Service Account https://console.cloud.google.com/iam-admin/serviceaccounts
+- Select your Service Account
+- Go to Keys
+- Click on Add Key -> Create new Key
+- Select JSON
+- Save the file
+
+On your `opensearch manager` instance:
+
+- Upload the key JSON file to the instance and add it to the keystore
+
+```terminal
+docker cp gcp-key.json bap_opensearch_manager:/tmp/gcp-key.json
+docker exec -it bap_opensearch_manager bash
+bin/opensearch-keystore add-file gcs.client.default.credentials_file /tmp/gcp-key.json --force
+```
+
+- Remove the key JSON file from the instance (recommended)
+- Reload the secure settings on OpenSearch Dashboard UI
+
+```
+POST _nodes/reload_secure_settings
+```
+
+- Now you can create the snapshot repository on OpenSearch Dashboard UI.
+
+```
+PUT /_snapshot/my-gcs-repository
+{
+  "type": "gcs",
+  "settings": {
+    "bucket": "my-gcs-bucket",
+    "base_path": "my/snapshot/directory"
+  }
+}
+```
+
+### Amazon Web Services - S3
+
+Create AWS Access Key ID and Secret Access Key.
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+1. Create a user (`bap_user`):
+   1. IAM -> Users -> Create user
+   1. User name: `bap_user`
+1. Generate an access key and secret key:
+   1. IAM -> Users -> `bap_user`
+   1. Security credentials -> Access Keys -> Create access key
+      - `Command Line Interface (CLI)`
+
+Store the access key and secret access key securely.
+
+More info at [the official AWS documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
+
+On your `opensearch manager` instance:
+
+- Add the AWS credentials to the keystore
+
+```terminal
+export AWS_ACCESS_KEY_ID="your-aws-access-key-id"
+export AWS_SECRET_ACCESS_KEY="your-aws-secret-access-key"
+
+echo "$AWS_ACCESS_KEY_ID" | docker exec -i bap_opensearch_manager bin/opensearch-keystore add --stdin s3.client.default.access_key --force
+echo "$AWS_SECRET_ACCESS_KEY" | docker exec -i bap_opensearch_manager bin/opensearch-keystore add --stdin s3.client.default.secret_key --force
+```
+
+- Reload the secure settings on OpenSearch Dashboard UI
+
+```
+POST _nodes/reload_secure_settings
+```
+
+- Now you can create the snapshot repository on OpenSearch Dashboard UI.
+
+```
+PUT /_snapshot/my-s3-repository
+{
+  "type": "s3",
+  "settings": {
+    "bucket": "my-s3-bucket",
+    "base_path": "my/snapshot/directory",
+    "region": "eu-north-1"
+  }
+}
+```
